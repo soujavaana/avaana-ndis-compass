@@ -13,7 +13,11 @@ const Header = () => {
           className="bg-gray-100"
         />
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-6">
+        <div className="flex items-center">
+          <span className="text-gray-500 mr-2">Application Manager:</span>
+          <span className="font-medium">Monique Wilson</span>
+        </div>
         <button className="p-2 rounded-full hover:bg-gray-100">
           <BellIcon size={20} />
         </button>

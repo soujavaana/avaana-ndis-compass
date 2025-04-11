@@ -13,6 +13,12 @@ import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
+// Import new routes
+import Profile from "./pages/Profile";
+import Registrations from "./pages/Registrations";
+import Participants from "./pages/Participants";
+import BusinessGoals from "./pages/BusinessGoals";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -23,8 +29,12 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/registrations" element={<Registrations />} />
           <Route path="/documents" element={<Documents />} />
           <Route path="/compliance" element={<Compliance />} />
+          <Route path="/participants" element={<Participants />} />
+          <Route path="/business-goals" element={<BusinessGoals />} />
           <Route path="/communication" element={<Communication />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/settings" element={<Settings />} />
