@@ -18,6 +18,7 @@ import Profile from "./pages/Profile";
 import Registrations from "./pages/Registrations";
 import Participants from "./pages/Participants";
 import BusinessGoals from "./pages/BusinessGoals";
+import TaxAccounting from "./pages/TaxAccounting";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/compliance" element={<Compliance />} />
           <Route path="/participants" element={<Participants />} />
           <Route path="/business-goals" element={<BusinessGoals />} />
+          <Route path="/tax-accounting" element={<TaxAccounting />} />
           <Route path="/communication" element={<Communication />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/settings" element={<Settings />} />

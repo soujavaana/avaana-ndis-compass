@@ -93,7 +93,7 @@ const Communication = () => {
                 <div className="hover:bg-gray-50">
                   <div className="p-4 cursor-pointer">
                     <div className="flex justify-between">
-                      <div className="font-semibold">Support Team</div>
+                      <div className="font-semibold">Timothee - Account Manager</div>
                       <div className="text-xs text-gray-500">Apr 5</div>
                     </div>
                     <div className="text-sm truncate text-gray-600">Thank you for submitting your quarterly report...</div>

@@ -10,7 +10,8 @@ import {
   MessageSquare, 
   Users,
   Flag,
-  BarChart, 
+  BarChart,
+  Calculator,
   Settings 
 } from 'lucide-react';
 
@@ -22,6 +23,7 @@ const navItems = [
   { name: 'Compliance', icon: ShieldCheck, path: '/compliance' },
   { name: 'Participants', icon: Users, path: '/participants' },
   { name: 'Business Goals', icon: Flag, path: '/business-goals' },
+  { name: 'Tax & Accounting', icon: Calculator, path: '/tax-accounting' },
   { name: 'Messages', icon: MessageSquare, path: '/communication', badge: 2 },
   { name: 'Analytics', icon: BarChart, path: '/analytics' },
   { name: 'Settings', icon: Settings, path: '/settings' },
@@ -32,15 +34,13 @@ const Sidebar = () => {
 
   return (
     <div className="h-screen w-64 bg-avaana-primary text-white flex flex-col">
-      <div className="p-4 border-b border-white/10 flex items-center">
-        <div className="flex items-center space-x-2">
-          <img 
-            src="/lovable-uploads/eb0ab4e0-8f8d-4a73-bdd3-3cd47db54801.png" 
-            alt="Avaana Logo" 
-            className="h-8" 
-          />
-          <h1 className="text-lg font-medium">Business Dashboard</h1>
-        </div>
+      <div className="p-4 border-b border-white/10 flex flex-col items-center">
+        <img 
+          src="https://ndis.avaana.com.au/wp-content/uploads/2024/09/Avaana-logo-colourmix.svg" 
+          alt="Avaana Logo" 
+          className="h-8 mb-1" 
+        />
+        <h1 className="text-lg font-medium">Business Dashboard</h1>
       </div>
       <nav className="flex-1 overflow-y-auto">
         <ul className="py-4">
