@@ -4,7 +4,7 @@ import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { UserIcon, SendIcon } from 'lucide-react';
+import { UserIcon, SendIcon, Mail, Phone } from 'lucide-react';
 
 const messages = [
   {
@@ -130,14 +130,39 @@ const Communication = () => {
                   <div>
                     <CardTitle>Monique Wilson</CardTitle>
                     <div className="text-sm text-gray-500">Application Manager</div>
+                    <div className="flex items-center gap-4 mt-1">
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <Mail size={12} />
+                        <span>Monique@avaana.com.au</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <Phone size={12} />
+                        <span>0403 887 568</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div>
-                  <Tabs defaultValue="messages">
-                    <TabsList>
-                      <TabsTrigger value="messages">Messages</TabsTrigger>
-                      <TabsTrigger value="files">Files</TabsTrigger>
-                      <TabsTrigger value="tasks">Tasks</TabsTrigger>
+                  <Tabs defaultValue="messages" className="w-[320px]">
+                    <TabsList className="bg-gray-100 grid w-full grid-cols-3 rounded-lg h-8">
+                      <TabsTrigger 
+                        value="messages" 
+                        className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7"
+                      >
+                        Messages
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="files" 
+                        className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7"
+                      >
+                        Files
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="tasks" 
+                        className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7"
+                      >
+                        Tasks
+                      </TabsTrigger>
                     </TabsList>
                   </Tabs>
                 </div>

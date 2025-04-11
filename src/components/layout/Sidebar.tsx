@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   User, 
@@ -28,11 +28,19 @@ const navItems = [
 ];
 
 const Sidebar = () => {
+  const location = useLocation();
+
   return (
     <div className="h-screen w-64 bg-avaana-primary text-white flex flex-col">
-      <div className="p-4 border-b border-white/10 flex items-center space-x-2">
-        <div className="bg-white text-avaana-primary font-bold rounded-lg p-1 text-sm">AVAANA</div>
-        <h1 className="text-lg font-medium">Business Dashboard</h1>
+      <div className="p-4 border-b border-white/10 flex items-center">
+        <div className="flex items-center space-x-2">
+          <img 
+            src="/lovable-uploads/eb0ab4e0-8f8d-4a73-bdd3-3cd47db54801.png" 
+            alt="Avaana Logo" 
+            className="h-8" 
+          />
+          <h1 className="text-lg font-medium">Business Dashboard</h1>
+        </div>
       </div>
       <nav className="flex-1 overflow-y-auto">
         <ul className="py-4">
@@ -40,7 +48,9 @@ const Sidebar = () => {
             <li key={item.name}>
               <Link
                 to={item.path}
-                className="flex items-center gap-3 px-6 py-3 hover:bg-avaana-secondary transition-colors relative"
+                className={`flex items-center gap-3 px-6 py-3 hover:bg-avaana-secondary transition-colors relative ${
+                  location.pathname === item.path ? 'bg-avaana-secondary' : ''
+                }`}
               >
                 <item.icon size={20} />
                 <span>{item.name}</span>

@@ -70,91 +70,27 @@ const BusinessGoals = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue="active">
-        <TabsList className="mb-6">
-          <TabsTrigger value="active">Active Goals</TabsTrigger>
-          <TabsTrigger value="completed">Completed</TabsTrigger>
-          <TabsTrigger value="progress">Progress Tracking</TabsTrigger>
+      <Tabs defaultValue="progress">
+        <TabsList className="mb-6 border-b w-full justify-start space-x-6 bg-transparent p-0">
+          <TabsTrigger 
+            value="progress" 
+            className="px-4 py-2 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-avaana-primary data-[state=active]:border-b-2 data-[state=active]:border-avaana-primary rounded-none"
+          >
+            Progress Tracking
+          </TabsTrigger>
+          <TabsTrigger 
+            value="active" 
+            className="px-4 py-2 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-avaana-primary data-[state=active]:border-b-2 data-[state=active]:border-avaana-primary rounded-none"
+          >
+            Active Goals
+          </TabsTrigger>
+          <TabsTrigger 
+            value="completed" 
+            className="px-4 py-2 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-avaana-primary data-[state=active]:border-b-2 data-[state=active]:border-avaana-primary rounded-none"
+          >
+            Completed
+          </TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="active">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {goals.filter(goal => goal.status !== "Completed").map((goal) => (
-              <Card key={goal.id}>
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle>{goal.title}</CardTitle>
-                      <CardDescription>Category: {goal.category}</CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      {goal.status === "In Progress" ? (
-                        <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          <span>In Progress</span>
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-green-100 text-green-800 hover:bg-green-200 flex items-center gap-1">
-                          <CheckCircle className="h-3 w-3" />
-                          <span>Completed</span>
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-500 mb-3">{goal.description}</p>
-                  <div className="mb-2">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium">Progress</span>
-                      <span className="text-sm font-medium">{goal.progress}%</span>
-                    </div>
-                    <Progress value={goal.progress} className="h-2" />
-                  </div>
-                  <div className="flex justify-between items-center mt-4">
-                    <p className="text-sm text-gray-500">Due: {goal.dueDate}</p>
-                    <Button variant="outline" size="sm">Update Progress</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="completed">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {goals.filter(goal => goal.status === "Completed").map((goal) => (
-              <Card key={goal.id}>
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle>{goal.title}</CardTitle>
-                      <CardDescription>Category: {goal.category}</CardDescription>
-                    </div>
-                    <Badge className="bg-green-100 text-green-800 hover:bg-green-200 flex items-center gap-1">
-                      <CheckCircle className="h-3 w-3" />
-                      <span>Completed</span>
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-500 mb-3">{goal.description}</p>
-                  <div className="mb-2">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium">Progress</span>
-                      <span className="text-sm font-medium">{goal.progress}%</span>
-                    </div>
-                    <Progress value={goal.progress} className="h-2" />
-                  </div>
-                  <div className="flex justify-between items-center mt-4">
-                    <p className="text-sm text-gray-500">Completed: {goal.dueDate}</p>
-                    <Button variant="outline" size="sm">View Details</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
         
         <TabsContent value="progress">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -281,6 +217,85 @@ const BusinessGoals = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="active">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {goals.filter(goal => goal.status !== "Completed").map((goal) => (
+              <Card key={goal.id}>
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle>{goal.title}</CardTitle>
+                      <CardDescription>Category: {goal.category}</CardDescription>
+                    </div>
+                    <div className="flex gap-2">
+                      {goal.status === "In Progress" ? (
+                        <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          <span>In Progress</span>
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-green-100 text-green-800 hover:bg-green-200 flex items-center gap-1">
+                          <CheckCircle className="h-3 w-3" />
+                          <span>Completed</span>
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-500 mb-3">{goal.description}</p>
+                  <div className="mb-2">
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm font-medium">Progress</span>
+                      <span className="text-sm font-medium">{goal.progress}%</span>
+                    </div>
+                    <Progress value={goal.progress} className="h-2" />
+                  </div>
+                  <div className="flex justify-between items-center mt-4">
+                    <p className="text-sm text-gray-500">Due: {goal.dueDate}</p>
+                    <Button variant="outline" size="sm">Update Progress</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="completed">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {goals.filter(goal => goal.status === "Completed").map((goal) => (
+              <Card key={goal.id}>
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle>{goal.title}</CardTitle>
+                      <CardDescription>Category: {goal.category}</CardDescription>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800 hover:bg-green-200 flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3" />
+                      <span>Completed</span>
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-500 mb-3">{goal.description}</p>
+                  <div className="mb-2">
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm font-medium">Progress</span>
+                      <span className="text-sm font-medium">{goal.progress}%</span>
+                    </div>
+                    <Progress value={goal.progress} className="h-2" />
+                  </div>
+                  <div className="flex justify-between items-center mt-4">
+                    <p className="text-sm text-gray-500">Completed: {goal.dueDate}</p>
+                    <Button variant="outline" size="sm">View Details</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
       </Tabs>
     </Layout>

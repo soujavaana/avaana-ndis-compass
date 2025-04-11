@@ -4,7 +4,7 @@ import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Clock, XCircle, FileText, ArrowRight } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, FileText, ArrowRight, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const ndisRegistrations = [
@@ -76,10 +76,31 @@ const Registrations = () => {
       </div>
 
       <Tabs defaultValue="ndis">
-        <TabsList className="mb-6">
-          <TabsTrigger value="ndis">NDIS Provider</TabsTrigger>
-          <TabsTrigger value="aged-care">My Aged Care Provider</TabsTrigger>
-          <TabsTrigger value="dva">DVA</TabsTrigger>
+        <TabsList className="mb-6 border-b w-full justify-start space-x-6 bg-transparent p-0">
+          <TabsTrigger 
+            value="ndis" 
+            className="px-4 py-2 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-avaana-primary data-[state=active]:border-b-2 data-[state=active]:border-avaana-primary rounded-none"
+          >
+            NDIS Provider
+          </TabsTrigger>
+          <TabsTrigger 
+            value="aged-care" 
+            className="px-4 py-2 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-avaana-primary data-[state=active]:border-b-2 data-[state=active]:border-avaana-primary rounded-none"
+          >
+            <div className="flex items-center gap-2">
+              My Aged Care Provider
+              <AlertTriangle className="h-4 w-4 text-amber-500" title="Registration not started" />
+            </div>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="dva" 
+            className="px-4 py-2 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-avaana-primary data-[state=active]:border-b-2 data-[state=active]:border-avaana-primary rounded-none"
+          >
+            <div className="flex items-center gap-2">
+              DVA
+              <AlertTriangle className="h-4 w-4 text-amber-500" title="Registration not started" />
+            </div>
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="ndis">

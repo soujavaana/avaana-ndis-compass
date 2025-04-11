@@ -2,8 +2,15 @@
 import React from 'react';
 import { BellIcon, UserIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
+  const navigate = useNavigate();
+  
+  const handleManagerClick = () => {
+    navigate('/communication');
+  };
+
   return (
     <header className="w-full bg-white px-6 py-4 flex items-center justify-between border-b">
       <div className="w-full max-w-md">
@@ -16,7 +23,12 @@ const Header = () => {
       <div className="flex items-center gap-6">
         <div className="flex items-center">
           <span className="text-gray-500 mr-2">Application Manager:</span>
-          <span className="font-medium">Monique Wilson</span>
+          <button 
+            onClick={handleManagerClick} 
+            className="font-medium hover:text-avaana-primary hover:underline transition-colors"
+          >
+            Monique Wilson
+          </button>
         </div>
         <button className="p-2 rounded-full hover:bg-gray-100">
           <BellIcon size={20} />
