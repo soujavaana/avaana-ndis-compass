@@ -89,7 +89,10 @@ const Registrations = () => {
           >
             <div className="flex items-center gap-2">
               My Aged Care Provider
-              <AlertTriangle className="h-4 w-4 text-amber-500" title="Registration not started" />
+              <AlertTriangle 
+                className="h-4 w-4 text-amber-500" 
+                aria-label="Registration not started" 
+              />
             </div>
           </TabsTrigger>
           <TabsTrigger 
@@ -98,7 +101,10 @@ const Registrations = () => {
           >
             <div className="flex items-center gap-2">
               DVA
-              <AlertTriangle className="h-4 w-4 text-amber-500" title="Registration not started" />
+              <AlertTriangle 
+                className="h-4 w-4 text-amber-500" 
+                aria-label="Registration not started" 
+              />
             </div>
           </TabsTrigger>
         </TabsList>
