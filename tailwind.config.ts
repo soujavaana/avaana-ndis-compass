@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,16 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Avaana custom colors
+				avaana: {
+					'primary': '#2DCE89',
+					'secondary': '#1AAE6F',
+					'light': '#4FD69C',
+					'accent': '#8BE9C0',
+					'background': '#F9FAFB',
+					'text': '#111827',
+					'alert': '#EF4444',
 				}
 			},
 			borderRadius: {
