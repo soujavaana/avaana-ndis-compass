@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +8,10 @@ import { CalendarIcon, FileTextIcon, AlertTriangleIcon, CheckCircleIcon } from '
 const Dashboard = () => {
   return (
     <Layout>
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Dashboard</h1>
+      <div className="bg-green-600 text-white p-4 rounded-lg mb-6">
+        <h1 className="text-2xl font-bold">Welcome back, Happy Horizons NDIS Services</h1>
+        <p className="text-sm">Your compliance status: 85% complete</p>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
