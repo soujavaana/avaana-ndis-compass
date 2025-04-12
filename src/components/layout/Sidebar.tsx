@@ -12,7 +12,8 @@ import {
   Flag,
   BarChart,
   Calculator,
-  Settings 
+  Settings,
+  Network
 } from 'lucide-react';
 
 const navItems = [
@@ -24,6 +25,7 @@ const navItems = [
   { name: 'Participants', icon: Users, path: '/participants' },
   { name: 'Business Goals', icon: Flag, path: '/business-goals' },
   { name: 'Tax & Accounting', icon: Calculator, path: '/tax-accounting' },
+  { name: 'Networking', icon: Network, path: '/networking' },
   { name: 'Messages', icon: MessageSquare, path: '/communication', badge: 2 },
   { name: 'Analytics', icon: BarChart, path: '/analytics' },
   { name: 'Settings', icon: Settings, path: '/settings' },

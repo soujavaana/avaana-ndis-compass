@@ -19,6 +19,7 @@ import Registrations from "./pages/Registrations";
 import Participants from "./pages/Participants";
 import BusinessGoals from "./pages/BusinessGoals";
 import TaxAccounting from "./pages/TaxAccounting";
+import Networking from "./pages/Networking";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/participants" element={<Participants />} />
           <Route path="/business-goals" element={<BusinessGoals />} />
           <Route path="/tax-accounting" element={<TaxAccounting />} />
+          <Route path="/networking" element={<Networking />} />
           <Route path="/communication" element={<Communication />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/settings" element={<Settings />} />
