@@ -12,16 +12,16 @@ const Header = () => {
   };
 
   return (
-    <header className="w-full bg-white px-6 py-4 flex items-center justify-between border-b">
-      <div className="w-full max-w-md">
+    <header className="w-full bg-white px-3 md:px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between border-b gap-3 md:gap-0">
+      <div className="w-full md:max-w-md">
         <Input 
           type="search" 
           placeholder="Search documents..." 
           className="bg-gray-100"
         />
       </div>
-      <div className="flex items-center gap-6">
-        <div className="flex items-center">
+      <div className="flex items-center justify-between md:justify-end w-full md:w-auto gap-3 md:gap-6">
+        <div className="hidden md:flex items-center">
           <span className="text-gray-500 mr-2">Application Manager:</span>
           <button 
             onClick={handleManagerClick} 

@@ -17,9 +17,9 @@ import {
 
 const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
-  { name: 'Your Profile', icon: User, path: '/profile' },
-  { name: 'Your Registrations', icon: ClipboardCheck, path: '/registrations' },
-  { name: 'Your Documents', icon: FileText, path: '/documents' },
+  { name: 'Profile', icon: User, path: '/profile' },
+  { name: 'Registrations', icon: ClipboardCheck, path: '/registrations' },
+  { name: 'Documents', icon: FileText, path: '/documents' },
   { name: 'Compliance', icon: ShieldCheck, path: '/compliance' },
   { name: 'Participants', icon: Users, path: '/participants' },
   { name: 'Business Goals', icon: Flag, path: '/business-goals' },
@@ -40,7 +40,7 @@ const Sidebar = () => {
           alt="Avaana Logo" 
           className="h-8 mb-1" 
         />
-        <h1 className="text-lg font-medium">Business Dashboard</h1>
+        <h1 className="text-lg font-medium">Dashboard</h1>
       </div>
       <nav className="flex-1 overflow-y-auto">
         <ul className="py-4">
