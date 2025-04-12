@@ -9,6 +9,7 @@ import { ChartContainer } from '@/components/ui/chart';
 import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { CheckCircle, Clock, Flag, TrendingUp, Award, Users } from 'lucide-react';
+import BookingCalendar from '@/components/booking/BookingCalendar';
 
 const goals = [
   {
@@ -69,6 +70,9 @@ const BusinessGoals = () => {
           Add New Goal
         </Button>
       </div>
+
+      {/* Add Booking Calendar Component */}
+      <BookingCalendar credits={350} expiryDate="31st Dec 2025" />
 
       <Tabs defaultValue="progress">
         <TabsList className="mb-6 border-b w-full justify-start space-x-6 bg-transparent p-0">
