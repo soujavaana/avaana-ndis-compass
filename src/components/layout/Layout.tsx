@@ -43,8 +43,10 @@ const Layout = ({ children }: LayoutProps) => {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-auto bg-avaana-background p-6">
-          {children}
+        <main className="flex-1 overflow-auto bg-avaana-background p-3 sm:p-4 md:p-6">
+          <div className="max-w-full">
+            {children}
+          </div>
         </main>
       </div>
     </div>
