@@ -13,7 +13,7 @@ import {
 const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
   { name: 'Profile', icon: User, path: '/profile' },
-  { name: 'NDIS Provider Registration', icon: ClipboardCheck, path: '/registrations' },
+  { name: 'Registrations', icon: ClipboardCheck, path: '/registrations' },
   { name: 'Documents', icon: FileText, path: '/documents' },
   { name: 'Compliance', icon: ShieldCheck, path: '/compliance' },
   { name: 'Business Goals', icon: Flag, path: '/business-goals' },

@@ -12,8 +12,8 @@ const Profile = () => {
   return (
     <Layout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Your Profile</h1>
-        <Button className="bg-avaana-primary hover:bg-avaana-secondary">Save Changes</Button>
+        <h1 className="text-[32px] font-[400] leading-[48px] font-recoleta flex items-center gap-[5px]">Your Profile</h1>
+        <Button>Save Changes</Button>
       </div>
 
       <Tabs defaultValue="personal">
