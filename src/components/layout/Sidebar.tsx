@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -8,6 +7,7 @@ import {
   FileText, 
   ShieldCheck, 
   Flag,
+  MessageSquare
 } from 'lucide-react';
 
 const navItems = [
@@ -16,6 +16,7 @@ const navItems = [
   { name: 'Registrations', icon: ClipboardCheck, path: '/registrations' },
   { name: 'Documents', icon: FileText, path: '/documents' },
   { name: 'Compliance', icon: ShieldCheck, path: '/compliance' },
+  { name: 'Messages', icon: MessageSquare, path: '/communication' },
   { name: 'Business Goals', icon: Flag, path: '/business-goals' },
 ];
 

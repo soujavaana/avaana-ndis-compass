@@ -28,7 +28,12 @@ const BusinessGoals = () => {
   return (
     <Layout>
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-6">Business Goals</h1>
+        <div className="flex flex-col gap-4 mb-6">
+          <h1 className="text-2xl font-semibold text-gray-900">Business Goals</h1>
+          <p className="text-lg text-avaana-primary font-medium">
+            You have $350 in credits. Book a Business Goal session now.
+          </p>
+        </div>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Upcoming Business Goal Sessions</CardTitle>
