@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -8,7 +7,8 @@ import {
   FileText, 
   ShieldCheck, 
   Flag,
-  MessageSquare
+  MessageSquare,
+  Network
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -25,6 +25,7 @@ const navItems = [
     notification: 1 
   },
   { name: 'Business Goals', icon: Flag, path: '/business-goals' },
+  { name: 'Networking', icon: Network, path: '/networking' },
 ];
 
 const Sidebar = () => {
@@ -74,4 +75,3 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
-

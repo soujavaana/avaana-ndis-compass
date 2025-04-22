@@ -13,6 +13,7 @@ import Profile from "./pages/Profile";
 import Registrations from "./pages/Registrations";
 import BusinessGoals from "./pages/BusinessGoals";
 import Communication from "./pages/Communication";
+import Networking from "./pages/Networking";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/compliance" element={<Compliance />} />
           <Route path="/communication" element={<Communication />} />
           <Route path="/business-goals" element={<BusinessGoals />} />
+          <Route path="/networking" element={<Networking />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </TooltipProvider>
