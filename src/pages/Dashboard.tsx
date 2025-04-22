@@ -9,23 +9,12 @@ import {
   FileTextIcon, 
   AlertTriangleIcon, 
   CheckCircleIcon,
-  LayoutDashboard,
-  User,
-  ClipboardCheck,
-  ShieldCheck,
-  Users,
-  Flag,
-  Calculator,
-  MessageSquare,
-  BarChart,
-  Settings
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
   return (
     <Layout>
-      <div className="bg-green-600 text-white p-4 rounded-lg mb-6">
+      <div className="bg-[#F97316] text-white p-4 rounded-lg mb-6">
         <h1 className="text-2xl font-bold">Welcome back, Happy Horizons NDIS Services</h1>
         <p className="text-sm">You have $350 in credits. Book a Business Goal session now.</p>
       </div>
@@ -117,132 +106,6 @@ const Dashboard = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
-      
-      {/* Menu item snapshots section */}
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold mb-4">Quick Access</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          <Link to="/profile" className="no-underline">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4 flex items-center">
-                <User className="h-8 w-8 mr-3 text-avaana-primary" />
-                <div>
-                  <h3 className="font-medium">Profile</h3>
-                  <p className="text-sm text-gray-500">Manage your business profile</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-          
-          <Link to="/registrations" className="no-underline">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4 flex items-center">
-                <ClipboardCheck className="h-8 w-8 mr-3 text-avaana-primary" />
-                <div>
-                  <h3 className="font-medium">Registrations</h3>
-                  <p className="text-sm text-gray-500">Review registration status</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-          
-          <Link to="/documents" className="no-underline">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4 flex items-center">
-                <FileTextIcon className="h-8 w-8 mr-3 text-avaana-primary" />
-                <div>
-                  <h3 className="font-medium">Documents</h3>
-                  <p className="text-sm text-gray-500">Access important files</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-          
-          <Link to="/compliance" className="no-underline">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4 flex items-center">
-                <ShieldCheck className="h-8 w-8 mr-3 text-avaana-primary" />
-                <div>
-                  <h3 className="font-medium">Compliance</h3>
-                  <p className="text-sm text-gray-500">Track compliance requirements</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-          
-          <Link to="/participants" className="no-underline">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4 flex items-center">
-                <Users className="h-8 w-8 mr-3 text-avaana-primary" />
-                <div>
-                  <h3 className="font-medium">Participants</h3>
-                  <p className="text-sm text-gray-500">Manage NDIS participants</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-          
-          <Link to="/business-goals" className="no-underline">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4 flex items-center">
-                <Flag className="h-8 w-8 mr-3 text-avaana-primary" />
-                <div>
-                  <h3 className="font-medium">Business Goals</h3>
-                  <p className="text-sm text-gray-500">Plan your business growth</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-          
-          <Link to="/tax-accounting" className="no-underline">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4 flex items-center">
-                <Calculator className="h-8 w-8 mr-3 text-avaana-primary" />
-                <div>
-                  <h3 className="font-medium">Tax & Accounting</h3>
-                  <p className="text-sm text-gray-500">Manage financial records</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-          
-          <Link to="/communication" className="no-underline">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4 flex items-center">
-                <MessageSquare className="h-8 w-8 mr-3 text-avaana-primary" />
-                <div>
-                  <h3 className="font-medium">Messages</h3>
-                  <p className="text-sm text-gray-500">View important communications</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-          
-          <Link to="/analytics" className="no-underline">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4 flex items-center">
-                <BarChart className="h-8 w-8 mr-3 text-avaana-primary" />
-                <div>
-                  <h3 className="font-medium">Analytics</h3>
-                  <p className="text-sm text-gray-500">Track business performance</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-          
-          <Link to="/settings" className="no-underline">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4 flex items-center">
-                <Settings className="h-8 w-8 mr-3 text-avaana-primary" />
-                <div>
-                  <h3 className="font-medium">Settings</h3>
-                  <p className="text-sm text-gray-500">Configure your preferences</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        </div>
       </div>
     </Layout>
   );
