@@ -16,19 +16,19 @@ const Layout = ({ children }: LayoutProps) => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-[#F9FAFB]">
       {/* Mobile sidebar toggle */}
       <div className="md:hidden fixed top-4 left-4 z-50">
         <button
           onClick={toggleSidebar}
-          className="bg-avaana-primary text-white p-2 rounded-md"
+          className="bg-[#2DCE89] text-white p-2 rounded-md hover:bg-[#1AAE6F] transition-colors"
           aria-label="Toggle sidebar"
         >
           <Menu size={20} />
         </button>
       </div>
       
-      {/* Sidebar for different screen sizes */}
+      {/* Sidebar */}
       <div className={`md:block ${sidebarOpen ? 'block' : 'hidden'} fixed md:static z-40 md:z-auto`}>
         <Sidebar />
       </div>
@@ -43,8 +43,8 @@ const Layout = ({ children }: LayoutProps) => {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-auto bg-avaana-background p-3 sm:p-4 md:p-6">
-          <div className="max-w-full">
+        <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-6">
+          <div className="max-w-[1200px] mx-auto">
             {children}
           </div>
         </main>

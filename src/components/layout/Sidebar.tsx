@@ -13,7 +13,8 @@ import {
   BarChart,
   Calculator,
   Settings,
-  Network
+  Network,
+  Pin
 } from 'lucide-react';
 
 const navItems = [
@@ -35,29 +36,32 @@ const Sidebar = () => {
   const location = useLocation();
 
   return (
-    <div className="h-screen w-64 bg-avaana-primary text-white flex flex-col overflow-hidden">
-      <div className="p-3 sm:p-4 border-b border-white/10 flex flex-col items-center">
-        <img 
-          src="https://ndis.avaana.com.au/wp-content/uploads/2024/09/Avaana-logo-colourmix.svg" 
-          alt="Avaana Logo" 
-          className="h-6 sm:h-8 mb-1" 
-        />
-        <h1 className="text-base sm:text-lg font-medium">Dashboard</h1>
+    <div className="h-screen w-64 bg-[#0B4A3B] text-white flex flex-col overflow-hidden">
+      <div className="p-4 border-b border-white/10">
+        <div className="flex items-center gap-2 px-2 py-1.5 bg-white/10 rounded-md mb-2">
+          <Pin size={16} />
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-medium truncate">Kamal Test</h3>
+            <p className="text-xs text-white/70 truncate">Surry Hills</p>
+          </div>
+        </div>
       </div>
-      <nav className="flex-1 overflow-y-auto">
-        <ul className="py-2 sm:py-4">
+      
+      <nav className="flex-1 overflow-y-auto py-2">
+        <ul className="space-y-0.5 px-2">
           {navItems.map((item) => (
             <li key={item.name}>
               <Link
                 to={item.path}
-                className={`flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 hover:bg-avaana-secondary transition-colors relative ${
-                  location.pathname === item.path ? 'bg-avaana-secondary' : ''
-                }`}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors relative
+                  ${location.pathname === item.path 
+                    ? 'bg-white/15 text-white' 
+                    : 'text-white/80 hover:bg-white/10 hover:text-white'}`}
               >
                 <item.icon size={18} className="flex-shrink-0" />
-                <span className="text-sm whitespace-nowrap">{item.name}</span>
+                <span className="text-sm">{item.name}</span>
                 {item.badge && (
-                  <span className="absolute right-3 sm:right-6 bg-red-500 text-white text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center">
+                  <span className="absolute right-3 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     {item.badge}
                   </span>
                 )}
