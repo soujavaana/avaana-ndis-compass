@@ -21,7 +21,7 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="md:hidden fixed top-4 left-4 z-50">
         <button
           onClick={toggleSidebar}
-          className="bg-[#2DCE89] text-white p-2 rounded-md hover:bg-[#1AAE6F] transition-colors"
+          className="bg-[#F97316] text-white p-2 rounded-md hover:bg-[#EA580C] transition-colors"
           aria-label="Toggle sidebar"
         >
           <Menu size={20} />

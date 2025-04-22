@@ -28,11 +28,11 @@ export default {
         background: '#F4F4F0',
         foreground: 'hsl(var(--foreground))',
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
+          DEFAULT: '#F97316',
           foreground: 'hsl(var(--primary-foreground))'
         },
         secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
+          DEFAULT: '#EA580C',
           foreground: 'hsl(var(--secondary-foreground))'
         },
         destructive: {
@@ -66,10 +66,10 @@ export default {
           ring: 'hsl(var(--sidebar-ring))'
         },
         avaana: {
-          primary: '#2DCE89',
-          secondary: '#1AAE6F',
-          light: '#4FD69C',
-          accent: '#8BE9C0',
+          primary: '#F97316',
+          secondary: '#EA580C',
+          light: '#FB923C',
+          accent: '#FFEDD5',
           background: '#F6F8FA',
           text: '#333333',
           border: '#E5E7EB',
