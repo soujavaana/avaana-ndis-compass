@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -9,6 +10,7 @@ import {
   Flag,
   MessageSquare
 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const navItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
@@ -16,7 +18,12 @@ const navItems = [
   { name: 'Registrations', icon: ClipboardCheck, path: '/registrations' },
   { name: 'Documents', icon: FileText, path: '/documents' },
   { name: 'Compliance', icon: ShieldCheck, path: '/compliance' },
-  { name: 'Messages', icon: MessageSquare, path: '/communication' },
+  { 
+    name: 'Messages', 
+    icon: MessageSquare, 
+    path: '/communication', 
+    notification: 1 
+  },
   { name: 'Business Goals', icon: Flag, path: '/business-goals' },
 ];
 
@@ -37,7 +44,7 @@ const Sidebar = () => {
       <nav className="flex-1 overflow-y-auto py-2">
         <ul className="space-y-0.5 px-2">
           {navItems.map((item) => (
-            <li key={item.name} className="nav-item">
+            <li key={item.name} className="nav-item relative">
               <Link
                 to={item.path}
                 className={`nav-link flex items-center justify-start text-center w-full 
@@ -49,6 +56,14 @@ const Sidebar = () => {
               >
                 <item.icon size={18} className="flex-shrink-0" />
                 <span>{item.name}</span>
+                {item.notification && (
+                  <Badge 
+                    variant="destructive" 
+                    className="absolute right-2 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px]"
+                  >
+                    {item.notification}
+                  </Badge>
+                )}
               </Link>
             </li>
           ))}
