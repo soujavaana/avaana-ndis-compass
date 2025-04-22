@@ -12,7 +12,7 @@ const Profile = () => {
   return (
     <Layout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-[32px] font-[400] leading-[48px] font-recoleta flex items-center gap-[5px]">Your Profile</h1>
+        <h1 className="text-[32px] font-[400] leading-[48px] font-recoleta flex items-center gap-[5px]">Your Business Details</h1>
         <Button>Save Changes</Button>
       </div>
 
