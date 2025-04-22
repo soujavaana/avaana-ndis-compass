@@ -59,7 +59,7 @@ const Sidebar = () => {
                 {item.notification && (
                   <Badge 
                     variant="destructive" 
-                    className="absolute right-2 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px]"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 size-5 flex items-center justify-center rounded-full p-0 text-[10px]"
                   >
                     {item.notification}
                   </Badge>
@@ -74,3 +74,4 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
+
