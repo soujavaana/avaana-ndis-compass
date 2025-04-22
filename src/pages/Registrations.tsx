@@ -1,58 +1,24 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Clock, XCircle, FileText, ArrowRight, AlertTriangle } from 'lucide-react';
+import { FileText, ArrowRight, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const ndisRegistrations = [
-  {
-    category: "Assistance with Daily Life",
-    registrationNumber: "ABC12345",
-    status: "Approved",
-    dateApplied: "January 10, 2024",
-    dateApproved: "February 15, 2024",
-    renewalDate: "February 15, 2027",
-  },
-  {
-    category: "Assistance with Social & Community Participation",
-    registrationNumber: "DEF67890",
-    status: "Approved",
-    dateApplied: "January 10, 2024",
-    dateApproved: "February 15, 2024",
-    renewalDate: "February 15, 2027",
-  },
-  {
-    category: "Improved Daily Living",
-    registrationNumber: "GHI12345",
-    status: "In Progress",
-    dateApplied: "March 5, 2025",
-    dateApproved: null,
-    renewalDate: null,
-  },
-  {
-    category: "Household Tasks",
-    registrationNumber: null,
-    status: "Not Applied",
-    dateApplied: null,
-    dateApproved: null,
-    renewalDate: null,
-  }
-];
-
-const getStatusIcon = (status) => {
-  switch(status) {
-    case "Approved":
-      return <CheckCircle className="h-5 w-5 text-green-500" />;
-    case "In Progress":
-      return <Clock className="h-5 w-5 text-amber-500" />;
-    case "Not Applied":
-      return <XCircle className="h-5 w-5 text-gray-400" />;
-    default:
-      return null;
-  }
+const ndisRegistrations = {
+  title: "NDIS Registration Groups",
+  registrationNumber: "ABC12345",
+  status: "Approved",
+  dateApplied: "January 10, 2024",
+  dateApproved: "February 15, 2024",
+  renewalDate: "February 15, 2027",
+  categories: [
+    "Assistance with Daily Life",
+    "Assistance with Social & Community Participation",
+    "Improved Daily Living",
+    "Household Tasks"
+  ]
 };
 
 const getStatusBadge = (status) => {
@@ -72,7 +38,7 @@ const Registrations = () => {
   return (
     <Layout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Your Registrations</h1>
+        <h1 className="text-3xl font-bold text-gray-900">NDIS Provider Registration</h1>
       </div>
 
       <Tabs defaultValue="ndis">
@@ -112,57 +78,41 @@ const Registrations = () => {
         <TabsContent value="ndis">
           <Card>
             <CardHeader>
-              <CardTitle>NDIS Registration Categories</CardTitle>
+              <CardTitle>NDIS Registration Groups</CardTitle>
               <CardDescription>View and manage your NDIS provider registrations</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {ndisRegistrations.map((reg, index) => (
-                  <div key={index} className={`${index > 0 ? "border-t pt-6" : ""} flex justify-between items-start`}>
-                    <div className="flex items-start gap-3">
-                      {getStatusIcon(reg.status)}
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-medium">{reg.category}</h3>
-                          {getStatusBadge(reg.status)}
-                        </div>
-                        {reg.registrationNumber && (
-                          <p className="text-sm text-gray-500">Registration Number: {reg.registrationNumber}</p>
-                        )}
-                        {reg.dateApplied && (
-                          <p className="text-sm text-gray-500">Applied: {reg.dateApplied}</p>
-                        )}
-                        {reg.dateApproved && (
-                          <p className="text-sm text-gray-500">Approved: {reg.dateApproved}</p>
-                        )}
-                        {reg.renewalDate && (
-                          <p className="text-sm text-gray-500">Renewal Date: {reg.renewalDate}</p>
-                        )}
-                      </div>
+                <div className="flex justify-between items-start">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium text-lg">{ndisRegistrations.title}</h3>
+                      {getStatusBadge(ndisRegistrations.status)}
                     </div>
-                    <div>
-                      {reg.status === "Approved" && (
-                        <Button variant="outline" className="flex items-center gap-1">
-                          <FileText className="h-4 w-4" />
-                          <span>View Certificate</span>
-                        </Button>
-                      )}
-                      {reg.status === "In Progress" && (
-                        <Button variant="outline" className="flex items-center gap-1">
-                          <FileText className="h-4 w-4" />
-                          <span>View Application</span>
-                        </Button>
-                      )}
-                      {reg.status === "Not Applied" && (
-                        <Button className="bg-avaana-primary text-white hover:bg-avaana-secondary">
-                          Start Application
-                        </Button>
-                      )}
+                    <div className="space-y-1 text-sm text-gray-500">
+                      <p>Registration Number: {ndisRegistrations.registrationNumber}</p>
+                      <p>Applied: {ndisRegistrations.dateApplied}</p>
+                      <p>Approved: {ndisRegistrations.dateApproved}</p>
+                      <p>Renewal Date: {ndisRegistrations.renewalDate}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="font-medium">Registration Groups:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        {ndisRegistrations.categories.map((category, index) => (
+                          <li key={index} className="text-gray-600">{category}</li>
+                        ))}
+                      </ul>
                     </div>
                   </div>
-                ))}
+                  <Button variant="outline" className="flex items-center gap-1">
+                    <FileText className="h-4 w-4" />
+                    <span>View Certificate</span>
+                  </Button>
+                </div>
                 <div className="border-t pt-6">
-                  <Button className="bg-avaana-primary text-white hover:bg-avaana-secondary flex items-center gap-2">
+                  <Button 
+                    className="bg-[#F97316] text-white hover:bg-[#EA580C] flex items-center gap-2"
+                  >
                     <span>Apply for Additional Categories</span>
                     <ArrowRight className="h-4 w-4" />
                   </Button>
