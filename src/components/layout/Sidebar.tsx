@@ -36,16 +36,18 @@ const Sidebar = () => {
       <nav className="flex-1 overflow-y-auto py-2">
         <ul className="space-y-0.5 px-2">
           {navItems.map((item) => (
-            <li key={item.name}>
+            <li key={item.name} className="nav-item">
               <Link
                 to={item.path}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors relative
+                className={`nav-link flex items-center justify-start text-center w-full 
+                  text-[16px] leading-[24px] cursor-pointer px-[14px] py-[6px] gap-[14px] 
+                  relative no-underline whitespace-nowrap
                   ${location.pathname === item.path 
                     ? 'bg-gray-100 text-[#333333]' 
                     : 'text-gray-700 hover:bg-gray-50 hover:text-[#333333]'}`}
               >
                 <item.icon size={18} className="flex-shrink-0" />
-                <span className="text-sm">{item.name}</span>
+                <span>{item.name}</span>
               </Link>
             </li>
           ))}
