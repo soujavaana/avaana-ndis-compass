@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -74,6 +75,17 @@ const mainNavItems = [
 const Sidebar = () => {
   const location = useLocation();
   const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
+
+  // Initialize expanded state based on current route
+  React.useEffect(() => {
+    const currentPath = location.pathname;
+    const parentItem = mainNavItems.find(item => 
+      item.subItems?.some(subItem => currentPath.startsWith(subItem.path))
+    );
+    if (parentItem && !expandedItems.includes(parentItem.name)) {
+      setExpandedItems(prev => [...prev, parentItem.name]);
+    }
+  }, [location.pathname]);
 
   const toggleExpand = (name: string) => {
     setExpandedItems(prev => 
