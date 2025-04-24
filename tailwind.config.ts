@@ -20,6 +20,7 @@ export default {
     extend: {
       fontFamily: {
         recoleta: ['Recoleta', 'serif'],
+        avenir: ['Avenir', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',

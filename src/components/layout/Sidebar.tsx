@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -12,7 +11,7 @@ import {
   Boxes,
   ShieldCheck,
   LucideShieldCheck,
-  BriefcaseBusiness, // Added for Business Goals
+  BriefcaseBusiness,
 } from 'lucide-react';
 
 const mainNavItems = [
@@ -23,7 +22,7 @@ const mainNavItems = [
   { name: 'Communication', icon: MessageSquare, path: '/communication', badge: '1' },
   { name: 'Networking', icon: Network, path: '/networking' },
   { name: 'Tests', icon: ClipboardCheck, path: '/tests' },
-  { name: 'Business Goals', icon: BriefcaseBusiness, path: '/business-goals' }, // Added Business Goals
+  { name: 'Business Goals', icon: BriefcaseBusiness, path: '/business-goals' },
   { 
     name: 'Compliance', 
     icon: Shield,
@@ -78,7 +77,6 @@ const Sidebar = () => {
   const location = useLocation();
   const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
 
-  // Initialize expanded state based on current route
   React.useEffect(() => {
     const currentPath = location.pathname;
     const parentItem = mainNavItems.find(item => 
@@ -104,7 +102,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="h-screen w-64 bg-[#F4F4F0] text-[#333333] flex flex-col overflow-hidden">
+    <div className="h-screen w-64 bg-[#F4F4F0] text-[#333333] flex flex-col overflow-hidden font-avenir">
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center gap-2 px-2 py-1.5 bg-gray-50 rounded-md mb-2">
           <div className="min-w-0 flex-1">
