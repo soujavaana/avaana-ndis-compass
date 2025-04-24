@@ -1,7 +1,6 @@
 
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
@@ -38,39 +37,37 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/registrations" element={<Registrations />} />
-          <Route path="/documents" element={<Documents />} />
-          <Route path="/compliance" element={<Compliance />} />
-          <Route path="/compliance/frameworks" element={<Frameworks />} />
-          <Route path="/compliance/controls" element={<Controls />} />
-          <Route path="/compliance/policies" element={<Policies />} />
-          <Route path="/compliance/evidence-tasks" element={<EvidenceTasks />} />
-          <Route path="/compliance/cloud" element={<Cloud />} />
-          <Route path="/compliance/vault" element={<Vault />} />
-          <Route path="/risk/vendors" element={<Vendors />} />
-          <Route path="/risk/management" element={<RiskManagement />} />
-          <Route path="/trust/vault" element={<TrustVault />} />
-          <Route path="/audit/center" element={<AuditCenter />} />
-          <Route path="/audit/corrective-action" element={<CorrectiveAction />} />
-          <Route path="/people/employees" element={<Employees />} />
-          <Route path="/people/training" element={<TrainingCampaigns />} />
-          <Route path="/product-updates" element={<ProductUpdates />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/integrations" element={<Integrations />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/communication" element={<Communication />} />
-          <Route path="/business-goals" element={<BusinessGoals />} />
-          <Route path="/networking" element={<Networking />} />
-          <Route path="/tests" element={<Tests />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/registrations" element={<Registrations />} />
+        <Route path="/documents" element={<Documents />} />
+        <Route path="/compliance" element={<Compliance />} />
+        <Route path="/compliance/frameworks" element={<Frameworks />} />
+        <Route path="/compliance/controls" element={<Controls />} />
+        <Route path="/compliance/policies" element={<Policies />} />
+        <Route path="/compliance/evidence-tasks" element={<EvidenceTasks />} />
+        <Route path="/compliance/cloud" element={<Cloud />} />
+        <Route path="/compliance/vault" element={<Vault />} />
+        <Route path="/risk/vendors" element={<Vendors />} />
+        <Route path="/risk/management" element={<RiskManagement />} />
+        <Route path="/trust/vault" element={<TrustVault />} />
+        <Route path="/audit/center" element={<AuditCenter />} />
+        <Route path="/audit/corrective-action" element={<CorrectiveAction />} />
+        <Route path="/people/employees" element={<Employees />} />
+        <Route path="/people/training" element={<TrainingCampaigns />} />
+        <Route path="/product-updates" element={<ProductUpdates />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/integrations" element={<Integrations />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/communication" element={<Communication />} />
+        <Route path="/business-goals" element={<BusinessGoals />} />
+        <Route path="/networking" element={<Networking />} />
+        <Route path="/tests" element={<Tests />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </BrowserRouter>
   </QueryClientProvider>
 );
