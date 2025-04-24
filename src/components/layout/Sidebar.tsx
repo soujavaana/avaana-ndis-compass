@@ -2,28 +2,28 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
-  TestTube, 
-  Shield, 
+  ClipboardCheck,
+  Shield,
   FileText, 
   Network,
   MessageSquare,
   Users,
-  Database,
+  Boxes,
   ShieldCheck,
-  FileText as FilePolicies,
+  LucideShieldCheck,
 } from 'lucide-react';
 
 const mainNavItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
   { name: 'Profile', icon: Users, path: '/profile' },
-  { name: 'Registrations', icon: Database, path: '/registrations' },
+  { name: 'Registrations', icon: Boxes, path: '/registrations' },
   { name: 'Documents', icon: FileText, path: '/documents' },
   { name: 'Communication', icon: MessageSquare, path: '/communication', badge: '1' },
   { name: 'Networking', icon: Network, path: '/networking' },
-  { name: 'Tests', icon: TestTube, path: '/tests' },
+  { name: 'Tests', icon: ClipboardCheck, path: '/tests' },
   { 
     name: 'Compliance', 
-    icon: Shield, 
+    icon: Shield,
     path: '/compliance',
     subItems: [
       { name: 'Frameworks', path: '/compliance/frameworks' },
@@ -36,7 +36,7 @@ const mainNavItems = [
   },
   { 
     name: 'Risk', 
-    icon: ShieldCheck, 
+    icon: ShieldCheck,
     path: '/risk',
     subItems: [
       { name: 'Vendors', path: '/risk/vendors' },
@@ -45,7 +45,7 @@ const mainNavItems = [
   },
   { 
     name: 'Trust', 
-    icon: Shield, 
+    icon: LucideShieldCheck,
     path: '/trust',
     subItems: [
       { name: 'Trust Vault', path: '/trust/vault' }
@@ -53,7 +53,7 @@ const mainNavItems = [
   },
   { 
     name: 'Audit', 
-    icon: FileText, 
+    icon: FileText,
     path: '/audit',
     subItems: [
       { name: 'Audit Center', path: '/audit/center' },
@@ -62,7 +62,7 @@ const mainNavItems = [
   },
   { 
     name: 'People', 
-    icon: Users, 
+    icon: Users,
     path: '/people',
     subItems: [
       { name: 'Employees', path: '/people/employees' },

@@ -19,7 +19,7 @@ const Frameworks = () => {
             <h1 className="text-2xl font-bold">Frameworks</h1>
             <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-sm">1</span>
           </div>
-          <Button className="bg-purple-600 hover:bg-purple-700">
+          <Button className="bg-[#F1490D] hover:bg-[#EA580C]">
             + Create Framework
           </Button>
         </div>
