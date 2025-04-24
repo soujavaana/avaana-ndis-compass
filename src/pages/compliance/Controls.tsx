@@ -1,114 +1,152 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Progress } from "@/components/ui/progress";
+import ControlStats from '@/components/controls/ControlStats';
+import ControlsChart from '@/components/controls/ControlsChart';
+import { Search, ChevronDown } from 'lucide-react';
 
 const Controls = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
+
   return (
     <Layout>
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Controls</h1>
           <div className="flex items-center gap-2">
-            <Button variant="outline" className="bg-white">Filter</Button>
-            <Button variant="outline" className="bg-white">Sort</Button>
-            <Button className="bg-blue-600 hover:bg-blue-700">+ New Control</Button>
+            <h1 className="text-2xl font-bold">Controls</h1>
+            <span className="px-2 py-1 text-sm bg-gray-100 rounded">209</span>
           </div>
+          <Button className="bg-[#7c3aed] hover:bg-[#6d28d9]">
+            + Create Control
+          </Button>
         </div>
         
-        <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
-          <div className="mb-4">
-            <Input placeholder="Search controls..." className="max-w-md" />
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="mb-6 bg-transparent p-0 h-auto">
+            <TabsTrigger 
+              value="dashboard" 
+              className="px-4 py-2 rounded-md data-[state=active]:bg-black data-[state=active]:text-white"
+            >
+              Dashboard
+            </TabsTrigger>
+            <TabsTrigger 
+              value="all" 
+              className="px-4 py-2 rounded-md data-[state=active]:bg-black data-[state=active]:text-white"
+            >
+              All Controls
+            </TabsTrigger>
+          </TabsList>
           
-          <Tabs defaultValue="all" className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger 
-                value="all" 
-                className="px-4 py-2 text-gray-600"
-              >
-                All Controls
-              </TabsTrigger>
-              <TabsTrigger 
-                value="implemented" 
-                className="px-4 py-2 text-gray-600"
-              >
-                Implemented
-              </TabsTrigger>
-            </TabsList>
+          <TabsContent value="dashboard">
+            <ControlStats />
             
-            <TabsContent value="all">
-              <div className="border rounded-md">
-                <div className="grid grid-cols-7 bg-gray-50 py-2 px-4 border-b">
-                  <div className="font-medium">Control ID</div>
-                  <div className="font-medium">Name</div>
-                  <div className="font-medium col-span-2">Description</div>
-                  <div className="font-medium">Framework</div>
-                  <div className="font-medium">Status</div>
-                  <div className="font-medium">Actions</div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <ControlsChart />
+              <div className="bg-white rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium">By Framework</h3>
+                  <Button variant="ghost" className="text-sm">
+                    Highest <ChevronDown className="ml-1 h-4 w-4" />
+                  </Button>
                 </div>
-                
-                {[
-                  {
-                    id: "C-001",
-                    name: "Password Policy",
-                    description: "Ensure password complexity requirements are enforced",
-                    framework: "NDIS",
-                    status: "Implemented" 
-                  },
-                  {
-                    id: "C-002",
-                    name: "Access Control",
-                    description: "Implement role-based access control for all systems",
-                    framework: "ISO 27001",
-                    status: "Implemented"
-                  },
-                  {
-                    id: "C-003",
-                    name: "Data Backup",
-                    description: "Regular automated backups of all critical data",
-                    framework: "NDIS",
-                    status: "Not Implemented"
-                  },
-                  {
-                    id: "C-004",
-                    name: "Incident Response",
-                    description: "Documented procedure for security incidents",
-                    framework: "ISO 27001",
-                    status: "Partially Implemented"
-                  }
-                ].map((control, i) => (
-                  <div key={i} className="grid grid-cols-7 py-3 px-4 border-b hover:bg-gray-50">
-                    <div className="text-gray-600">{control.id}</div>
-                    <div className="font-medium">{control.name}</div>
-                    <div className="col-span-2 text-sm">{control.description}</div>
-                    <div>{control.framework}</div>
-                    <div>
-                      <span className={`text-xs font-medium px-2 py-1 rounded ${
-                        control.status === 'Implemented' ? 'bg-green-100 text-green-800' :
-                        control.status === 'Not Implemented' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {control.status}
-                      </span>
-                    </div>
-                    <div>
-                      <Button variant="link" className="p-0 h-auto">View Details</Button>
-                    </div>
-                  </div>
-                ))}
+                {/* Framework progress bars would go here */}
               </div>
-            </TabsContent>
-            
-            <TabsContent value="implemented">
-              <p className="text-gray-500">Showing implemented controls only.</p>
-            </TabsContent>
-          </Tabs>
-        </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="all">
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="p-4 flex items-center gap-4">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input 
+                    placeholder="Search by control code, name" 
+                    className="pl-9"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  {['Assignee', 'Framework', 'Entities', 'Domain', 'Function Grouping', 'Control Scope'].map((filter) => (
+                    <Button key={filter} variant="outline" className="text-sm">
+                      {filter} <ChevronDown className="ml-1 h-4 w-4" />
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[30px]"></TableHead>
+                    <TableHead>Control Name</TableHead>
+                    <TableHead>Control Code</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Assignee</TableHead>
+                    <TableHead>Control Domain</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {controls.map((control) => (
+                    <TableRow key={control.code}>
+                      <TableCell>
+                        <input type="checkbox" className="rounded border-gray-300" />
+                      </TableCell>
+                      <TableCell className="font-medium">{control.name}</TableCell>
+                      <TableCell>{control.code}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          control.status === 'Compliant' 
+                            ? 'bg-green-50 text-green-600' 
+                            : 'bg-red-50 text-red-600'
+                        }`}>
+                          {control.status}
+                        </span>
+                      </TableCell>
+                      <TableCell>{control.assignee || '—'}</TableCell>
+                      <TableCell>{control.domain}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
 };
+
+const controls = [
+  {
+    name: 'Vulnerability & Patch Management Program (VPMP)',
+    code: 'VPM-01',
+    status: 'Non Compliant',
+    domain: 'Vulnerability and Patch Management'
+  },
+  {
+    name: 'Threat Intelligence Program',
+    code: 'THR-01',
+    status: 'Non Compliant',
+    domain: 'Threat Management'
+  },
+  {
+    name: 'Managing Changes To Third-Party Services',
+    code: 'TPM-10',
+    status: 'Compliant',
+    domain: 'Third-Party Management'
+  }
+  // Add more controls as needed
+];
 
 export default Controls;
