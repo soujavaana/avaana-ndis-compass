@@ -18,7 +18,7 @@ const mainNavItems = [
   { name: 'Profile', icon: Users, path: '/profile' },
   { name: 'Registrations', icon: Database, path: '/registrations' },
   { name: 'Documents', icon: FileText, path: '/documents' },
-  { name: 'Communication', icon: MessageSquare, path: '/communication' },
+  { name: 'Communication', icon: MessageSquare, path: '/communication', badge: '1' },
   { name: 'Networking', icon: Network, path: '/networking' },
   { name: 'Tests', icon: TestTube, path: '/tests' },
   { 
@@ -95,7 +95,6 @@ const Sidebar = () => {
         <div className="flex items-center gap-2 px-2 py-1.5 bg-gray-50 rounded-md mb-2">
           <div className="min-w-0 flex-1">
             <h3 className="text-sm font-medium truncate">Happy Horizons NDIS</h3>
-            <p className="text-xs text-gray-600 truncate">Automation Services</p>
           </div>
         </div>
       </div>
@@ -162,6 +161,11 @@ const Sidebar = () => {
                 >
                   <item.icon size={18} className="flex-shrink-0" />
                   <span>{item.name}</span>
+                  {item.badge && (
+                    <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               )}
             </li>
