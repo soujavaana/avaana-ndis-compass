@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card } from '@/components/ui/card';
@@ -16,7 +15,7 @@ const Reports = () => {
               <Calendar size={16} />
               <span>Last 30 Days</span>
             </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700">
+            <Button className="bg-[#F1490D] hover:bg-[#EA580C]">
               <span className="mr-1">+</span> Generate Report
             </Button>
           </div>

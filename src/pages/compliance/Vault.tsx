@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Input } from '@/components/ui/input';
@@ -25,7 +24,7 @@ const Vault = () => {
                 </svg>
                 Audit Log
               </Button>
-              <Button className="bg-violet-600 hover:bg-violet-700">
+              <Button className="bg-[#F1490D] hover:bg-[#EA580C]">
                 <span className="mr-1">+</span> Add a New
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-1">
                   <path d="M6 1L11 6L6 11L1 6L6 1Z" fill="currentColor" />
