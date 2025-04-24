@@ -12,6 +12,7 @@ import {
   Boxes,
   ShieldCheck,
   LucideShieldCheck,
+  BriefcaseBusiness, // Added for Business Goals
 } from 'lucide-react';
 
 const mainNavItems = [
@@ -22,6 +23,7 @@ const mainNavItems = [
   { name: 'Communication', icon: MessageSquare, path: '/communication', badge: '1' },
   { name: 'Networking', icon: Network, path: '/networking' },
   { name: 'Tests', icon: ClipboardCheck, path: '/tests' },
+  { name: 'Business Goals', icon: BriefcaseBusiness, path: '/business-goals' }, // Added Business Goals
   { 
     name: 'Compliance', 
     icon: Shield,

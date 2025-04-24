@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -26,6 +25,7 @@ import CorrectiveAction from "./pages/audit/CorrectiveAction";
 import Employees from "./pages/people/Employees";
 import TrainingCampaigns from "./pages/people/TrainingCampaigns";
 import NotFound from "./pages/NotFound";
+import BusinessGoals from "./pages/BusinessGoals";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +54,7 @@ const App = () => (
           <Route path="/audit/corrective-action" element={<CorrectiveAction />} />
           <Route path="/people/employees" element={<Employees />} />
           <Route path="/people/training" element={<TrainingCampaigns />} />
+          <Route path="/business-goals" element={<BusinessGoals />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />
