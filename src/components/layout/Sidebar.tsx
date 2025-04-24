@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -6,19 +5,35 @@ import {
   TestTube, 
   Shield, 
   FileText, 
-  Settings,
   Network,
-  FileText as FilePolicies,
-  ShieldCheck,
+  MessageSquare,
+  Users,
   Database,
-  BarChart, // Changed from Report to BarChart
-  Users
+  ShieldCheck,
+  FileText as FilePolicies,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 
 const mainNavItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
+  { name: 'Profile', icon: Users, path: '/profile' },
+  { name: 'Registrations', icon: Database, path: '/registrations' },
+  { name: 'Documents', icon: FileText, path: '/documents' },
+  { name: 'Communication', icon: MessageSquare, path: '/communication' },
+  { name: 'Networking', icon: Network, path: '/networking' },
   { name: 'Tests', icon: TestTube, path: '/tests' },
+  { 
+    name: 'Compliance', 
+    icon: Shield, 
+    path: '/compliance',
+    subItems: [
+      { name: 'Frameworks', path: '/compliance/frameworks' },
+      { name: 'Controls', path: '/compliance/controls' },
+      { name: 'Policies', path: '/compliance/policies' },
+      { name: 'Evidence Tasks', path: '/compliance/evidence-tasks' },
+      { name: 'Cloud', path: '/compliance/cloud' },
+      { name: 'Vault', path: '/compliance/vault' }
+    ]
+  },
   { 
     name: 'Risk', 
     icon: ShieldCheck, 
@@ -52,29 +67,6 @@ const mainNavItems = [
     subItems: [
       { name: 'Employees', path: '/people/employees' },
       { name: 'Training Campaigns', path: '/people/training' }
-    ]
-  },
-  { name: 'Product Updates', icon: FileText, path: '/product-updates' },
-  { name: 'Settings', icon: Settings, path: '/settings' },
-  { name: 'Integrations', icon: Network, path: '/integrations' },
-  { name: 'Reports', icon: BarChart, path: '/reports' },
-  { name: 'Networking', icon: Network, path: '/networking' },
-  { name: 'Profile', icon: Users, path: '/profile' },
-  { name: 'Business Goals', icon: FilePolicies, path: '/business-goals' },
-  { name: 'Documents', icon: FileText, path: '/documents' },
-  { name: 'Registrations', icon: Database, path: '/registrations' },
-  { name: 'Communication', icon: FileText, path: '/communication' },
-  { 
-    name: 'Compliance', 
-    icon: Shield, 
-    path: '/compliance',
-    subItems: [
-      { name: 'Frameworks', path: '/compliance/frameworks' },
-      { name: 'Controls', path: '/compliance/controls' },
-      { name: 'Policies', path: '/compliance/policies' },
-      { name: 'Evidence Tasks', path: '/compliance/evidence-tasks' },
-      { name: 'Cloud', path: '/compliance/cloud' },
-      { name: 'Vault', path: '/compliance/vault' }
     ]
   },
 ];
