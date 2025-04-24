@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BellIcon, UserIcon, SearchIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -13,7 +12,7 @@ const Header = () => {
   };
 
   return (
-    <header className="w-full bg-white px-3 md:px-6 py-3 md:py-4 flex flex-col md:flex-row md:items-center md:justify-between border-b gap-2 md:gap-0 shadow-sm">
+    <header className="w-full bg-[#F4F4F0] px-3 md:px-6 py-3 md:py-4 flex flex-col md:flex-row md:items-center md:justify-between border-b gap-2 md:gap-0 shadow-sm">
       <div className="w-full md:max-w-md">
         <div className="relative">
           <SearchIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
