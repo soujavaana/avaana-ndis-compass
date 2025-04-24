@@ -1,112 +1,104 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { Input } from '@/components/ui/input';
+import { Search, LayoutGrid, LayoutList } from 'lucide-react';
+import ComplianceChart from '@/components/frameworks/ComplianceChart';
 
 const Frameworks = () => {
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
   return (
     <Layout>
-      <div className="p-6 bg-[#F9FAFB]">
+      <div className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-medium text-gray-800">Compliance Frameworks</h1>
-          <Button>+ Add Framework</Button>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">Frameworks</h1>
+            <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-sm">1</span>
+          </div>
+          <Button className="bg-purple-600 hover:bg-purple-700">
+            + Create Framework
+          </Button>
         </div>
-        
-        <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
-          <TooltipProvider>
-            <Tabs defaultValue="active" className="w-full">
+
+        <div className="bg-white rounded-lg shadow-sm">
+          <Tabs defaultValue="my-frameworks" className="w-full">
+            <div className="px-4 pt-4">
               <TabsList className="mb-4">
-                <TabsTrigger 
-                  value="active" 
-                  className="px-4 py-2 text-gray-600"
-                >
-                  Active Frameworks
+                <TabsTrigger value="my-frameworks" className="px-4 py-2">
+                  My Frameworks
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="archived" 
-                  className="px-4 py-2 text-gray-600"
-                >
-                  Archived
+                <TabsTrigger value="library" className="px-4 py-2">
+                  Frameworks Library
                 </TabsTrigger>
               </TabsList>
-              
-              <TabsContent value="active">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {[
-                    {
-                      name: "NDIS Practice Standards",
-                      description: "Core compliance framework for NDIS providers",
-                      totalControls: 54,
-                      implemented: 48,
-                      progress: 89
-                    },
-                    {
-                      name: "ISO 27001",
-                      description: "Information security management standards",
-                      totalControls: 114,
-                      implemented: 92,
-                      progress: 81
-                    },
-                    {
-                      name: "ISO 9001",
-                      description: "Quality management system requirements",
-                      totalControls: 82,
-                      implemented: 76,
-                      progress: 93
-                    },
-                    {
-                      name: "Aged Care Quality Standards",
-                      description: "Standards for aged care service providers",
-                      totalControls: 42,
-                      implemented: 39,
-                      progress: 93
-                    },
-                    {
-                      name: "HIPAA",
-                      description: "Health Insurance Portability and Accountability Act",
-                      totalControls: 68,
-                      implemented: 52,
-                      progress: 76
-                    }
-                  ].map((framework, i) => (
-                    <Card key={i} className="p-6 hover:shadow-md transition-shadow border border-gray-200">
-                      <h3 className="font-bold text-lg">{framework.name}</h3>
-                      <p className="text-gray-500 text-sm mt-2 mb-4">{framework.description}</p>
-                      
-                      <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-                        <span>Implementation Progress</span>
-                        <span className="font-medium">{framework.progress}%</span>
-                      </div>
-                      
-                      <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                        <div 
-                          className="bg-blue-600 h-2.5 rounded-full" 
-                          style={{ width: `${framework.progress}%` }}
-                        ></div>
-                      </div>
-                      
-                      <div className="flex justify-between items-center text-sm">
-                        <div>
-                          <span className="text-gray-600">Controls: </span>
-                          <span className="font-medium">{framework.implemented}/{framework.totalControls}</span>
-                        </div>
-                        <Button variant="outline" size="sm">View Details</Button>
-                      </div>
-                    </Card>
-                  ))}
+            </div>
+
+            <TabsContent value="my-frameworks">
+              <div className="px-4 pb-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input 
+                      placeholder="Search by name" 
+                      className="pl-9"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <select className="px-3 py-2 border rounded-md text-sm">
+                      <option>Sort by: Highest Compliance</option>
+                      <option>Sort by: Lowest Compliance</option>
+                      <option>Sort by: Name</option>
+                    </select>
+                    <div className="flex border rounded-md">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className={viewMode === 'grid' ? 'bg-gray-100' : ''}
+                        onClick={() => setViewMode('grid')}
+                      >
+                        <LayoutGrid className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className={viewMode === 'list' ? 'bg-gray-100' : ''}
+                        onClick={() => setViewMode('list')}
+                      >
+                        <LayoutList className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </TabsContent>
-              
-              <TabsContent value="archived">
-                <div className="text-center py-12 text-gray-500">
-                  <p>No archived frameworks found.</p>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </TooltipProvider>
+              </div>
+
+              <div className="p-4">
+                <Card className="p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="bg-black text-white text-xs px-2 py-1 rounded">ISO</div>
+                    <h3 className="text-lg font-semibold">ISO 27001:2022</h3>
+                  </div>
+                  <ComplianceChart 
+                    totalCompliance={13.5}
+                    metrics={{
+                      policies: 22.8,
+                      evidenceTasks: 0,
+                      automatedTests: 65.3
+                    }}
+                  />
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="library">
+              <div className="p-8 text-center text-gray-500">
+                <p>Browse available frameworks from our library</p>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </Layout>
