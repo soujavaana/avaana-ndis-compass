@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "next-themes";
 
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
@@ -29,35 +30,37 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <Toaster />
-      <Sonner />
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/registrations" element={<Registrations />} />
-        <Route path="/documents" element={<Documents />} />
-        <Route path="/communication" element={<Communication />} />
-        <Route path="/networking" element={<Networking />} />
-        <Route path="/tests" element={<Tests />} />
-        <Route path="/compliance/frameworks" element={<Frameworks />} />
-        <Route path="/compliance/controls" element={<Controls />} />
-        <Route path="/compliance/policies" element={<Policies />} />
-        <Route path="/compliance/evidence-tasks" element={<EvidenceTasks />} />
-        <Route path="/compliance/cloud" element={<Cloud />} />
-        <Route path="/compliance/vault" element={<Vault />} />
-        <Route path="/risk/vendors" element={<Vendors />} />
-        <Route path="/risk/management" element={<RiskManagement />} />
-        <Route path="/trust/vault" element={<TrustVault />} />
-        <Route path="/audit/center" element={<AuditCenter />} />
-        <Route path="/audit/corrective-action" element={<CorrectiveAction />} />
-        <Route path="/people/employees" element={<Employees />} />
-        <Route path="/people/training" element={<TrainingCampaigns />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
-  </QueryClientProvider>
+  <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/registrations" element={<Registrations />} />
+          <Route path="/documents" element={<Documents />} />
+          <Route path="/communication" element={<Communication />} />
+          <Route path="/networking" element={<Networking />} />
+          <Route path="/tests" element={<Tests />} />
+          <Route path="/compliance/frameworks" element={<Frameworks />} />
+          <Route path="/compliance/controls" element={<Controls />} />
+          <Route path="/compliance/policies" element={<Policies />} />
+          <Route path="/compliance/evidence-tasks" element={<EvidenceTasks />} />
+          <Route path="/compliance/cloud" element={<Cloud />} />
+          <Route path="/compliance/vault" element={<Vault />} />
+          <Route path="/risk/vendors" element={<Vendors />} />
+          <Route path="/risk/management" element={<RiskManagement />} />
+          <Route path="/trust/vault" element={<TrustVault />} />
+          <Route path="/audit/center" element={<AuditCenter />} />
+          <Route path="/audit/corrective-action" element={<CorrectiveAction />} />
+          <Route path="/people/employees" element={<Employees />} />
+          <Route path="/people/training" element={<TrainingCampaigns />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster />
+        <Sonner />
+      </BrowserRouter>
+    </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;
