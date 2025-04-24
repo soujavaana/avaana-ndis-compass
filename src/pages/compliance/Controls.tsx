@@ -134,7 +134,7 @@ const Controls = () => {
   );
 };
 
-const controls = [
+const controls: ControlItem[] = [
   {
     name: 'Vulnerability & Patch Management Program (VPMP)',
     code: 'VPM-01',
@@ -151,7 +151,8 @@ const controls = [
     name: 'Managing Changes To Third-Party Services',
     code: 'TPM-10',
     status: 'Compliant',
-    domain: 'Third-Party Management'
+    domain: 'Third-Party Management',
+    assignee: 'John Doe'
   }
   // Add more controls as needed
 ];

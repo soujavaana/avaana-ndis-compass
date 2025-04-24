@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Export, Plus } from 'lucide-react';
+import { Search, Filter, Download, Plus } from 'lucide-react';
 
 interface Policy {
   name: string;
@@ -171,7 +170,7 @@ const Policies = () => {
                   </SelectContent>
                 </Select>
                 <Button variant="outline" className="gap-2">
-                  <Export className="h-4 w-4" />
+                  <Download className="h-4 w-4" />
                   Export
                 </Button>
               </div>
