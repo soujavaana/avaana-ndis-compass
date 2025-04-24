@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Download, Plus } from 'lucide-react';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 interface Policy {
   name: string;
@@ -248,7 +249,7 @@ const Policies = () => {
 
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="bg-black text-white">1</Button>
+                <Button variant="outline" size="sm" className="bg-transparent text-black">1</Button>
                 <Button variant="ghost" size="sm">2</Button>
                 <Button variant="ghost" size="sm">3</Button>
                 <Button variant="ghost" size="sm">4</Button>

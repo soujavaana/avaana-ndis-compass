@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Search, LayoutGrid, LayoutList } from 'lucide-react';
 import ComplianceChart from '@/components/frameworks/ComplianceChart';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Frameworks = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -48,11 +49,16 @@ const Frameworks = () => {
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <select className="px-3 py-2 border rounded-md text-sm">
-                      <option>Sort by: Highest Compliance</option>
-                      <option>Sort by: Lowest Compliance</option>
-                      <option>Sort by: Name</option>
-                    </select>
+                    <Select>
+                      <SelectTrigger className="w-[200px] bg-white border border-gray-300">
+                        <SelectValue placeholder="Sort by: Highest Compliance" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="highest">Sort by: Highest Compliance</SelectItem>
+                        <SelectItem value="lowest">Sort by: Lowest Compliance</SelectItem>
+                        <SelectItem value="name">Sort by: Name</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <div className="flex border rounded-md">
                       <Button 
                         variant="ghost" 
