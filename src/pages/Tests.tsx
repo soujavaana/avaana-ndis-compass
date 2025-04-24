@@ -1,170 +1,336 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Checkbox } from '@/components/ui/checkbox';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChevronDown } from 'lucide-react';
 
 const Tests = () => {
+  const testData = [
+    {
+      name: "Security & Privacy Awareness Training Report",
+      status: "Needs Attention",
+      type: "Evidence",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Contact with Special Interest Groups and Authorities",
+      status: "Needs Attention",
+      type: "Evidence",
+      application: "Scrut",
+      assignee: "-",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Review of the classification policy",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Information Security",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Backup Policy",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Acceptable Usage Policy",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Password Policy",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Data Security Policy",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Contact with Special Interest Groups and Authorities",
+      status: "Needs Attention",
+      type: "Evidence",
+      application: "Scrut",
+      assignee: "-",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Review of the classification policy",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Information Security",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Backup Policy",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Acceptable Usage Policy",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Password Policy",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Data Security Policy",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Contact with Special Interest Groups and Authorities",
+      status: "Needs Attention",
+      type: "Evidence",
+      application: "Scrut",
+      assignee: "-",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Review of the classification policy",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Information Security",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Backup Policy",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Acceptable Usage Policy",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Password Policy",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+    {
+      name: "Data Security Policy",
+      status: "OK",
+      type: "Policy",
+      application: "Scrut",
+      assignee: "M",
+      framework: "ISO 27001:2022"
+    },
+  ];
+
   return (
     <Layout>
       <div className="p-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2 mb-6">
           <h1 className="text-2xl font-bold">Tests</h1>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" className="bg-white">Status</Button>
-            <Button variant="outline" className="bg-white">Filter</Button>
-            <Button className="bg-blue-600 hover:bg-blue-700">+ New Test</Button>
+          <Badge variant="secondary" className="bg-gray-100">197</Badge>
+        </div>
+
+        <Tabs defaultValue="all-tests" className="w-full">
+          <div className="flex gap-2 mb-6">
+            <Button variant="default" className="bg-black text-white hover:bg-gray-900">All Tests</Button>
+            <Button variant="ghost">Test Library</Button>
           </div>
-        </div>
-        
-        <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
-          <Tabs defaultValue="run-tests" className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger 
-                value="run-tests" 
-                className="px-4 py-2 text-gray-600"
-              >
-                Run Tests
-              </TabsTrigger>
-              <TabsTrigger 
-                value="past-runs" 
-                className="px-4 py-2 text-gray-600"
-              >
-                Past Runs
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="run-tests">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                  {
-                    title: "Password Policy",
-                    description: "Verifies that your password policy meets industry standards",
-                    status: "Passed"
-                  },
-                  {
-                    title: "MFA Setting",
-                    description: "Checks if MFA is enabled for all user accounts",
-                    status: "Passed"
-                  },
-                  {
-                    title: "Admin Access",
-                    description: "Reviews admin access permissions across your organization",
-                    status: "Failed"
-                  }
-                ].map((test, i) => (
-                  <Card key={i} className="p-4 hover:shadow-md transition-shadow border border-gray-200">
-                    <h3 className="font-medium text-lg">{test.title}</h3>
-                    <p className="text-gray-500 text-sm mt-2 mb-4">{test.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className={`text-sm font-medium px-2 py-1 rounded ${
-                        test.status === 'Passed' ? 'bg-green-100 text-green-800' :
-                        test.status === 'Failed' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                      }`}>
+
+          <div className="grid grid-cols-3 gap-6 mb-8">
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="bg-green-100 text-green-800">OK</Badge>
+              </div>
+              <div className="mt-4">
+                <span className="text-3xl font-semibold">89</span>
+                <span className="text-gray-500">/197</span>
+              </div>
+              <div className="mt-2">
+                <div className="h-2 bg-green-100 rounded-full">
+                  <div className="h-full w-[45.1%] bg-green-500 rounded-full"></div>
+                </div>
+                <span className="text-sm text-gray-500">45.1% done</span>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <Badge variant="secondary" className="bg-red-100 text-red-800">Needs Attention</Badge>
+              <div className="mt-4">
+                <span className="text-3xl font-semibold">108</span>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <Badge variant="secondary" className="bg-gray-100">Ignored</Badge>
+              <div className="mt-4">
+                <span className="text-3xl font-semibold">1</span>
+              </div>
+            </div>
+          </div>
+
+          <TabsList className="mb-6">
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="automated">Automated Tests</TabsTrigger>
+            <TabsTrigger value="policy">Policy</TabsTrigger>
+            <TabsTrigger value="evidence">Evidence</TabsTrigger>
+          </TabsList>
+
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <Input 
+              placeholder="Search by name" 
+              className="max-w-sm"
+            />
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    Application
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" />
+              </DropdownMenu>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    Assignee
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" />
+              </DropdownMenu>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    Framework
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" />
+              </DropdownMenu>
+
+              <div className="flex items-center gap-2">
+                <Switch id="unmapped" />
+                <label htmlFor="unmapped" className="text-sm">Show Unmapped Tests</label>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[30px]"><Checkbox /></TableHead>
+                  <TableHead className="font-medium">TestName</TableHead>
+                  <TableHead className="font-medium">Status</TableHead>
+                  <TableHead className="font-medium">Type</TableHead>
+                  <TableHead className="font-medium">Applications</TableHead>
+                  <TableHead className="font-medium">Assignees</TableHead>
+                  <TableHead className="font-medium">Framework</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {testData.map((test, index) => (
+                  <TableRow key={index}>
+                    <TableCell><Checkbox /></TableCell>
+                    <TableCell>{test.name}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className="bg-red-100 text-red-800">
                         {test.status}
-                      </span>
-                      <Button variant="ghost" size="sm">Run Test</Button>
-                    </div>
-                  </Card>
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{test.type}</TableCell>
+                    <TableCell>{test.application}</TableCell>
+                    <TableCell>
+                      {test.assignee === "M" ? (
+                        <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                          M
+                        </Badge>
+                      ) : (
+                        test.assignee
+                      )}
+                    </TableCell>
+                    <TableCell>{test.framework}</TableCell>
+                  </TableRow>
                 ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="past-runs">
-              <div className="mb-4">
-                <Input placeholder="Search tests" className="max-w-sm" />
-              </div>
-              
-              <Tabs defaultValue="all" className="w-full">
-                <TabsList className="mb-4">
-                  <TabsTrigger
-                    value="all"
-                    className="px-3 py-1 text-sm"
-                  >
-                    All
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="passed"
-                    className="px-3 py-1 text-sm"
-                  >
-                    Passed
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="failed"
-                    className="px-3 py-1 text-sm"
-                  >
-                    Failed
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="pending"
-                    className="px-3 py-1 text-sm"
-                  >
-                    Pending
-                  </TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="all">
-                  <div className="border rounded-md">
-                    <div className="grid grid-cols-4 bg-gray-50 py-2 px-4 border-b">
-                      <div className="font-medium">Test Name</div>
-                      <div className="font-medium">Date Run</div>
-                      <div className="font-medium">Status</div>
-                      <div className="font-medium">Actions</div>
-                    </div>
-                    
-                    {[
-                      {
-                        name: "Password Policy",
-                        date: "Jun 10, 2025",
-                        status: "Passed" 
-                      },
-                      {
-                        name: "MFA Setting",
-                        date: "Jun 8, 2025",
-                        status: "Passed"
-                      },
-                      {
-                        name: "Admin Access",
-                        date: "Jun 7, 2025",
-                        status: "Failed"
-                      }
-                    ].map((item, i) => (
-                      <div key={i} className="grid grid-cols-4 py-3 px-4 border-b items-center">
-                        <div>{item.name}</div>
-                        <div className="text-gray-600">{item.date}</div>
-                        <div>
-                          <span className={`text-sm font-medium px-2 py-1 rounded ${
-                            item.status === 'Passed' ? 'bg-green-100 text-green-800' :
-                            item.status === 'Failed' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {item.status}
-                          </span>
-                        </div>
-                        <div>
-                          <Button variant="link" className="p-0 h-auto">View Results</Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="passed">
-                  <p className="text-gray-500">Showing passed tests only.</p>
-                </TabsContent>
-                
-                <TabsContent value="failed">
-                  <p className="text-gray-500">Showing failed tests only.</p>
-                </TabsContent>
-                
-                <TabsContent value="pending">
-                  <p className="text-gray-500">Showing pending tests only.</p>
-                </TabsContent>
-              </Tabs>
-            </TabsContent>
-          </Tabs>
-        </div>
+              </TableBody>
+            </Table>
+          </div>
+        </Tabs>
       </div>
     </Layout>
   );

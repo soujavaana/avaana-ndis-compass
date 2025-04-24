@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +15,14 @@ import { Progress } from "@/components/ui/progress";
 import ControlStats from '@/components/controls/ControlStats';
 import ControlsChart from '@/components/controls/ControlsChart';
 import { Search, ChevronDown } from 'lucide-react';
+
+interface ControlItem {
+  name: string;
+  code: string;
+  status: string;
+  domain: string;
+  assignee?: string;
+}
 
 const Controls = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
