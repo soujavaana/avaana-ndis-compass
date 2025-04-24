@@ -28,7 +28,7 @@ export default {
         background: '#F4F4F0',
         foreground: 'hsl(var(--foreground))',
         primary: {
-          DEFAULT: '#F97316',
+          DEFAULT: '#F1490D',
           foreground: 'hsl(var(--primary-foreground))'
         },
         secondary: {
@@ -66,7 +66,7 @@ export default {
           ring: 'hsl(var(--sidebar-ring))'
         },
         avaana: {
-          primary: '#F97316',
+          primary: '#F1490D',
           secondary: '#EA580C',
           light: '#FB923C',
           accent: '#FFEDD5',
