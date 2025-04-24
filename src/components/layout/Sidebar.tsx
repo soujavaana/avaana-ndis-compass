@@ -11,7 +11,7 @@ import {
   FileText as FilePolicies,
   ShieldCheck,
   Database,
-  Report,
+  BarChart, // Changed from Report to BarChart
   Users
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -19,19 +19,6 @@ import { Badge } from '@/components/ui/badge';
 const mainNavItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
   { name: 'Tests', icon: TestTube, path: '/tests' },
-  { 
-    name: 'Compliance', 
-    icon: Shield, 
-    path: '/compliance',
-    subItems: [
-      { name: 'Frameworks', path: '/compliance/frameworks' },
-      { name: 'Controls', path: '/compliance/controls' },
-      { name: 'Policies', path: '/compliance/policies' },
-      { name: 'Evidence Tasks', path: '/compliance/evidence-tasks' },
-      { name: 'Cloud', path: '/compliance/cloud' },
-      { name: 'Vault', path: '/compliance/vault' }
-    ]
-  },
   { 
     name: 'Risk', 
     icon: ShieldCheck, 
@@ -70,13 +57,26 @@ const mainNavItems = [
   { name: 'Product Updates', icon: FileText, path: '/product-updates' },
   { name: 'Settings', icon: Settings, path: '/settings' },
   { name: 'Integrations', icon: Network, path: '/integrations' },
-  { name: 'Reports', icon: Report, path: '/reports' },
+  { name: 'Reports', icon: BarChart, path: '/reports' },
   { name: 'Networking', icon: Network, path: '/networking' },
   { name: 'Profile', icon: Users, path: '/profile' },
   { name: 'Business Goals', icon: FilePolicies, path: '/business-goals' },
   { name: 'Documents', icon: FileText, path: '/documents' },
   { name: 'Registrations', icon: Database, path: '/registrations' },
   { name: 'Communication', icon: FileText, path: '/communication' },
+  { 
+    name: 'Compliance', 
+    icon: Shield, 
+    path: '/compliance',
+    subItems: [
+      { name: 'Frameworks', path: '/compliance/frameworks' },
+      { name: 'Controls', path: '/compliance/controls' },
+      { name: 'Policies', path: '/compliance/policies' },
+      { name: 'Evidence Tasks', path: '/compliance/evidence-tasks' },
+      { name: 'Cloud', path: '/compliance/cloud' },
+      { name: 'Vault', path: '/compliance/vault' }
+    ]
+  },
 ];
 
 const Sidebar = () => {
@@ -170,14 +170,6 @@ const Sidebar = () => {
                 >
                   <item.icon size={18} className="flex-shrink-0" />
                   <span>{item.name}</span>
-                  {item.notification && (
-                    <Badge 
-                      variant="destructive" 
-                      className="absolute right-2 top-1/2 -translate-y-1/2 size-5 flex items-center justify-center rounded-full p-0 text-[10px]"
-                    >
-                      {item.notification}
-                    </Badge>
-                  )}
                 </Link>
               )}
             </li>

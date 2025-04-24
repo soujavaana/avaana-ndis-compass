@@ -1,162 +1,109 @@
 
 import React from 'react';
 import Layout from '@/components/layout/Layout';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 
 const Frameworks = () => {
   return (
     <Layout>
-      <div className="bg-gray-50 min-h-screen">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold">Frameworks</h1>
-              <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-sm">1</span>
-            </div>
-            <Button className="bg-violet-600 hover:bg-violet-700">
-              <span className="mr-1">+</span> Create Framework
-            </Button>
-          </div>
-          
-          <div className="mb-6">
-            <TabsList className="bg-white shadow-sm w-auto">
-              <TabsTrigger className="bg-black text-white hover:bg-black/90">My Frameworks</TabsTrigger>
-              <TabsTrigger className="text-black hover:bg-gray-100">Frameworks Library</TabsTrigger>
-            </TabsList>
-          </div>
-          
-          <div className="mb-6 flex flex-col md:flex-row justify-between gap-4">
-            <Input className="bg-white max-w-xs" placeholder="Search by name" />
-            <div className="flex items-center gap-2">
-              <span className="text-gray-700">Sort by: Highest Compliance</span>
-              <span>▼</span>
-              <div className="flex gap-1 ml-2">
-                <Button variant="outline" size="icon" className="bg-white">
-                  <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2 2H13V13H2V2Z" stroke="currentColor" strokeWidth="1" />
-                  </svg>
-                </Button>
-                <Button variant="outline" size="icon" className="bg-white">
-                  <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2 2H13V3H2V2ZM2 7H13V8H2V7ZM2 12H13V13H2V12Z" fill="currentColor" />
-                  </svg>
-                </Button>
-              </div>
-            </div>
-          </div>
-          
-          <Card className="mb-6">
-            <CardContent className="p-6">
-              <div className="flex items-center mb-6">
-                <div className="flex items-center justify-center h-8 w-8 bg-black text-white text-xs rounded-full font-bold">
-                  ISO
-                </div>
-                <h3 className="ml-2 font-medium">ISO 27001:2022</h3>
-              </div>
-              
-              <div className="flex justify-center mb-8">
-                <div className="relative w-40 h-40">
-                  <div className="absolute inset-0">
-                    <svg viewBox="0 0 120 120" className="transform -rotate-90">
-                      <circle cx="60" cy="60" r="54" fill="none" stroke="#e6e6e6" strokeWidth="12" />
-                      <circle
-                        cx="60"
-                        cy="60"
-                        r="54"
-                        fill="none"
-                        stroke="#f87171"
-                        strokeWidth="12"
-                        strokeDasharray="339.3"
-                        strokeDashoffset="293"
-                      />
-                    </svg>
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center flex-col">
-                    <span className="text-2xl font-bold">13.5%</span>
-                    <span className="text-sm text-gray-600">Compliant</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="flex items-center">
-                  <div className="relative w-16 h-16 mr-4">
-                    <svg viewBox="0 0 120 120" className="transform -rotate-90">
-                      <circle cx="60" cy="60" r="54" fill="none" stroke="#e6e6e6" strokeWidth="12" />
-                      <circle
-                        cx="60"
-                        cy="60"
-                        r="54"
-                        fill="none"
-                        stroke="#f87171"
-                        strokeWidth="12"
-                        strokeDasharray="339.3"
-                        strokeDashoffset="262"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="font-bold">22.8%</div>
-                    <div className="text-sm text-gray-600">Policies</div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center">
-                  <div className="relative w-16 h-16 mr-4">
-                    <svg viewBox="0 0 120 120" className="transform -rotate-90">
-                      <circle cx="60" cy="60" r="54" fill="none" stroke="#e6e6e6" strokeWidth="12" />
-                      <circle
-                        cx="60"
-                        cy="60"
-                        r="54"
-                        fill="none"
-                        stroke="#e6e6e6"
-                        strokeWidth="12"
-                        strokeDasharray="339.3"
-                        strokeDashoffset="339.3"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="font-bold">0%</div>
-                    <div className="text-sm text-gray-600">Evidence Tasks</div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center">
-                  <div className="relative w-16 h-16 mr-4">
-                    <svg viewBox="0 0 120 120" className="transform -rotate-90">
-                      <circle cx="60" cy="60" r="54" fill="none" stroke="#e6e6e6" strokeWidth="12" />
-                      <circle
-                        cx="60"
-                        cy="60"
-                        r="54"
-                        fill="none"
-                        stroke="#fbbf24"
-                        strokeWidth="12"
-                        strokeDasharray="339.3"
-                        strokeDashoffset="118"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="font-bold">65.3%</div>
-                    <div className="text-sm text-gray-600">Automated Tests</div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Compliance Frameworks</h1>
+          <Button className="bg-blue-600 hover:bg-blue-700">+ Add Framework</Button>
         </div>
         
-        {/* Help Button */}
-        <div className="fixed bottom-6 right-6">
-          <Button className="bg-blue-900 hover:bg-blue-800 text-white rounded-full h-10 w-10 flex items-center justify-center p-0">
-            <span className="text-lg">?</span>
-          </Button>
+        <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+          <Tabs defaultValue="active" className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger 
+                value="active" 
+                className="px-4 py-2 text-gray-600"
+              >
+                Active Frameworks
+              </TabsTrigger>
+              <TabsTrigger 
+                value="archived" 
+                className="px-4 py-2 text-gray-600"
+              >
+                Archived
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="active">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  {
+                    name: "NDIS Practice Standards",
+                    description: "Core compliance framework for NDIS providers",
+                    totalControls: 54,
+                    implemented: 48,
+                    progress: 89
+                  },
+                  {
+                    name: "ISO 27001",
+                    description: "Information security management standards",
+                    totalControls: 114,
+                    implemented: 92,
+                    progress: 81
+                  },
+                  {
+                    name: "ISO 9001",
+                    description: "Quality management system requirements",
+                    totalControls: 82,
+                    implemented: 76,
+                    progress: 93
+                  },
+                  {
+                    name: "Aged Care Quality Standards",
+                    description: "Standards for aged care service providers",
+                    totalControls: 42,
+                    implemented: 39,
+                    progress: 93
+                  },
+                  {
+                    name: "HIPAA",
+                    description: "Health Insurance Portability and Accountability Act",
+                    totalControls: 68,
+                    implemented: 52,
+                    progress: 76
+                  }
+                ].map((framework, i) => (
+                  <Card key={i} className="p-6 hover:shadow-md transition-shadow border border-gray-200">
+                    <h3 className="font-bold text-lg">{framework.name}</h3>
+                    <p className="text-gray-500 text-sm mt-2 mb-4">{framework.description}</p>
+                    
+                    <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                      <span>Implementation Progress</span>
+                      <span className="font-medium">{framework.progress}%</span>
+                    </div>
+                    
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                      <div 
+                        className="bg-blue-600 h-2.5 rounded-full" 
+                        style={{ width: `${framework.progress}%` }}
+                      ></div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center text-sm">
+                      <div>
+                        <span className="text-gray-600">Controls: </span>
+                        <span className="font-medium">{framework.implemented}/{framework.totalControls}</span>
+                      </div>
+                      <Button variant="outline" size="sm">View Details</Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="archived">
+              <div className="text-center py-12 text-gray-500">
+                <p>No archived frameworks found.</p>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </Layout>

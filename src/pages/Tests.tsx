@@ -1,266 +1,169 @@
 
 import React from 'react';
 import Layout from '@/components/layout/Layout';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext } from '@/components/ui/pagination';
-import { InfoIcon, ArrowUpDown } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
 
 const Tests = () => {
   return (
     <Layout>
-      <div className="bg-gray-50 min-h-screen">
-        <div className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <h1 className="text-2xl font-bold">Tests</h1>
-            <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-sm">197</span>
-          </div>
-          
-          <div className="mb-6">
-            <TabsList className="bg-white shadow-sm w-auto">
-              <TabsTrigger className="bg-black text-white hover:bg-black/90 data-[state=active]:bg-black">All Tests</TabsTrigger>
-              <TabsTrigger className="text-black hover:bg-gray-100">Test Library</TabsTrigger>
-            </TabsList>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            {/* OK Tests */}
-            <div className="bg-white p-6 rounded-md shadow-sm">
-              <div className="flex items-center mb-2">
-                <span className="text-emerald-500 font-medium mr-2">OK</span>
-                <InfoIcon size={16} className="text-gray-400" />
-              </div>
-              <div className="flex items-baseline">
-                <h2 className="text-4xl font-bold">89</h2>
-                <span className="ml-1 text-gray-600">/197</span>
-              </div>
-              <div className="mt-2">
-                <div className="w-full bg-gray-200 h-2 rounded-full">
-                  <div className="bg-emerald-500 h-2 rounded-full" style={{ width: '45.1%' }}></div>
-                </div>
-                <div className="text-xs text-gray-600 mt-1">45.1% done</div>
-              </div>
-            </div>
-            
-            {/* Needs Attention */}
-            <div className="bg-white p-6 rounded-md shadow-sm">
-              <div className="flex items-center mb-2">
-                <span className="text-red-500 font-medium mr-2">Needs Attention</span>
-                <InfoIcon size={16} className="text-gray-400" />
-              </div>
-              <h2 className="text-4xl font-bold">108</h2>
-            </div>
-            
-            {/* Ignored */}
-            <div className="bg-white p-6 rounded-md shadow-sm">
-              <div className="flex items-center mb-2">
-                <span className="text-gray-500 font-medium mr-2">Ignored</span>
-                <InfoIcon size={16} className="text-gray-400" />
-              </div>
-              <h2 className="text-4xl font-bold">1</h2>
-            </div>
-          </div>
-          
-          <div className="mb-6">
-            <TabsList className="bg-white shadow-sm w-auto">
-              <TabsTrigger className="text-violet-800 data-[state=active]:text-violet-800 data-[state=active]:border-b-2 data-[state=active]:border-violet-800 rounded-none">All</TabsTrigger>
-              <TabsTrigger className="text-gray-600">Automated Tests</TabsTrigger>
-              <TabsTrigger className="text-gray-600">Policy</TabsTrigger>
-              <TabsTrigger className="text-gray-600">Evidence</TabsTrigger>
-            </TabsList>
-          </div>
-          
-          <div className="mb-6 flex flex-col md:flex-row gap-4">
-            <Input className="bg-white" placeholder="Search by name" />
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" className="bg-white flex gap-2">
-                Application <span className="ml-1">▼</span>
-              </Button>
-              <Button variant="outline" className="bg-white flex gap-2">
-                Assignee <span className="ml-1">▼</span>
-              </Button>
-              <Button variant="outline" className="bg-white flex gap-2">
-                Framework <span className="ml-1">▼</span>
-              </Button>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded border border-gray-300"></div>
-                <span className="text-sm">Show Unmapped Tests</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-md shadow-sm overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[40px]">
-                    <input type="checkbox" className="rounded border-gray-300" />
-                  </TableHead>
-                  <TableHead>
-                    TestName <ArrowUpDown size={14} />
-                  </TableHead>
-                  <TableHead>
-                    Status <ArrowUpDown size={14} />
-                  </TableHead>
-                  <TableHead>
-                    Type <ArrowUpDown size={14} />
-                  </TableHead>
-                  <TableHead>
-                    Applications <ArrowUpDown size={14} />
-                  </TableHead>
-                  <TableHead>
-                    Assignees <ArrowUpDown size={14} />
-                  </TableHead>
-                  <TableHead>
-                    Framework <ArrowUpDown size={14} />
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {[
-                  {
-                    name: "Security & Privacy Awareness Training Report",
-                    status: "Needs Attention",
-                    type: "Evidence",
-                    app: "Scrut",
-                    assignee: "M",
-                    framework: "ISO 27001:2022"
-                  },
-                  {
-                    name: "Contact with Special Interest Groups and Authorities",
-                    status: "Needs Attention",
-                    type: "Evidence",
-                    app: "Scrut",
-                    assignee: "-",
-                    framework: "ISO 27001:2022"
-                  },
-                  {
-                    name: "Risk Register",
-                    status: "Needs Attention",
-                    type: "Evidence",
-                    app: "Scrut",
-                    assignee: "-",
-                    framework: "ISO 27001:2022"
-                  },
-                  {
-                    name: "Onboarding - Date of Joining/Date of Hire - Evidence can be from HRMS screenshot (Tool/Email)",
-                    status: "Needs Attention",
-                    type: "Evidence",
-                    app: "Scrut",
-                    assignee: "-",
-                    framework: "ISO 27001:2022"
-                  },
-                  {
-                    name: "Production Servers within the Private Subnet",
-                    status: "Needs Attention",
-                    type: "Evidence",
-                    app: "Scrut",
-                    assignee: "-",
-                    framework: "ISO 27001:2022"
-                  },
-                  {
-                    name: "Anti-virus dashboard and regular updates",
-                    status: "Needs Attention",
-                    type: "Evidence",
-                    app: "Scrut",
-                    assignee: "-",
-                    framework: "ISO 27001:2022"
-                  },
-                  {
-                    name: "Records for HR Exit Forms for all terminated users (employees and sub-contractors) with the employee...",
-                    status: "Needs Attention",
-                    type: "Evidence",
-                    app: "Scrut",
-                    assignee: "-",
-                    framework: "ISO 27001:2022"
-                  },
-                  {
-                    name: "Fire Extinguisher with Signage",
-                    status: "Needs Attention",
-                    type: "Evidence",
-                    app: "Scrut",
-                    assignee: "-",
-                    framework: "ISO 27001:2022"
-                  },
-                  {
-                    name: "Code Requirements, Design Docs, Test plans/result, Approval, Release Notes",
-                    status: "Needs Attention",
-                    type: "Evidence",
-                    app: "Scrut",
-                    assignee: "-",
-                    framework: "ISO 27001:2022"
-                  },
-                  {
-                    name: "Review of Vendor Audit Reports",
-                    status: "Needs Attention",
-                    type: "Evidence",
-                    app: "Scrut",
-                    assignee: "-",
-                    framework: "ISO 27001:2022"
-                  }
-                ].map((test, i) => (
-                  <TableRow key={i}>
-                    <TableCell>
-                      <input type="checkbox" className="rounded border-gray-300" />
-                    </TableCell>
-                    <TableCell>{test.name}</TableCell>
-                    <TableCell>
-                      <span className="bg-red-100 text-red-500 rounded px-2 py-1 text-xs">
-                        {test.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>{test.type}</TableCell>
-                    <TableCell>{test.app}</TableCell>
-                    <TableCell>
-                      {test.assignee !== "-" ? (
-                        <div className="bg-orange-100 text-orange-700 rounded-full w-6 h-6 flex items-center justify-center">
-                          {test.assignee}
-                        </div>
-                      ) : test.assignee}
-                    </TableCell>
-                    <TableCell>{test.framework}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            
-            <div className="p-4 border-t border-gray-200">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationLink className="bg-black text-white">1</PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink>2</PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink>3</PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink>4</PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink>5</PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationNext />
-                  </PaginationItem>
-                  <PaginationItem className="ml-2 text-sm text-gray-500">
-                    1-10/198
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Tests</h1>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" className="bg-white">Status</Button>
+            <Button variant="outline" className="bg-white">Filter</Button>
+            <Button className="bg-blue-600 hover:bg-blue-700">+ New Test</Button>
           </div>
         </div>
-
-        {/* Help Button */}
-        <div className="fixed bottom-6 right-6">
-          <Button className="bg-blue-900 hover:bg-blue-800 text-white rounded-full h-10 w-10 flex items-center justify-center p-0">
-            <span className="text-lg">?</span>
-          </Button>
+        
+        <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+          <Tabs defaultValue="run-tests" className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger 
+                value="run-tests" 
+                className="px-4 py-2 text-gray-600"
+              >
+                Run Tests
+              </TabsTrigger>
+              <TabsTrigger 
+                value="past-runs" 
+                className="px-4 py-2 text-gray-600"
+              >
+                Past Runs
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="run-tests">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  {
+                    title: "Password Policy",
+                    description: "Verifies that your password policy meets industry standards",
+                    status: "Passed"
+                  },
+                  {
+                    title: "MFA Setting",
+                    description: "Checks if MFA is enabled for all user accounts",
+                    status: "Passed"
+                  },
+                  {
+                    title: "Admin Access",
+                    description: "Reviews admin access permissions across your organization",
+                    status: "Failed"
+                  }
+                ].map((test, i) => (
+                  <Card key={i} className="p-4 hover:shadow-md transition-shadow border border-gray-200">
+                    <h3 className="font-medium text-lg">{test.title}</h3>
+                    <p className="text-gray-500 text-sm mt-2 mb-4">{test.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className={`text-sm font-medium px-2 py-1 rounded ${
+                        test.status === 'Passed' ? 'bg-green-100 text-green-800' :
+                        test.status === 'Failed' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {test.status}
+                      </span>
+                      <Button variant="ghost" size="sm">Run Test</Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="past-runs">
+              <div className="mb-4">
+                <Input placeholder="Search tests" className="max-w-sm" />
+              </div>
+              
+              <Tabs defaultValue="all" className="w-full">
+                <TabsList className="mb-4">
+                  <TabsTrigger
+                    value="all"
+                    className="px-3 py-1 text-sm"
+                  >
+                    All
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="passed"
+                    className="px-3 py-1 text-sm"
+                  >
+                    Passed
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="failed"
+                    className="px-3 py-1 text-sm"
+                  >
+                    Failed
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="pending"
+                    className="px-3 py-1 text-sm"
+                  >
+                    Pending
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="all">
+                  <div className="border rounded-md">
+                    <div className="grid grid-cols-4 bg-gray-50 py-2 px-4 border-b">
+                      <div className="font-medium">Test Name</div>
+                      <div className="font-medium">Date Run</div>
+                      <div className="font-medium">Status</div>
+                      <div className="font-medium">Actions</div>
+                    </div>
+                    
+                    {[
+                      {
+                        name: "Password Policy",
+                        date: "Jun 10, 2025",
+                        status: "Passed" 
+                      },
+                      {
+                        name: "MFA Setting",
+                        date: "Jun 8, 2025",
+                        status: "Passed"
+                      },
+                      {
+                        name: "Admin Access",
+                        date: "Jun 7, 2025",
+                        status: "Failed"
+                      }
+                    ].map((item, i) => (
+                      <div key={i} className="grid grid-cols-4 py-3 px-4 border-b items-center">
+                        <div>{item.name}</div>
+                        <div className="text-gray-600">{item.date}</div>
+                        <div>
+                          <span className={`text-sm font-medium px-2 py-1 rounded ${
+                            item.status === 'Passed' ? 'bg-green-100 text-green-800' :
+                            item.status === 'Failed' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {item.status}
+                          </span>
+                        </div>
+                        <div>
+                          <Button variant="link" className="p-0 h-auto">View Results</Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="passed">
+                  <p className="text-gray-500">Showing passed tests only.</p>
+                </TabsContent>
+                
+                <TabsContent value="failed">
+                  <p className="text-gray-500">Showing failed tests only.</p>
+                </TabsContent>
+                
+                <TabsContent value="pending">
+                  <p className="text-gray-500">Showing pending tests only.</p>
+                </TabsContent>
+              </Tabs>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </Layout>
