@@ -111,7 +111,7 @@ const Sidebar = () => {
                       text-[16px] leading-[24px] cursor-pointer px-[14px] py-[6px] gap-[14px] 
                       relative no-underline whitespace-nowrap
                       ${isActive(item.path) 
-                        ? 'bg-gray-100 text-[#333333]' 
+                        ? 'bg-[#063e3b] text-white' 
                         : 'text-gray-700 hover:bg-gray-50 hover:text-[#333333]'}`}
                   >
                     <div className="flex items-center gap-[14px]">
@@ -139,7 +139,7 @@ const Sidebar = () => {
                             to={subItem.path}
                             className={`block text-[14px] py-[5px] px-[14px] rounded-md
                               ${isSubActive(subItem.path)
-                                ? 'text-[#333333] font-medium'
+                                ? 'bg-[#063e3b] text-white'
                                 : 'text-gray-600 hover:text-[#333333]'}`}
                           >
                             {subItem.name}
@@ -156,7 +156,7 @@ const Sidebar = () => {
                     text-[16px] leading-[24px] cursor-pointer px-[14px] py-[6px] gap-[14px] 
                     relative no-underline whitespace-nowrap
                     ${isActive(item.path) 
-                      ? 'bg-gray-100 text-[#333333]' 
+                      ? 'bg-[#063e3b] text-white' 
                       : 'text-gray-700 hover:bg-gray-50 hover:text-[#333333]'}`}
                 >
                   <item.icon size={18} className="flex-shrink-0" />
