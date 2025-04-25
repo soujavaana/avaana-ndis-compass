@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Input } from '@/components/ui/input';
@@ -204,7 +205,7 @@ const Tests = () => {
 
         <Tabs defaultValue="all-tests" className="w-full">
           <div className="flex gap-2 mb-6">
-            <Button variant="default" className="bg-black text-white hover:bg-gray-900">All Tests</Button>
+            <Button variant="default" className="bg-black text-white hover:bg-gray-900 bg-opacity-0">All Tests</Button>
             <Button variant="ghost">Test Library</Button>
           </div>
 

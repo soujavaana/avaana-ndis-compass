@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Input } from '@/components/ui/input';
@@ -67,7 +68,7 @@ const Vault = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[
               {
-                title: "VAPT final Updated Reports",
+                title: "VAPT Updated Reports", // Changed from "VAPT final Updated Reports"
                 date: "Feb 10, 2025"
               },
               {

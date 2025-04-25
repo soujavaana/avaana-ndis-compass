@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -80,12 +81,18 @@ const Sidebar = () => {
 
   React.useEffect(() => {
     const currentPath = location.pathname;
-    const parentItem = mainNavItems.find(item => 
+    
+    // Find all parent items that have a matching subpath
+    const parentItems = mainNavItems.filter(item => 
       item.subItems?.some(subItem => currentPath.startsWith(subItem.path))
     );
-    if (parentItem && !expandedItems.includes(parentItem.name)) {
-      setExpandedItems(prev => [...prev, parentItem.name]);
-    }
+
+    // Add all parent names to expandedItems
+    const parentNames = parentItems.map(item => item.name);
+    setExpandedItems(prev => {
+      const newExpandedItems = new Set([...prev, ...parentNames]);
+      return Array.from(newExpandedItems);
+    });
   }, [location.pathname]);
 
   const toggleExpand = (name: string) => {
