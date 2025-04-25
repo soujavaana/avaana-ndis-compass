@@ -1,16 +1,18 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   ClipboardCheck,
-  Shield,
+  ShieldCheck,  // Replacing Shield with ShieldCheck for Compliance
   FileText, 
   Network,
   MessageSquare,
   Users,
   Boxes,
-  ShieldCheck,
-  LucideShieldCheck,
+  AlertTriangle,  // New icon for Risk
+  Lock,  // New icon for Trust
+  FileSearch,  // New icon for Audit
   BriefcaseBusiness,
 } from 'lucide-react';
 
@@ -25,7 +27,7 @@ const mainNavItems = [
   { name: 'Tests', icon: ClipboardCheck, path: '/tests' },
   { 
     name: 'Compliance', 
-    icon: Shield,
+    icon: ShieldCheck,  // Changed from Shield to ShieldCheck
     path: '/compliance',
     subItems: [
       { name: 'Frameworks', path: '/compliance/frameworks' },
@@ -38,7 +40,7 @@ const mainNavItems = [
   },
   { 
     name: 'Risk', 
-    icon: ShieldCheck,
+    icon: AlertTriangle,  // Changed from ShieldCheck to AlertTriangle
     path: '/risk',
     subItems: [
       { name: 'Vendors', path: '/risk/vendors' },
@@ -47,7 +49,7 @@ const mainNavItems = [
   },
   { 
     name: 'Trust', 
-    icon: LucideShieldCheck,
+    icon: Lock,  // Changed from LucideShieldCheck to Lock
     path: '/trust',
     subItems: [
       { name: 'Trust Vault', path: '/trust/vault' }
@@ -55,7 +57,7 @@ const mainNavItems = [
   },
   { 
     name: 'Audit', 
-    icon: FileText,
+    icon: FileSearch,  // Changed from FileText to FileSearch
     path: '/audit',
     subItems: [
       { name: 'Audit Center', path: '/audit/center' },
