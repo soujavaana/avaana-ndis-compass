@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,7 +11,7 @@ const Settings = () => {
   return (
     <Layout>
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Settings</h1>
+        <h1 className="text-[32px] font-[400] leading-[48px] font-recoleta mb-6">Settings</h1>
         
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <Tabs defaultValue="general" className="w-full">
@@ -65,11 +64,11 @@ const Settings = () => {
               <div className="flex-1 min-w-0">
                 <TabsContent value="general" className="mt-0">
                   <div>
-                    <h2 className="text-xl font-semibold mb-4">General Settings</h2>
+                    <h2 className="text-xl mb-4">General Settings</h2>
                     <p className="text-gray-600 mb-6">Configure your organization settings</p>
                     
                     <Card className="p-6 mb-6">
-                      <h3 className="text-lg font-medium mb-4">Organization Details</h3>
+                      <h3 className="text-lg mb-4">Organization Details</h3>
                       <div className="space-y-4">
                         <div className="grid gap-2">
                           <label className="text-sm font-medium">Organization Name</label>
@@ -89,7 +88,7 @@ const Settings = () => {
                       
                       <Separator className="my-6" />
                       
-                      <h3 className="text-lg font-medium mb-4">Contact Information</h3>
+                      <h3 className="text-lg mb-4">Contact Information</h3>
                       <div className="space-y-4">
                         <div className="grid gap-2">
                           <label className="text-sm font-medium">Email Address</label>
@@ -109,7 +108,7 @@ const Settings = () => {
                       
                       <Separator className="my-6" />
                       
-                      <h3 className="text-lg font-medium mb-4">Address</h3>
+                      <h3 className="text-lg mb-4">Address</h3>
                       <div className="space-y-4">
                         <div className="grid gap-2">
                           <label className="text-sm font-medium">Street Address</label>
@@ -149,32 +148,32 @@ const Settings = () => {
                 </TabsContent>
                 
                 <TabsContent value="profile">
-                  <h2 className="text-xl font-semibold mb-4">Profile Settings</h2>
+                  <h2 className="text-xl mb-4">Profile Settings</h2>
                   <p className="text-gray-500">Manage your user profile information.</p>
                 </TabsContent>
                 
                 <TabsContent value="security">
-                  <h2 className="text-xl font-semibold mb-4">Security & Privacy Settings</h2>
+                  <h2 className="text-xl mb-4">Security & Privacy Settings</h2>
                   <p className="text-gray-500">Manage your account security and privacy preferences.</p>
                 </TabsContent>
                 
                 <TabsContent value="notifications">
-                  <h2 className="text-xl font-semibold mb-4">Notification Settings</h2>
+                  <h2 className="text-xl mb-4">Notification Settings</h2>
                   <p className="text-gray-500">Control how you receive notifications.</p>
                 </TabsContent>
                 
                 <TabsContent value="team">
-                  <h2 className="text-xl font-semibold mb-4">Team Settings</h2>
+                  <h2 className="text-xl mb-4">Team Settings</h2>
                   <p className="text-gray-500">Manage your team members and their access levels.</p>
                 </TabsContent>
                 
                 <TabsContent value="compliance">
-                  <h2 className="text-xl font-semibold mb-4">Compliance Settings</h2>
+                  <h2 className="text-xl mb-4">Compliance Settings</h2>
                   <p className="text-gray-500">Configure your compliance framework preferences.</p>
                 </TabsContent>
                 
                 <TabsContent value="email">
-                  <h2 className="text-xl font-semibold mb-4">Email Settings</h2>
+                  <h2 className="text-xl mb-4">Email Settings</h2>
                   <p className="text-gray-500">Configure your email preferences and templates.</p>
                 </TabsContent>
               </div>

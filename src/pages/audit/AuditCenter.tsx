@@ -57,7 +57,7 @@ const AuditCenter = () => {
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">Audit Center</h1>
+            <h1 className="text-[32px] font-[400] leading-[48px] font-recoleta">Audit Center</h1>
           </div>
           <Button className="bg-[#F1490D] hover:bg-[#EA580C]">
             + New Audit

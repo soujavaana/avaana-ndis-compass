@@ -25,7 +25,7 @@ const Reports = () => {
           <Card className="p-4 flex flex-col">
             <h3 className="text-sm font-medium text-gray-500 mb-1">Compliance Score</h3>
             <div className="flex items-end justify-between">
-              <div className="text-3xl font-bold">87%</div>
+              <div className="text-3xl">87%</div>
               <span className="text-green-600 text-sm">↑ 4%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-1.5 mt-4">
@@ -36,7 +36,7 @@ const Reports = () => {
           <Card className="p-4 flex flex-col">
             <h3 className="text-sm font-medium text-gray-500 mb-1">Risk Score</h3>
             <div className="flex items-end justify-between">
-              <div className="text-3xl font-bold">23%</div>
+              <div className="text-3xl">23%</div>
               <span className="text-green-600 text-sm">↓ 7%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-1.5 mt-4">
@@ -47,7 +47,7 @@ const Reports = () => {
           <Card className="p-4 flex flex-col">
             <h3 className="text-sm font-medium text-gray-500 mb-1">Open Issues</h3>
             <div className="flex items-end justify-between">
-              <div className="text-3xl font-bold">12</div>
+              <div className="text-3xl">12</div>
               <span className="text-red-600 text-sm">↑ 2</span>
             </div>
             <div className="mt-4 text-sm text-gray-500">
@@ -58,7 +58,7 @@ const Reports = () => {
           <Card className="p-4 flex flex-col">
             <h3 className="text-sm font-medium text-gray-500 mb-1">Tasks Completed</h3>
             <div className="flex items-end justify-between">
-              <div className="text-3xl font-bold">87%</div>
+              <div className="text-3xl">87%</div>
               <span className="text-green-600 text-sm">↑ 12%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-1.5 mt-4">

@@ -6,7 +6,7 @@ const Cloud = () => {
   return (
     <Layout>
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Cloud Compliance</h1>
+        <h1 className="text-[32px] font-[400] leading-[48px] font-recoleta mb-6">Cloud Compliance</h1>
         <p>Cloud compliance management content will be displayed here.</p>
       </div>
     </Layout>
