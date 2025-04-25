@@ -205,7 +205,7 @@ const Tests = () => {
 
         <Tabs defaultValue="all-tests" className="w-full">
           <div className="flex gap-2 mb-6">
-            <Button variant="default" className="bg-black text-white hover:bg-gray-900 bg-opacity-0">All Tests</Button>
+            <Button variant="default" className="bg-black/0 text-white hover:bg-gray-900/10">All Tests</Button>
             <Button variant="ghost">Test Library</Button>
           </div>
 
