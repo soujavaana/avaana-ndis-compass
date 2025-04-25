@@ -10,7 +10,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Download, Plus } from 'lucide-react';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-
 interface Policy {
   name: string;
   status: 'Published' | 'Draft';
@@ -23,93 +22,82 @@ interface Policy {
   publishedBy?: string;
   publishedOn?: string;
 }
-
-const policies: Policy[] = [
-  {
-    name: "Data Breach Response Plan",
-    status: "Published",
-    assignee: "R",
-    approver: "R",
-    department: "ADMIN",
-    version: "1.0",
-    createdBy: "M",
-    createdOn: "Jan 8, 2025",
-    publishedBy: "R",
-    publishedOn: "Apr 10, 2025"
-  },
-  {
-    name: "ISMS Clause Requirements",
-    status: "Draft",
-    assignee: "M",
-    approver: "R",
-    department: "IT",
-    version: "1.2",
-    createdBy: "M",
-    createdOn: "Jan 8, 2025"
-  },
-  {
-    name: "Compliance Monitoring Policy",
-    status: "Draft",
-    assignee: "J",
-    approver: "R",
-    department: "COMPLIANCE",
-    version: "1.1",
-    createdBy: "J",
-    createdOn: "Feb 15, 2025"
-  },
-  {
-    name: "Third-Party Risk Management Policy",
-    status: "Published",
-    assignee: "M",
-    approver: "R",
-    department: "RISK",
-    version: "2.0",
-    createdBy: "M",
-    createdOn: "Mar 20, 2025",
-    publishedBy: "R",
-    publishedOn: "Apr 25, 2025"
-  },
-  {
-    name: "Incident Response Policy",
-    status: "Draft",
-    assignee: "S",
-    approver: "R",
-    department: "IT",
-    version: "1.3",
-    createdBy: "S",
-    createdOn: "Apr 10, 2025"
-  },
-  {
-    name: "Remote Work Security Policy",
-    status: "Published",
-    assignee: "H",
-    approver: "R",
-    department: "HR",
-    version: "1.2",
-    createdBy: "H",
-    createdOn: "Jan 25, 2025",
-    publishedBy: "R",
-    publishedOn: "Feb 28, 2025"
-  },
-  {
-    name: "Asset Management Policy",
-    status: "Draft",
-    assignee: "K",
-    approver: "R",
-    department: "ADMIN",
-    version: "1.0",
-    createdBy: "K",
-    createdOn: "May 5, 2025"
-  }
-];
-
+const policies: Policy[] = [{
+  name: "Data Breach Response Plan",
+  status: "Published",
+  assignee: "R",
+  approver: "R",
+  department: "ADMIN",
+  version: "1.0",
+  createdBy: "M",
+  createdOn: "Jan 8, 2025",
+  publishedBy: "R",
+  publishedOn: "Apr 10, 2025"
+}, {
+  name: "ISMS Clause Requirements",
+  status: "Draft",
+  assignee: "M",
+  approver: "R",
+  department: "IT",
+  version: "1.2",
+  createdBy: "M",
+  createdOn: "Jan 8, 2025"
+}, {
+  name: "Compliance Monitoring Policy",
+  status: "Draft",
+  assignee: "J",
+  approver: "R",
+  department: "COMPLIANCE",
+  version: "1.1",
+  createdBy: "J",
+  createdOn: "Feb 15, 2025"
+}, {
+  name: "Third-Party Risk Management Policy",
+  status: "Published",
+  assignee: "M",
+  approver: "R",
+  department: "RISK",
+  version: "2.0",
+  createdBy: "M",
+  createdOn: "Mar 20, 2025",
+  publishedBy: "R",
+  publishedOn: "Apr 25, 2025"
+}, {
+  name: "Incident Response Policy",
+  status: "Draft",
+  assignee: "S",
+  approver: "R",
+  department: "IT",
+  version: "1.3",
+  createdBy: "S",
+  createdOn: "Apr 10, 2025"
+}, {
+  name: "Remote Work Security Policy",
+  status: "Published",
+  assignee: "H",
+  approver: "R",
+  department: "HR",
+  version: "1.2",
+  createdBy: "H",
+  createdOn: "Jan 25, 2025",
+  publishedBy: "R",
+  publishedOn: "Feb 28, 2025"
+}, {
+  name: "Asset Management Policy",
+  status: "Draft",
+  assignee: "K",
+  approver: "R",
+  department: "ADMIN",
+  version: "1.0",
+  createdBy: "K",
+  createdOn: "May 5, 2025"
+}];
 const Policies = () => {
-  return (
-    <Layout>
+  return <Layout>
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">Policies</h1>
+            <h1 className="text-2xl font-normal">Policies</h1>
             <Badge variant="secondary" className="bg-gray-100">36</Badge>
           </div>
           <Button className="bg-[#F1490D] hover:bg-[#EA580C] gap-2">
@@ -120,16 +108,10 @@ const Policies = () => {
 
         <Tabs defaultValue="all" className="w-full">
           <TabsList className="bg-transparent border-b border-gray-200 w-full justify-start h-auto p-0 mb-6">
-            <TabsTrigger 
-              value="dashboard" 
-              className="py-2 px-4 rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:bg-transparent"
-            >
+            <TabsTrigger value="dashboard" className="py-2 px-4 rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:bg-transparent">
               Dashboard
             </TabsTrigger>
-            <TabsTrigger 
-              value="all" 
-              className="py-2 px-4 rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:bg-transparent"
-            >
+            <TabsTrigger value="all" className="py-2 px-4 rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:bg-transparent">
               All Policies
             </TabsTrigger>
           </TabsList>
@@ -161,10 +143,7 @@ const Policies = () => {
             <div className="flex items-center justify-between mb-4 gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input 
-                  placeholder="Search by name, entities or approver"
-                  className="pl-9"
-                />
+                <Input placeholder="Search by name, entities or approver" className="pl-9" />
               </div>
               <div className="flex items-center gap-2">
                 <Select>
@@ -250,21 +229,13 @@ const Policies = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {policies.map((policy, i) => (
-                    <TableRow key={i}>
+                  {policies.map((policy, i) => <TableRow key={i}>
                       <TableCell>
                         <Checkbox />
                       </TableCell>
                       <TableCell className="font-medium">{policy.name}</TableCell>
                       <TableCell>
-                        <Badge 
-                          variant="secondary"
-                          className={
-                            policy.status === 'Published' 
-                              ? 'bg-green-50 text-green-700' 
-                              : 'bg-amber-50 text-amber-700'
-                          }
-                        >
+                        <Badge variant="secondary" className={policy.status === 'Published' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}>
                           {policy.status}
                         </Badge>
                       </TableCell>
@@ -287,15 +258,12 @@ const Policies = () => {
                       </TableCell>
                       <TableCell>{policy.createdOn}</TableCell>
                       <TableCell>
-                        {policy.publishedBy && (
-                          <Badge variant="secondary" className="bg-purple-50 text-purple-700">
+                        {policy.publishedBy && <Badge variant="secondary" className="bg-purple-50 text-purple-700">
                             {policy.publishedBy}
-                          </Badge>
-                        )}
+                          </Badge>}
                       </TableCell>
                       <TableCell>{policy.publishedOn}</TableCell>
-                    </TableRow>
-                  ))}
+                    </TableRow>)}
                 </TableBody>
               </Table>
             </div>
@@ -319,8 +287,6 @@ const Policies = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Policies;
