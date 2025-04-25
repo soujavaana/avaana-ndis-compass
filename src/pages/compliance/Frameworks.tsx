@@ -7,16 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Search, LayoutGrid, LayoutList } from 'lucide-react';
 import ComplianceChart from '@/components/frameworks/ComplianceChart';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
 const Frameworks = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-
-  return (
-    <Layout>
+  return <Layout>
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">Frameworks</h1>
+            <h1 className="text-2xl font-normal">Frameworks</h1>
             <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-sm">1</span>
           </div>
           <Button className="bg-[#F1490D] hover:bg-[#EA580C]">
@@ -42,10 +39,7 @@ const Frameworks = () => {
                 <div className="flex items-center justify-between gap-4">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <Input 
-                      placeholder="Search by name" 
-                      className="pl-9"
-                    />
+                    <Input placeholder="Search by name" className="pl-9" />
                   </div>
                   <div className="flex items-center gap-2">
                     <Select>
@@ -59,20 +53,10 @@ const Frameworks = () => {
                       </SelectContent>
                     </Select>
                     <div className="flex border rounded-md">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className={viewMode === 'grid' ? 'bg-gray-100' : ''}
-                        onClick={() => setViewMode('grid')}
-                      >
+                      <Button variant="ghost" size="icon" className={viewMode === 'grid' ? 'bg-gray-100' : ''} onClick={() => setViewMode('grid')}>
                         <LayoutGrid className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className={viewMode === 'list' ? 'bg-gray-100' : ''}
-                        onClick={() => setViewMode('list')}
-                      >
+                      <Button variant="ghost" size="icon" className={viewMode === 'list' ? 'bg-gray-100' : ''} onClick={() => setViewMode('list')}>
                         <LayoutList className="h-4 w-4" />
                       </Button>
                     </div>
@@ -86,14 +70,11 @@ const Frameworks = () => {
                     <div className="text-[#F97316] text-xs px-2 py-1 rounded border border-[#F97316]">ISO</div>
                     <h3 className="text-lg font-semibold">ISO 27001:2022</h3>
                   </div>
-                  <ComplianceChart 
-                    totalCompliance={75}
-                    metrics={{
-                      policies: 80,
-                      evidenceTasks: 60,
-                      automatedTests: 85
-                    }}
-                  />
+                  <ComplianceChart totalCompliance={75} metrics={{
+                  policies: 80,
+                  evidenceTasks: 60,
+                  automatedTests: 85
+                }} />
                 </Card>
               </div>
             </TabsContent>
@@ -106,8 +87,6 @@ const Frameworks = () => {
           </Tabs>
         </div>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Frameworks;
