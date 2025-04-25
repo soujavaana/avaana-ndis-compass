@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { UserIcon, SendIcon, Mail, Phone } from 'lucide-react';
-
 const messages = [{
   id: 1,
   sender: 'Monique Wilson',
@@ -46,7 +45,6 @@ const messages = [{
   content: 'Your mid-term audit is scheduled for May 15th, so ideally we should have all documents prepared by May 1st to give us time for any revisions. I\'ve just uploaded some templates to your Documents section. Let me know if you have any questions!',
   read: false
 }];
-
 const Communication = () => {
   return <Layout>
       <div className="flex items-center justify-between mb-6">
@@ -60,7 +58,7 @@ const Communication = () => {
         <div className="lg:col-span-1">
           <Card className="h-[calc(100vh-12rem)]">
             <CardHeader className="pb-3">
-              <CardTitle>Conversations</CardTitle>
+              <CardTitle className="font-normal">Conversations</CardTitle>
               <div className="mt-2">
                 <Input placeholder="Search messages..." />
               </div>
@@ -120,7 +118,7 @@ const Communication = () => {
                     <UserIcon size={20} />
                   </div>
                   <div>
-                    <CardTitle>Monique Wilson</CardTitle>
+                    <CardTitle className="text-base font-normal">Monique Wilson</CardTitle>
                     <div className="text-sm text-gray-500">Application Manager</div>
                     <div className="flex items-center gap-4 mt-1">
                       <div className="flex items-center gap-1 text-xs text-gray-500">
@@ -179,5 +177,4 @@ const Communication = () => {
       </div>
     </Layout>;
 };
-
 export default Communication;
