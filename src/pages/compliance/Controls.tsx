@@ -24,6 +24,77 @@ interface ControlItem {
   assignee?: string;
 }
 
+const controls: ControlItem[] = [
+  {
+    name: 'Vulnerability & Patch Management Program (VPMP)',
+    code: 'VPM-01',
+    status: 'Non Compliant',
+    domain: 'Vulnerability and Patch Management'
+  },
+  {
+    name: 'Threat Intelligence Program',
+    code: 'THR-01',
+    status: 'Non Compliant',
+    domain: 'Threat Management'
+  },
+  {
+    name: 'Managing Changes To Third-Party Services',
+    code: 'TPM-10',
+    status: 'Compliant',
+    domain: 'Third-Party Management',
+    assignee: 'John Doe'
+  },
+  {
+    name: 'Information Security Policy',
+    code: 'ISP-01',
+    status: 'Compliant',
+    domain: 'Information Security',
+    assignee: 'Sarah Smith'
+  },
+  {
+    name: 'Access Control Management',
+    code: 'ACM-01',
+    status: 'Non Compliant',
+    domain: 'Access Control',
+    assignee: 'Mike Johnson'
+  },
+  {
+    name: 'Data Encryption Standards',
+    code: 'DES-01',
+    status: 'Compliant',
+    domain: 'Data Security',
+    assignee: 'Emma Wilson'
+  },
+  {
+    name: 'Incident Response Plan',
+    code: 'IRP-01',
+    status: 'Compliant',
+    domain: 'Incident Management',
+    assignee: 'Alex Brown'
+  },
+  {
+    name: 'Business Continuity Plan',
+    code: 'BCP-01',
+    status: 'Non Compliant',
+    domain: 'Business Continuity',
+    assignee: 'Tom Davis'
+  },
+  {
+    name: 'Network Security Controls',
+    code: 'NSC-01',
+    status: 'Compliant',
+    domain: 'Network Security',
+    assignee: 'Lisa Chen'
+  },
+  {
+    name: 'Cloud Security Configuration',
+    code: 'CSC-01',
+    status: 'Non Compliant',
+    domain: 'Cloud Security',
+    assignee: 'David Kim'
+  }
+];
+
 const Controls = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
 
@@ -44,13 +115,13 @@ const Controls = () => {
           <TabsList className="mb-6 bg-transparent p-0 h-auto">
             <TabsTrigger 
               value="dashboard" 
-              className="px-4 py-2 rounded-md data-[state=active]:bg-black data-[state=active]:text-white"
+              className="px-4 py-2 rounded-md data-[state=active]:bg-transparent data-[state=active]:text-black"
             >
               Dashboard
             </TabsTrigger>
             <TabsTrigger 
               value="all" 
-              className="px-4 py-2 rounded-md data-[state=active]:bg-black data-[state=active]:text-white"
+              className="px-4 py-2 rounded-md data-[state=active]:bg-transparent data-[state=active]:text-black"
             >
               All Controls
             </TabsTrigger>
@@ -133,28 +204,5 @@ const Controls = () => {
     </Layout>
   );
 };
-
-const controls: ControlItem[] = [
-  {
-    name: 'Vulnerability & Patch Management Program (VPMP)',
-    code: 'VPM-01',
-    status: 'Non Compliant',
-    domain: 'Vulnerability and Patch Management'
-  },
-  {
-    name: 'Threat Intelligence Program',
-    code: 'THR-01',
-    status: 'Non Compliant',
-    domain: 'Threat Management'
-  },
-  {
-    name: 'Managing Changes To Third-Party Services',
-    code: 'TPM-10',
-    status: 'Compliant',
-    domain: 'Third-Party Management',
-    assignee: 'John Doe'
-  }
-  // Add more controls as needed
-];
 
 export default Controls;

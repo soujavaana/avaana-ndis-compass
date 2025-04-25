@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +15,7 @@ const Dashboard = () => {
     <Layout>
       <div className="bg-[#F97316] text-white p-4 rounded-lg mb-6">
         <h1 className="text-2xl font-bold">Welcome back, Happy Horizons NDIS Services</h1>
-        <p className="text-sm">You have $350 in credits. Book a Business Goal session now.</p>
+        <p className="text-sm text-[#2DCE89]">You have $350 in credits. Book a Business Goal session now.</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -46,6 +46,41 @@ const documents: Document[] = [
     status: 'Active',
     expiry: 'Sep 05, 2025',
   },
+  {
+    id: '6',
+    name: 'Information Security Policy',
+    category: 'Policies',
+    status: 'Active',
+    expiry: 'Oct 15, 2025',
+  },
+  {
+    id: '7',
+    name: 'Business Continuity Plan',
+    category: 'Policies',
+    status: 'Active',
+    expiry: 'Nov 20, 2025',
+  },
+  {
+    id: '8',
+    name: 'Employee Background Check - A. Johnson',
+    category: 'Screening',
+    status: 'Active',
+    expiry: 'Dec 05, 2025',
+  },
+  {
+    id: '9',
+    name: 'Professional Indemnity Insurance',
+    category: 'Certificates',
+    status: 'Active',
+    expiry: 'Mar 15, 2026',
+  },
+  {
+    id: '10',
+    name: 'Data Protection Impact Assessment',
+    category: 'Audits',
+    status: 'Pending',
+    expiry: 'Feb 28, 2026',
+  },
 ];
 
 const StatusBadge = ({ status }: { status: Document['status'] }) => {
