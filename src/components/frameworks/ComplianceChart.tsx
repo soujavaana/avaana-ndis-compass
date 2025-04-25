@@ -33,17 +33,23 @@ const ComplianceChart: React.FC<ComplianceChartProps> = ({ totalCompliance, metr
       
       <div className="grid grid-cols-3 gap-6 w-full">
         <div className="flex flex-col items-center">
-          <Progress value={metrics.policies} className="w-16 h-16 rounded-full" />
+          <div className="relative w-16 h-16">
+            <Progress value={metrics.policies} className="w-16 h-16 rounded-full" />
+          </div>
           <span className="mt-2 font-semibold">{metrics.policies}%</span>
           <span className="text-sm text-gray-500">Policies</span>
         </div>
         <div className="flex flex-col items-center">
-          <Progress value={metrics.evidenceTasks} className="w-16 h-16 rounded-full" />
+          <div className="relative w-16 h-16">
+            <Progress value={metrics.evidenceTasks} className="w-16 h-16 rounded-full" />
+          </div>
           <span className="mt-2 font-semibold">{metrics.evidenceTasks}%</span>
           <span className="text-sm text-gray-500">Evidence Tasks</span>
         </div>
         <div className="flex flex-col items-center">
-          <Progress value={metrics.automatedTests} className="w-16 h-16 rounded-full" />
+          <div className="relative w-16 h-16">
+            <Progress value={metrics.automatedTests} className="w-16 h-16 rounded-full" />
+          </div>
           <span className="mt-2 font-semibold">{metrics.automatedTests}%</span>
           <span className="text-sm text-gray-500">Automated Tests</span>
         </div>

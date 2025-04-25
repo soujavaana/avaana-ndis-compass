@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -84,15 +83,15 @@ const Frameworks = () => {
               <div className="p-4">
                 <Card className="p-6">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="bg-black text-white text-xs px-2 py-1 rounded">ISO</div>
+                    <div className="text-[#F97316] text-xs px-2 py-1 rounded border border-[#F97316]">ISO</div>
                     <h3 className="text-lg font-semibold">ISO 27001:2022</h3>
                   </div>
                   <ComplianceChart 
-                    totalCompliance={13.5}
+                    totalCompliance={75}
                     metrics={{
-                      policies: 22.8,
-                      evidenceTasks: 0,
-                      automatedTests: 65.3
+                      policies: 80,
+                      evidenceTasks: 60,
+                      automatedTests: 85
                     }}
                   />
                 </Card>
