@@ -13,9 +13,9 @@ import {
 const Dashboard = () => {
   return (
     <Layout>
-      <div className="bg-[#F97316] text-white p-4 rounded-lg mb-6">
+      <div className="bg-[#2DCE89] text-white p-4 rounded-lg mb-6">
         <h1 className="text-2xl font-bold">Welcome back, Happy Horizons NDIS Services</h1>
-        <p className="text-sm text-[#2DCE89]">You have $350 in credits. Book a Business Goal session now.</p>
+        <p className="text-sm text-white">You have $350 in credits. Book a Business Goal session now.</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
