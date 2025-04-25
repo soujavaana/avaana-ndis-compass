@@ -14,7 +14,7 @@ const Profile = () => {
     <Layout>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-medium text-gray-800">Business Profile Details</h1>
+          <h1 className="text-2xl font-medium text-gray-800">Business Details</h1>
           <p className="text-sm text-gray-500 mt-1">Manage your business information and settings</p>
         </div>
         <Button variant="default">Save changes</Button>

@@ -1,24 +1,23 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   ClipboardCheck,
-  ShieldCheck,  // Replacing Shield with ShieldCheck for Compliance
+  ShieldCheck,
   FileText, 
   Network,
   MessageSquare,
   Users,
   Boxes,
-  AlertTriangle,  // New icon for Risk
-  Lock,  // New icon for Trust
-  FileSearch,  // New icon for Audit
+  AlertTriangle,
+  Lock,
+  FileSearch,
   BriefcaseBusiness,
 } from 'lucide-react';
 
 const mainNavItems = [
-  { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
-  { name: 'Profile', icon: Users, path: '/profile' },
+  { name: 'Home', icon: LayoutDashboard, path: '/' },
+  { name: 'Business Profile', icon: Users, path: '/profile' },
   { name: 'Registrations', icon: Boxes, path: '/registrations' },
   { name: 'Documents', icon: FileText, path: '/documents' },
   { name: 'Communication', icon: MessageSquare, path: '/communication', badge: '1' },
@@ -27,7 +26,7 @@ const mainNavItems = [
   { name: 'Tests', icon: ClipboardCheck, path: '/tests' },
   { 
     name: 'Compliance', 
-    icon: ShieldCheck,  // Changed from Shield to ShieldCheck
+    icon: ShieldCheck,
     path: '/compliance',
     subItems: [
       { name: 'Frameworks', path: '/compliance/frameworks' },
@@ -40,7 +39,7 @@ const mainNavItems = [
   },
   { 
     name: 'Risk', 
-    icon: AlertTriangle,  // Changed from ShieldCheck to AlertTriangle
+    icon: AlertTriangle,
     path: '/risk',
     subItems: [
       { name: 'Vendors', path: '/risk/vendors' },
@@ -49,7 +48,7 @@ const mainNavItems = [
   },
   { 
     name: 'Trust', 
-    icon: Lock,  // Changed from LucideShieldCheck to Lock
+    icon: Lock,
     path: '/trust',
     subItems: [
       { name: 'Trust Vault', path: '/trust/vault' }
@@ -57,7 +56,7 @@ const mainNavItems = [
   },
   { 
     name: 'Audit', 
-    icon: FileSearch,  // Changed from FileText to FileSearch
+    icon: FileSearch,
     path: '/audit',
     subItems: [
       { name: 'Audit Center', path: '/audit/center' },
@@ -91,7 +90,9 @@ const Sidebar = () => {
 
   const toggleExpand = (name: string) => {
     setExpandedItems(prev => 
-      prev.includes(name) ? prev.filter(item => item !== name) : [...prev, name]
+      prev.includes(name) 
+        ? prev.filter(item => item !== name)
+        : [...prev, name]
     );
   };
 
