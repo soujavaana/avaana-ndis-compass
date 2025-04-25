@@ -199,7 +199,7 @@ const Tests = () => {
     <Layout>
       <div className="p-6">
         <div className="flex items-center gap-2 mb-6">
-          <h1 className="text-2xl font-bold">Tests</h1>
+          <h1 className="text-[32px] font-[400] leading-[48px] font-recoleta">Tests</h1>
           <Badge variant="secondary" className="bg-gray-100">197</Badge>
         </div>
 

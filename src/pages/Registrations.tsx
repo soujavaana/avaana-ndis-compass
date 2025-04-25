@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -38,7 +39,7 @@ const Registrations = () => {
   return (
     <Layout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">NDIS Provider Registration</h1>
+        <h1 className="text-[32px] font-[400] leading-[48px] font-recoleta">NDIS Provider Registration</h1>
       </div>
 
       <Tabs defaultValue="ndis">
