@@ -14,6 +14,44 @@ import {
 } from "@/components/ui/table";
 
 const AuditCenter = () => {
+  const auditData = [
+    {
+      name: "Gap Assessment",
+      status: "In Progress",
+      type: "Internal",
+      date: "Nov 20, 2024",
+      observationPeriod: "-"
+    },
+    {
+      name: "Compliance Verification",
+      status: "Completed",
+      type: "External",
+      date: "Mar 15, 2025",
+      observationPeriod: "Jan-Feb 2025"
+    },
+    {
+      name: "IT Security Audit",
+      status: "In Progress",
+      type: "Internal",
+      date: "Apr 10, 2025",
+      observationPeriod: "-"
+    },
+    {
+      name: "Third-Party Risk Assessment",
+      status: "Completed",
+      type: "External",
+      date: "Feb 25, 2025",
+      observationPeriod: "Dec 2024-Jan 2025"
+    },
+    {
+      name: "Data Privacy Audit",
+      status: "Planned",
+      type: "Internal",
+      date: "May 5, 2025",
+      observationPeriod: "-"
+    }
+  ];
+
   return (
     <Layout>
       <div className="p-6">
@@ -81,27 +119,33 @@ const AuditCenter = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell className="font-medium">Gap Assessment</TableCell>
-                <TableCell>
-                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-600">
-                    In Progress
-                  </span>
-                </TableCell>
-                <TableCell>Internal</TableCell>
-                <TableCell>Nov 20, 2024</TableCell>
-                <TableCell>-</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <Button variant="ghost" size="icon">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+              {auditData.map((audit, index) => (
+                <TableRow key={index}>
+                  <TableCell className="font-medium">{audit.name}</TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      audit.status === 'In Progress' ? 'bg-amber-50 text-amber-600' :
+                      audit.status === 'Completed' ? 'bg-green-50 text-green-600' :
+                      'bg-gray-50 text-gray-600'
+                    }`}>
+                      {audit.status}
+                    </span>
+                  </TableCell>
+                  <TableCell>{audit.type}</TableCell>
+                  <TableCell>{audit.date}</TableCell>
+                  <TableCell>{audit.observationPeriod}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <Button variant="ghost" size="icon">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
 

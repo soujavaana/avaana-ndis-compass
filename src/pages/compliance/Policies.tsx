@@ -47,7 +47,60 @@ const policies: Policy[] = [
     createdBy: "M",
     createdOn: "Jan 8, 2025"
   },
-  // ... more policies
+  {
+    name: "Compliance Monitoring Policy",
+    status: "Draft",
+    assignee: "J",
+    approver: "R",
+    department: "COMPLIANCE",
+    version: "1.1",
+    createdBy: "J",
+    createdOn: "Feb 15, 2025"
+  },
+  {
+    name: "Third-Party Risk Management Policy",
+    status: "Published",
+    assignee: "M",
+    approver: "R",
+    department: "RISK",
+    version: "2.0",
+    createdBy: "M",
+    createdOn: "Mar 20, 2025",
+    publishedBy: "R",
+    publishedOn: "Apr 25, 2025"
+  },
+  {
+    name: "Incident Response Policy",
+    status: "Draft",
+    assignee: "S",
+    approver: "R",
+    department: "IT",
+    version: "1.3",
+    createdBy: "S",
+    createdOn: "Apr 10, 2025"
+  },
+  {
+    name: "Remote Work Security Policy",
+    status: "Published",
+    assignee: "H",
+    approver: "R",
+    department: "HR",
+    version: "1.2",
+    createdBy: "H",
+    createdOn: "Jan 25, 2025",
+    publishedBy: "R",
+    publishedOn: "Feb 28, 2025"
+  },
+  {
+    name: "Asset Management Policy",
+    status: "Draft",
+    assignee: "K",
+    approver: "R",
+    department: "ADMIN",
+    version: "1.0",
+    createdBy: "K",
+    createdOn: "May 5, 2025"
+  }
 ];
 
 const Policies = () => {

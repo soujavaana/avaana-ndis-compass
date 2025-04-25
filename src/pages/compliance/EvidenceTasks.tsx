@@ -54,7 +54,41 @@ const evidenceTasks: EvidenceTask[] = [
     assignee: 'M',
     department: 'HR'
   },
-  // ... more tasks
+  {
+    id: '4',
+    name: 'Vulnerability Assessment Report',
+    status: 'Draft',
+    assignee: 'J',
+    department: 'IT'
+  },
+  {
+    id: '5',
+    name: 'Incident Response Exercise Documentation',
+    status: 'Not Uploaded',
+    assignee: 'S',
+    department: 'SECURITY'
+  },
+  {
+    id: '6',
+    name: 'Third-Party Risk Assessment',
+    status: 'Needs Attention',
+    assignee: 'M',
+    department: 'RISK'
+  },
+  {
+    id: '7',
+    name: 'Business Continuity Plan Testing',
+    status: 'Not Uploaded',
+    assignee: 'H',
+    department: 'OPERATIONS'
+  },
+  {
+    id: '8',
+    name: 'Security Awareness Training Log',
+    status: 'Draft',
+    assignee: 'K',
+    department: 'HR'
+  }
 ];
 
 const EvidenceTasks = () => {
