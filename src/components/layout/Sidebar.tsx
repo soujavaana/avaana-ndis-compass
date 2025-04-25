@@ -21,8 +21,8 @@ const mainNavItems = [
   { name: 'Documents', icon: FileText, path: '/documents' },
   { name: 'Communication', icon: MessageSquare, path: '/communication', badge: '1' },
   { name: 'Networking', icon: Network, path: '/networking' },
-  { name: 'Tests', icon: ClipboardCheck, path: '/tests' },
   { name: 'Business Goals', icon: BriefcaseBusiness, path: '/business-goals' },
+  { name: 'Tests', icon: ClipboardCheck, path: '/tests' },
   { 
     name: 'Compliance', 
     icon: Shield,

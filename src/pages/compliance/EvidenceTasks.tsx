@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -67,7 +66,7 @@ const EvidenceTasks = () => {
             <h1 className="text-2xl font-bold">Evidence Tasks</h1>
             <span className="px-2 py-1 text-sm bg-gray-100 rounded">38</span>
           </div>
-          <Button className="bg-indigo-600 hover:bg-indigo-700">
+          <Button className="bg-[#F1490D] hover:bg-[#EA580C]">
             + Create New Evidence
           </Button>
         </div>

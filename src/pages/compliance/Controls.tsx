@@ -35,7 +35,7 @@ const Controls = () => {
             <h1 className="text-2xl font-bold">Controls</h1>
             <span className="px-2 py-1 text-sm bg-gray-100 rounded">209</span>
           </div>
-          <Button className="bg-[#7c3aed] hover:bg-[#6d28d9]">
+          <Button className="bg-[#F1490D] hover:bg-[#EA580C]">
             + Create Control
           </Button>
         </div>

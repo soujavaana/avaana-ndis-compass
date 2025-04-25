@@ -82,7 +82,7 @@ const Profile = () => {
                   <Label htmlFor="aboutBusiness">About your business</Label>
                   <textarea
                     id="aboutBusiness"
-                    className="w-full min-h-[120px] p-3 rounded-md border border-gray-200"
+                    className="w-full min-h-[120px] p-3 rounded-md border border-gray-200 bg-transparent"
                     placeholder="Describe your business..."
                   />
                   <Button variant="secondary" className="float-right">

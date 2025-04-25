@@ -59,7 +59,7 @@ const Policies = () => {
             <h1 className="text-2xl font-bold">Policies</h1>
             <Badge variant="secondary" className="bg-gray-100">36</Badge>
           </div>
-          <Button className="bg-[#7c3aed] hover:bg-[#6d28d9] gap-2">
+          <Button className="bg-[#F1490D] hover:bg-[#EA580C] gap-2">
             <Plus className="h-4 w-4" />
             New Policy
           </Button>

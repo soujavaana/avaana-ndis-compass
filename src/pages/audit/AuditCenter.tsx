@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -22,7 +21,7 @@ const AuditCenter = () => {
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold">Audit Center</h1>
           </div>
-          <Button className="bg-purple-600 hover:bg-purple-700">
+          <Button className="bg-[#F1490D] hover:bg-[#EA580C]">
             + New Audit
           </Button>
         </div>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Input } from '@/components/ui/input';
@@ -14,7 +13,7 @@ const CorrectiveAction = () => {
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold">Corrective Action Tracker</h1>
             <div className="flex gap-2">
-              <Button className="bg-violet-600 hover:bg-violet-700">
+              <Button className="bg-[#F1490D] hover:bg-[#EA580C]">
                 <span className="mr-1">+</span> Add New
               </Button>
               <Button variant="outline" className="bg-white" size="icon">
