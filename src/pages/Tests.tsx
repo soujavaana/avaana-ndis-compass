@@ -1,10 +1,8 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import {
   DropdownMenu,
@@ -205,7 +203,7 @@ const Tests = () => {
 
         <Tabs defaultValue="all-tests" className="w-full">
           <div className="flex gap-2 mb-6">
-            <Button variant="default" className="bg-black/0 text-white hover:bg-gray-900/10">All Tests</Button>
+            <Button variant="ghost">All Tests</Button>
             <Button variant="ghost">Test Library</Button>
           </div>
 
