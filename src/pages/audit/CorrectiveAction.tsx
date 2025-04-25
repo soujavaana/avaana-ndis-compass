@@ -4,14 +4,12 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ArrowUpDown, Cog } from 'lucide-react';
-
 const CorrectiveAction = () => {
-  return (
-    <Layout>
+  return <Layout>
       <div className="bg-gray-50 min-h-screen">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold">Corrective Action Tracker</h1>
+            <h1 className="text-2xl font-normal">Corrective Action Tracker</h1>
             <div className="flex gap-2">
               <Button className="bg-[#F1490D] hover:bg-[#EA580C]">
                 <span className="mr-1">+</span> Add New
@@ -95,8 +93,6 @@ const CorrectiveAction = () => {
           </Button>
         </div>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default CorrectiveAction;
