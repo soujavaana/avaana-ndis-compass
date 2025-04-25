@@ -1,18 +1,21 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
+
 interface CategoryTabProps {
   label: string;
   active: boolean;
   onClick: () => void;
 }
+
 const CategoryTab = ({
   label,
   active,
   onClick
-}: CategoryTabProps) => <button onClick={onClick} className={`px-4 py-2 font-medium rounded-md ${active ? 'bg-avaana-accent text-avaana-text' : 'bg-white text-gray-600 hover:bg-gray-50'}`}>
+}: CategoryTabProps) => <button onClick={onClick} className={`px-4 py-2 font-normal rounded-md ${active ? 'bg-avaana-accent text-avaana-text' : 'bg-white text-gray-600 hover:bg-gray-50'}`}>
     {label}
   </button>;
+
 const DocumentsHeader = () => {
   const [activeCategory, setActiveCategory] = React.useState('All');
   const categories = ['All', 'Policies', 'Certificates', 'Audits', 'Screening'];
@@ -31,4 +34,5 @@ const DocumentsHeader = () => {
       </div>
     </div>;
 };
+
 export default DocumentsHeader;

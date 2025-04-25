@@ -20,7 +20,7 @@ const StatCard = ({ label, value, total, variant, progress }: StatCardProps) => 
   return (
     <div className="p-4 rounded-lg bg-white">
       <div className="flex items-center gap-1">
-        <span className={`text-sm font-medium ${colors[variant].split(' ')[0]}`}>
+        <span className={`text-sm font-normal ${colors[variant].split(' ')[0]}`}>
           {label}
         </span>
         <button className="text-gray-400 hover:text-gray-600">
@@ -33,7 +33,7 @@ const StatCard = ({ label, value, total, variant, progress }: StatCardProps) => 
       </div>
       <div className="mt-2">
         <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-bold">{value}</span>
+          <span className="text-3xl font-normal">{value}</span>
           {total && (
             <span className="text-gray-500 text-sm">/{total}</span>
           )}

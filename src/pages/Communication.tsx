@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { UserIcon, SendIcon, Mail, Phone } from 'lucide-react';
+
 const messages = [{
   id: 1,
   sender: 'Monique Wilson',
@@ -45,6 +46,7 @@ const messages = [{
   content: 'Your mid-term audit is scheduled for May 15th, so ideally we should have all documents prepared by May 1st to give us time for any revisions. I\'ve just uploaded some templates to your Documents section. Let me know if you have any questions!',
   read: false
 }];
+
 const Communication = () => {
   return <Layout>
       <div className="flex items-center justify-between mb-6">
@@ -68,7 +70,7 @@ const Communication = () => {
                 <div className="border-l-4 border-avaana-primary bg-gray-50">
                   <div className="p-4 cursor-pointer">
                     <div className="flex justify-between">
-                      <div className="font-semibold">Monique Wilson</div>
+                      <div className="font-normal">Monique Wilson</div>
                       <div className="text-xs text-gray-500">8:20 AM</div>
                     </div>
                     <div className="text-sm truncate text-gray-600">I've just uploaded some templates to your Documents...</div>
@@ -83,7 +85,7 @@ const Communication = () => {
                 <div className="hover:bg-gray-50">
                   <div className="p-4 cursor-pointer">
                     <div className="flex justify-between">
-                      <div className="font-semibold">Timothee - Account Manager</div>
+                      <div className="font-normal">Timothee - Account Manager</div>
                       <div className="text-xs text-gray-500">Apr 5</div>
                     </div>
                     <div className="text-sm truncate text-gray-600">Thank you for submitting your quarterly report...</div>
@@ -95,7 +97,7 @@ const Communication = () => {
                 <div className="hover:bg-gray-50">
                   <div className="p-4 cursor-pointer">
                     <div className="flex justify-between">
-                      <div className="font-semibold">James Peters</div>
+                      <div className="font-normal">James Peters</div>
                       <div className="text-xs text-gray-500">Mar 27</div>
                     </div>
                     <div className="text-sm truncate text-gray-600">Your registration has been approved. Congratulations!...</div>
@@ -154,7 +156,7 @@ const Communication = () => {
                 {messages.map(message => <div key={message.id} className={`flex ${message.isAdmin ? 'justify-start' : 'justify-end'}`}>
                     <div className={`max-w-[70%] rounded-lg p-4 ${message.isAdmin ? 'bg-gray-100 text-gray-800' : 'bg-avaana-primary text-white'}`}>
                       <div className="flex justify-between items-start mb-1">
-                        <div className="font-medium">{message.sender}</div>
+                        <div className="font-normal">{message.sender}</div>
                         <div className={`text-xs ${message.isAdmin ? 'text-gray-500' : 'text-white/80'}`}>
                           {message.time}
                         </div>
@@ -177,4 +179,5 @@ const Communication = () => {
       </div>
     </Layout>;
 };
+
 export default Communication;

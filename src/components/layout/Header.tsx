@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BellIcon, UserIcon, SearchIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -28,7 +29,7 @@ const Header = () => {
           <span className="text-gray-500 mr-2 text-sm">Application Manager:</span>
           <button 
             onClick={handleManagerClick} 
-            className="text-sm font-medium hover:text-[#2DCE89] transition-colors"
+            className="text-sm font-normal hover:text-[#2DCE89] transition-colors"
           >
             Monique Wilson
           </button>
