@@ -1,19 +1,16 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { MoreVertical } from 'lucide-react';
-
 const Vault = () => {
-  return (
-    <Layout>
+  return <Layout>
       <div className="bg-gray-50 min-h-screen">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold">Vault</h1>
+              <h1 className="text-3xl font-normal">Vault</h1>
               <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-sm">3</span>
             </div>
             <div className="flex gap-2">
@@ -66,21 +63,17 @@ const Vault = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[
-              {
-                title: "VAPT Updated Reports", // Changed from "VAPT final Updated Reports"
-                date: "Feb 10, 2025"
-              },
-              {
-                title: "VAPT",
-                date: "Dec 3, 2024"
-              },
-              {
-                title: "Kickoff",
-                date: "Nov 11, 2024"
-              }
-            ].map((doc, i) => (
-              <Card key={i} className="bg-white p-4 hover:shadow-md transition-shadow">
+            {[{
+            title: "VAPT Updated Reports",
+            // Changed from "VAPT final Updated Reports"
+            date: "Feb 10, 2025"
+          }, {
+            title: "VAPT",
+            date: "Dec 3, 2024"
+          }, {
+            title: "Kickoff",
+            date: "Nov 11, 2024"
+          }].map((doc, i) => <Card key={i} className="bg-white p-4 hover:shadow-md transition-shadow">
                 <div className="relative">
                   <Button variant="ghost" size="icon" className="absolute top-0 right-0">
                     <MoreVertical size={16} />
@@ -101,8 +94,7 @@ const Vault = () => {
                     </div>
                   </div>
                 </div>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
         
@@ -113,8 +105,6 @@ const Vault = () => {
           </Button>
         </div>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Vault;
