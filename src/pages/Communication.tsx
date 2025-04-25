@@ -1,64 +1,54 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { UserIcon, SendIcon, Mail, Phone } from 'lucide-react';
-
-const messages = [
-  {
-    id: 1,
-    sender: 'Monique Wilson',
-    avatar: null,
-    isAdmin: true,
-    time: 'Yesterday at 9:42 AM',
-    content: 'Hi there! Just checking in about your upcoming mid-term audit. Have you started gathering the required documents?',
-    read: true
-  },
-  {
-    id: 2,
-    sender: 'You',
-    avatar: null,
-    isAdmin: false,
-    time: 'Yesterday at 11:15 AM',
-    content: 'Hello Monique, not yet. Could you please remind me what documents I need to prepare?',
-    read: true
-  },
-  {
-    id: 3,
-    sender: 'Monique Wilson',
-    avatar: null,
-    isAdmin: true,
-    time: 'Yesterday at 2:30 PM',
-    content: 'Of course! For your mid-term audit, you\'ll need to provide:\n\n1. Updated policies and procedures\n2. Staff training records\n3. Incident reports from the last 6 months\n4. Evidence of continuous improvement activities\n5. Updated risk management plan\n\nWould you like me to send over some templates?',
-    read: true
-  },
-  {
-    id: 4,
-    sender: 'You',
-    avatar: null,
-    isAdmin: false,
-    time: 'Yesterday at 3:45 PM',
-    content: 'That would be very helpful. When is the deadline for submitting these documents?',
-    read: true
-  },
-  {
-    id: 5,
-    sender: 'Monique Wilson',
-    avatar: null,
-    isAdmin: true,
-    time: 'Today at 8:20 AM',
-    content: 'Your mid-term audit is scheduled for May 15th, so ideally we should have all documents prepared by May 1st to give us time for any revisions. I\'ve just uploaded some templates to your Documents section. Let me know if you have any questions!',
-    read: false
-  }
-];
-
+const messages = [{
+  id: 1,
+  sender: 'Monique Wilson',
+  avatar: null,
+  isAdmin: true,
+  time: 'Yesterday at 9:42 AM',
+  content: 'Hi there! Just checking in about your upcoming mid-term audit. Have you started gathering the required documents?',
+  read: true
+}, {
+  id: 2,
+  sender: 'You',
+  avatar: null,
+  isAdmin: false,
+  time: 'Yesterday at 11:15 AM',
+  content: 'Hello Monique, not yet. Could you please remind me what documents I need to prepare?',
+  read: true
+}, {
+  id: 3,
+  sender: 'Monique Wilson',
+  avatar: null,
+  isAdmin: true,
+  time: 'Yesterday at 2:30 PM',
+  content: 'Of course! For your mid-term audit, you\'ll need to provide:\n\n1. Updated policies and procedures\n2. Staff training records\n3. Incident reports from the last 6 months\n4. Evidence of continuous improvement activities\n5. Updated risk management plan\n\nWould you like me to send over some templates?',
+  read: true
+}, {
+  id: 4,
+  sender: 'You',
+  avatar: null,
+  isAdmin: false,
+  time: 'Yesterday at 3:45 PM',
+  content: 'That would be very helpful. When is the deadline for submitting these documents?',
+  read: true
+}, {
+  id: 5,
+  sender: 'Monique Wilson',
+  avatar: null,
+  isAdmin: true,
+  time: 'Today at 8:20 AM',
+  content: 'Your mid-term audit is scheduled for May 15th, so ideally we should have all documents prepared by May 1st to give us time for any revisions. I\'ve just uploaded some templates to your Documents section. Let me know if you have any questions!',
+  read: false
+}];
 const Communication = () => {
-  return (
-    <Layout>
+  return <Layout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Communication Center</h1>
+        <h1 className="text-3xl text-gray-900 font-normal">Communication Center</h1>
         <button className="bg-avaana-primary text-white px-4 py-2 rounded-md hover:bg-avaana-secondary transition-colors">
           New Message
         </button>
@@ -145,22 +135,13 @@ const Communication = () => {
                 <div>
                   <Tabs defaultValue="messages" className="w-[320px]">
                     <TabsList className="bg-gray-100 grid w-full grid-cols-3 rounded-lg h-8">
-                      <TabsTrigger 
-                        value="messages" 
-                        className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7"
-                      >
+                      <TabsTrigger value="messages" className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7">
                         Messages
                       </TabsTrigger>
-                      <TabsTrigger 
-                        value="files" 
-                        className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7"
-                      >
+                      <TabsTrigger value="files" className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7">
                         Files
                       </TabsTrigger>
-                      <TabsTrigger 
-                        value="tasks" 
-                        className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7"
-                      >
+                      <TabsTrigger value="tasks" className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7">
                         Tasks
                       </TabsTrigger>
                     </TabsList>
@@ -170,18 +151,8 @@ const Communication = () => {
             </CardHeader>
             <CardContent className="flex-1 overflow-y-auto p-4">
               <div className="space-y-4">
-                {messages.map((message) => (
-                  <div 
-                    key={message.id} 
-                    className={`flex ${message.isAdmin ? 'justify-start' : 'justify-end'}`}
-                  >
-                    <div 
-                      className={`max-w-[70%] rounded-lg p-4 ${
-                        message.isAdmin 
-                          ? 'bg-gray-100 text-gray-800' 
-                          : 'bg-avaana-primary text-white'
-                      }`}
-                    >
+                {messages.map(message => <div key={message.id} className={`flex ${message.isAdmin ? 'justify-start' : 'justify-end'}`}>
+                    <div className={`max-w-[70%] rounded-lg p-4 ${message.isAdmin ? 'bg-gray-100 text-gray-800' : 'bg-avaana-primary text-white'}`}>
                       <div className="flex justify-between items-start mb-1">
                         <div className="font-medium">{message.sender}</div>
                         <div className={`text-xs ${message.isAdmin ? 'text-gray-500' : 'text-white/80'}`}>
@@ -190,8 +161,7 @@ const Communication = () => {
                       </div>
                       <div className="whitespace-pre-line">{message.content}</div>
                     </div>
-                  </div>
-                ))}
+                  </div>)}
               </div>
             </CardContent>
             <div className="p-4 border-t">
@@ -205,8 +175,6 @@ const Communication = () => {
           </Card>
         </div>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Communication;
