@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
 import Layout from '../components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Network, Eye, EyeOff } from 'lucide-react';
-
 interface Contact {
   id: number;
   initial: string;
@@ -15,65 +13,55 @@ interface Contact {
   phone: string;
   email: string;
 }
-
 const NetworkingPage = () => {
   const [showContactInfo, setShowContactInfo] = useState(false);
-  
-  const contacts: Contact[] = [
-    { 
-      id: 1, 
-      initial: 'S', 
-      lastName: 'Johnson', 
-      role: 'Support Coordinator', 
-      location: 'Brisbane, QLD', 
-      distance: '3.2 km', 
-      phone: '0412 XXX XXX', 
-      email: 's.johnson@provider.com.au' 
-    },
-    { 
-      id: 2, 
-      initial: 'M', 
-      lastName: 'Williams', 
-      role: 'Plan Manager', 
-      location: 'Brisbane, QLD', 
-      distance: '5.1 km', 
-      phone: '0433 XXX XXX', 
-      email: 'm.williams@planlink.com.au' 
-    },
-    { 
-      id: 3, 
-      initial: 'J', 
-      lastName: 'Thompson', 
-      role: 'Support Coordinator', 
-      location: 'Gold Coast, QLD', 
-      distance: '12.3 km', 
-      phone: '0455 XXX XXX', 
-      email: 'j.thompson@supportco.com.au' 
-    },
-    { 
-      id: 4, 
-      initial: 'L', 
-      lastName: 'Garcia', 
-      role: 'Plan Manager', 
-      location: 'Brisbane, QLD', 
-      distance: '4.6 km', 
-      phone: '0478 XXX XXX', 
-      email: 'l.garcia@ndisplan.com.au' 
-    },
-    { 
-      id: 5, 
-      initial: 'R', 
-      lastName: 'Mitchell', 
-      role: 'Support Coordinator', 
-      location: 'Ipswich, QLD', 
-      distance: '15.7 km', 
-      phone: '0498 XXX XXX', 
-      email: 'r.mitchell@supportplus.com.au' 
-    },
-  ];
-
-  return (
-    <Layout>
+  const contacts: Contact[] = [{
+    id: 1,
+    initial: 'S',
+    lastName: 'Johnson',
+    role: 'Support Coordinator',
+    location: 'Brisbane, QLD',
+    distance: '3.2 km',
+    phone: '0412 XXX XXX',
+    email: 's.johnson@provider.com.au'
+  }, {
+    id: 2,
+    initial: 'M',
+    lastName: 'Williams',
+    role: 'Plan Manager',
+    location: 'Brisbane, QLD',
+    distance: '5.1 km',
+    phone: '0433 XXX XXX',
+    email: 'm.williams@planlink.com.au'
+  }, {
+    id: 3,
+    initial: 'J',
+    lastName: 'Thompson',
+    role: 'Support Coordinator',
+    location: 'Gold Coast, QLD',
+    distance: '12.3 km',
+    phone: '0455 XXX XXX',
+    email: 'j.thompson@supportco.com.au'
+  }, {
+    id: 4,
+    initial: 'L',
+    lastName: 'Garcia',
+    role: 'Plan Manager',
+    location: 'Brisbane, QLD',
+    distance: '4.6 km',
+    phone: '0478 XXX XXX',
+    email: 'l.garcia@ndisplan.com.au'
+  }, {
+    id: 5,
+    initial: 'R',
+    lastName: 'Mitchell',
+    role: 'Support Coordinator',
+    location: 'Ipswich, QLD',
+    distance: '15.7 km',
+    phone: '0498 XXX XXX',
+    email: 'r.mitchell@supportplus.com.au'
+  }];
+  return <Layout>
       <div className="flex flex-col space-y-4 sm:space-y-6 max-w-full">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
@@ -101,15 +89,14 @@ const NetworkingPage = () => {
           </CardContent>
         </Card>
 
-        <h2 className="text-base sm:text-lg md:text-xl font-bold mt-1 sm:mt-2">Professionals Near You</h2>
+        <h2 className="text-base sm:text-lg md:text-xl mt-1 sm:mt-2 font-normal">Professionals Near You</h2>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
-          {contacts.map((contact) => (
-            <Card key={contact.id} className="hover:shadow-md transition-shadow">
+          {contacts.map(contact => <Card key={contact.id} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-1 sm:pb-2 px-3 md:px-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-sm sm:text-base md:text-lg">
+                    <CardTitle className="text-sm sm:text-base font-normal md:text-xl">
                       {contact.initial}. {contact.lastName}
                     </CardTitle>
                     <CardDescription className="text-xs md:text-sm">{contact.role}</CardDescription>
@@ -134,31 +121,18 @@ const NetworkingPage = () => {
                       {contact.email}
                     </span>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full mt-2 text-xs md:text-sm h-7 sm:h-8" 
-                    onClick={() => setShowContactInfo(!showContactInfo)}
-                    disabled={!showContactInfo}
-                  >
-                    {showContactInfo ? (
-                      <>
+                  <Button variant="outline" size="sm" className="w-full mt-2 text-xs md:text-sm h-7 sm:h-8" onClick={() => setShowContactInfo(!showContactInfo)} disabled={!showContactInfo}>
+                    {showContactInfo ? <>
                         <Eye className="mr-1 h-3 w-3 md:h-4 md:w-4" /> View Contact Info
-                      </>
-                    ) : (
-                      <>
+                      </> : <>
                         <EyeOff className="mr-1 h-3 w-3 md:h-4 md:w-4" /> Subscribe to View
-                      </>
-                    )}
+                      </>}
                   </Button>
                 </div>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default NetworkingPage;
