@@ -33,7 +33,7 @@ const BusinessGoals = () => {
   return <Layout>
       <div className="max-w-5xl mx-auto">
         <div className="flex flex-col gap-4 mb-6">
-          <h1 className="text-gray-900 font-normal text-2xl">Business Goals</h1>
+          <h1 className="text-3xl font-light text-gray-900/[0.83]">Business Goals</h1>
           <p className="text-lg text-avaana-primary font-medium">
             You have $350 in credits. Book a Business Goal session now.
           </p>
