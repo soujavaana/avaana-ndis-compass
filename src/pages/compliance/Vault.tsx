@@ -10,7 +10,7 @@ const Vault = () => {
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <h1 className="text-3xl font-normal">Vault</h1>
+              <h1 className="font-normal text-2xl">Vault</h1>
               <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-sm">3</span>
             </div>
             <div className="flex gap-2">
