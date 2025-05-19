@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +38,18 @@ const SignUp = () => {
     },
   });
 
+  // Add Typeform script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = "//embed.typeform.com/next/embed.js";
+    script.async = true;
+    document.body.appendChild(script);
+    
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
@@ -55,7 +67,11 @@ const SignUp = () => {
       }
 
       toast.success("Account created successfully!");
-      navigate('/');
+      
+      // Instead of navigating to home page, redirect to Typeform with email parameter
+      // Create a URL with the email as a query parameter
+      const typeformUrl = `/?email=${encodeURIComponent(values.email)}#01JVKCRM3YDVW44NKP5T5SMKSE`;
+      navigate(typeformUrl);
     } catch (error) {
       console.error("Error during sign up:", error);
       toast.error("An error occurred during sign up. Please try again.");
