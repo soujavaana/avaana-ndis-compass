@@ -82,17 +82,22 @@ const OnboardingDemo = () => {
         setUserId(authData.user.id);
         console.log("User created with ID:", authData.user.id);
         
-        // Ensure the user profile has the email saved
+        // IMPROVED: Always ensure the user profile has the email saved
+        // This is critical for partial submissions
         const { error: profileError } = await supabase
           .from('profiles')
           .upsert({ 
             id: authData.user.id,
             email: values.email,
             updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'id'
           });
           
         if (profileError) {
           console.error("Error updating profile with email:", profileError);
+        } else {
+          console.log("Successfully initialized profile with email:", values.email);
         }
       }
 

@@ -130,17 +130,27 @@ serve(async (req: Request) => {
 
     logDetails("Extracted profile data", profileData);
 
-    // Always proceed with user lookup and update, even for partial responses
-    // This way, partial data gets saved and we can track progress
+    // Always ensure email is included in profile data if available
+    if (email && !profileData.email) {
+      profileData.email = email;
+    }
 
-    // Try to find the user
+    // ------------ UPDATED LOGIC FOR HANDLING PARTIAL SUBMISSIONS ------------
+
     let result;
     let foundUserId = userId;
     let userIdentified = false;
     
-    // If we have a user ID directly, use it first (most reliable)
+    // If we have a user ID directly, use it first (most reliable) - ALWAYS SAVE DATA FOR PARTIAL SUBMISSIONS IF WE HAVE USERID
     if (userId) {
       logDetails("Using provided userId to update profile", { userId });
+      
+      // For partial responses with userId, always ensure we at least store the email
+      if (isPartialResponse && email && !profileData.email) {
+        profileData.email = email;
+      }
+      
+      // Always update the profile if we have a userId, even for partial submissions
       result = await supabase
         .from("profiles")
         .update(profileData)
@@ -149,6 +159,26 @@ serve(async (req: Request) => {
       
       if (result.error) {
         logDetails("Error updating profile with userId", { error: result.error });
+        
+        // If update fails because the profile doesn't exist yet, attempt to create it
+        if (result.error.code === "23505" || result.error.message?.includes("does not exist")) {
+          logDetails("Profile doesn't exist yet, trying to create it", { userId });
+          
+          result = await supabase
+            .from("profiles")
+            .insert({
+              id: userId,
+              ...profileData
+            })
+            .select();
+          
+          if (result.error) {
+            logDetails("Error creating profile with userId", { error: result.error });
+          } else {
+            logDetails("Successfully created profile with userId", { userId });
+            userIdentified = true;
+          }
+        }
       } else {
         logDetails("Successfully updated profile with userId", { userId, updatedCount: result.data?.length });
         userIdentified = true;
