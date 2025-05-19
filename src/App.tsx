@@ -3,7 +3,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ThemeProvider } from "next-themes";
 
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
@@ -28,6 +27,7 @@ import TrainingCampaigns from "./pages/people/TrainingCampaigns";
 import NotFound from "./pages/NotFound";
 import BusinessGoals from "./pages/BusinessGoals";
 import SignUp from "./pages/SignUp";
+import OnboardingDemo from "./pages/OnboardingDemo";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +37,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/onboarding-demo" element={<OnboardingDemo />} />
           <Route path="/" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/registrations" element={<Registrations />} />
