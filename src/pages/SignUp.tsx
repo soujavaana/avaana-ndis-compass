@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,27 +38,26 @@ const SignUp = () => {
     },
   });
 
-  // Add Typeform script
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = "//embed.typeform.com/next/embed.js";
-    script.async = true;
-    document.body.appendChild(script);
-    
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
+      // Clean up any existing auth state
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
       // Register user with Supabase
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
+        options: {
+          // Skip email verification - user will be signed in immediately
+          data: {
+            email_confirmed: true
+          }
+        }
       });
 
       if (authError) {
@@ -70,8 +69,8 @@ const SignUp = () => {
 
       toast.success("Account created successfully!");
       
-      // Simply redirect to home page where the Typeform is embedded
-      navigate('/');
+      // Redirect to onboarding demo page after successful signup
+      navigate('/onboarding-demo');
     } catch (error) {
       console.error("Error during sign up:", error);
       toast.error("An error occurred during sign up. Please try again.");
@@ -144,7 +143,13 @@ const SignUp = () => {
             
             <div className="text-center mt-4">
               <span className="text-gray-600">Already have an account? </span>
-              <Button variant="link" className="text-[#F1490D] hover:underline p-0">Log in</Button>
+              <Button 
+                variant="link" 
+                className="text-[#F1490D] hover:underline p-0"
+                onClick={() => navigate('/onboarding-demo')}
+              >
+                Log in
+              </Button>
             </div>
           </form>
         </Form>
