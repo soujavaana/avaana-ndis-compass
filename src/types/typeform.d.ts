@@ -12,5 +12,6 @@ interface HTMLDivElement {
   dataset: {
     tfHiddenEmail?: string;
     tfHidden?: string;
+    tfLive?: string; // Added tfLive property for the form ID
   }
 }

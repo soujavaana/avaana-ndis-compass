@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import Layout from '../components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,6 @@ const OnboardingDemo = () => {
   const [showTypeform, setShowTypeform] = useState(false);
   const typeformContainerRef = useRef<HTMLDivElement>(null);
   const [typeformScriptLoaded, setTypeformScriptLoaded] = useState(false);
-  const [typeformUrl, setTypeformUrl] = useState("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -77,6 +77,7 @@ const OnboardingDemo = () => {
     // Set the typeform URL with email as a hidden field
     // The ID after data-tf-live is your Typeform ID
     const typeformElement = document.createElement('div');
+    // Ensure we're using the proper dataset property format
     typeformElement.dataset.tfLive = "01JVKKXJB3GH774HBBVQT55SD4";
     // Add the hidden field for email
     typeformElement.dataset.tfHiddenEmail = values.email;
