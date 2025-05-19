@@ -9,6 +9,8 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Checkbox } from '@/components/ui/checkbox';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -25,6 +27,8 @@ const formSchema = z.object({
   }),
   password: z.string().min(8, {
     message: "Password must be at least 8 characters.",
+  }).regex(/^(?=.*[A-Z])(?=.*[!@#$%^&*])/, {
+    message: "Password must contain at least one uppercase letter and one symbol.",
   }),
   confirmPassword: z.string(),
   businessName: z.string().min(2, {
@@ -43,22 +47,24 @@ const formSchema = z.object({
 });
 
 const serviceCategories = [
-  { value: "cleaning", label: "🧹 Cleaning" },
-  { value: "gardening", label: "🌿 Gardening" },
-  { value: "household-tasks", label: "🪛 Household tasks" },
-  { value: "home-modifications", label: "🛠️ Home Modifications" },
-  { value: "assistive-products", label: "🪑 Assistive Products" },
-  { value: "dehoarding", label: "📦 De-hoarding / Decluttering" },
-  { value: "social-advice", label: "👩‍⚕️ Professional social advice" },
-  { value: "personal-care", label: "🤝Personal care" },
-  { value: "housing", label: "🏡SIL/Respite Housing" },
-  { value: "therapeutic", label: "💪 Professional Therapeutic Supports" },
-  { value: "nursing", label: "🩺 Nursing" }
+  { value: "cleaning", label: "Cleaning" },
+  { value: "gardening", label: "Gardening" },
+  { value: "household-tasks", label: "Household tasks" },
+  { value: "home-modifications", label: "Home Modifications" },
+  { value: "assistive-products", label: "Assistive Products" },
+  { value: "dehoarding", label: "De-hoarding / Decluttering" },
+  { value: "social-advice", label: "Professional social advice" },
+  { value: "personal-care", label: "Personal care" },
+  { value: "housing", label: "SIL/Respite Housing" },
+  { value: "therapeutic", label: "Professional Therapeutic Supports" },
+  { value: "nursing", label: "Nursing" }
 ];
 
 const SignUp = () => {
   const navigate = useNavigate();
   const [showTypeform, setShowTypeform] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -76,13 +82,84 @@ const SignUp = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    setShowTypeform(true);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    try {
+      // Register user with Supabase
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            firstName: values.firstName,
+            lastName: values.lastName,
+            phone: values.phone,
+            businessName: values.businessName,
+            abn: values.abn || '',
+          }
+        }
+      });
+
+      if (authError) {
+        toast.error(authError.message);
+        console.error(authError);
+        setIsLoading(false);
+        return;
+      }
+
+      if (authData.user) {
+        // Store service categories
+        const insertPromises = values.serviceCategories.map(category => {
+          return supabase.from('user_services').insert({
+            user_id: authData.user?.id,
+            service_category_id: serviceCategories.findIndex(sc => sc.value === category) + 1 // +1 because our IDs start at 1
+          });
+        });
+
+        await Promise.all(insertPromises);
+        
+        // Save the user data for typeform
+        setUserData({
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
+          phone: values.phone,
+          businessName: values.businessName,
+          abn: values.abn,
+        });
+        
+        // Show typeform
+        setShowTypeform(true);
+      }
+    } catch (error) {
+      console.error("Error during sign up:", error);
+      toast.error("An error occurred during sign up. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const handleCancelTypeform = () => {
     navigate('/');
+  };
+
+  // Generate Typeform URL with prefilled parameters
+  const getTypeformUrl = () => {
+    if (!userData) return null;
+    
+    const params = new URLSearchParams({
+      'first_name': userData.firstName,
+      'last_name': userData.lastName,
+      'email': userData.email,
+      'phone': userData.phone,
+      'business_name': userData.businessName,
+    });
+    
+    if (userData.abn) {
+      params.append('abn', userData.abn);
+    }
+    
+    return `https://form.typeform.com/to/01JVKCRM3YDVW44NKP5T5SMKSE?${params.toString()}`;
   };
 
   // Load Typeform script when needed
@@ -108,9 +185,9 @@ const SignUp = () => {
             <p className="text-gray-600">Please fill out the following form to complete your registration.</p>
           </div>
           
-          {/* Typeform embed */}
+          {/* Typeform embed - with URL parameters for prefilling */}
           <div className="w-full h-[600px] border rounded-lg">
-            <div data-tf-live="01JVKCRM3YDVW44NKP5T5SMKSE"></div>
+            <div data-tf-live="01JVKCRM3YDVW44NKP5T5SMKSE" data-tf-hidden={JSON.stringify(userData)}></div>
           </div>
           
           <div className="mt-6 flex justify-end">
@@ -129,8 +206,7 @@ const SignUp = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-6">
-          <div className="text-2xl font-normal text-[#063e3b]">Avaana NDIS Business Dashboard</div>
+        <div className="flex justify-end items-center py-6">
           <div>
             <span className="mr-2 text-gray-600">Already have an account?</span>
             <Button variant="link" className="text-[#F1490D] hover:underline">Log in</Button>
@@ -219,6 +295,7 @@ const SignUp = () => {
                           <Input type="password" placeholder="Create a password" {...field} />
                         </FormControl>
                         <FormMessage />
+                        <p className="text-xs text-gray-500">Must contain at least 8 characters, one uppercase letter, and one symbol.</p>
                       </FormItem>
                     )}
                   />
@@ -348,8 +425,12 @@ const SignUp = () => {
                 </div>
                 
                 <div className="pt-6">
-                  <Button type="submit" className="w-full">
-                    Create Account
+                  <Button 
+                    type="submit" 
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Creating Account..." : "Create Account"}
                   </Button>
                 </div>
               </form>
