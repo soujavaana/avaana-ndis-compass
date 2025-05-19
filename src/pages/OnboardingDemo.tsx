@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from '@/components/ui/use-toast';
 
 // Simplified form schema - just keeping email field for demonstration
 const formSchema = z.object({
@@ -18,6 +19,7 @@ const OnboardingDemo = () => {
   const [showTypeform, setShowTypeform] = useState(false);
   const typeformContainerRef = useRef<HTMLDivElement>(null);
   const [typeformScriptLoaded, setTypeformScriptLoaded] = useState(false);
+  const [typeformUrl, setTypeformUrl] = useState("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,8 +71,23 @@ const OnboardingDemo = () => {
     }
   }, [showTypeform, typeformScriptLoaded]);
 
-  const handleProceed = () => {
-    console.log("Proceeding directly to Typeform");
+  const handleProceed = (values: z.infer<typeof formSchema>) => {
+    console.log("Proceeding to Typeform with email:", values.email);
+    
+    // Set the typeform URL with email as a hidden field
+    // The ID after data-tf-live is your Typeform ID
+    const typeformElement = document.createElement('div');
+    typeformElement.dataset.tfLive = "01JVKKXJB3GH774HBBVQT55SD4";
+    // Add the hidden field for email
+    typeformElement.dataset.tfHiddenEmail = values.email;
+
+    // Show success toast
+    toast({
+      title: "Success!",
+      description: "Continuing to onboarding form...",
+    });
+    
+    // Show the Typeform
     setShowTypeform(true);
   };
 
@@ -113,7 +130,11 @@ const OnboardingDemo = () => {
             </div>
           ) : (
             <div className="h-[80vh]" ref={typeformContainerRef}>
-              <div data-tf-live="01JVKKXJB3GH774HBBVQT55SD4"></div>
+              {/* Use a URL parameter to pass the email to Typeform as a hidden field */}
+              <div 
+                data-tf-live="01JVKKXJB3GH774HBBVQT55SD4"
+                data-tf-hidden={`email=${form.getValues("email")}`}
+              ></div>
             </div>
           )}
         </div>

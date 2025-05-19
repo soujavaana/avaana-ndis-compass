@@ -1,1 +1,5 @@
+
 project_id = "vrnjxgfzzbexjaytszvg"
+
+[functions.typeform-webhook]
+verify_jwt = false
