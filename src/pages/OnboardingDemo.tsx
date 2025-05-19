@@ -86,33 +86,73 @@ const OnboardingDemo = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      // Register user with Supabase, with the emailRedirectTo option set to null
-      // and the options.data.email_confirm set to true to bypass email verification
-      const { error: authError } = await supabase.auth.signUp({
+      console.log("Attempting to register user with email:", values.email);
+      
+      // First, let's try to create the user with autoconfirm enabled
+      // This approach uses direct signup with admin rights bypassing the email
+      const { data, error: authError } = await supabase.auth.admin.createUser({
         email: values.email,
         password: values.password,
-        options: {
-          emailRedirectTo: null,
-          data: {
-            email_confirmed: true, // This helps bypass email verification
-          }
-        }
+        email_confirm: true, // This is the key setting to bypass email verification
+        user_metadata: { onboarded: false }
       });
 
       if (authError) {
-        toast.error(authError.message);
-        console.error("Auth error:", authError);
-        setIsLoading(false);
-        return;
+        console.error("Auth error details:", authError);
+        // If we can't use admin API (likely in dev), fall back to regular signup with auto-confirm
+        if (authError.message.includes("not authorized") || authError.status === 403) {
+          console.log("Falling back to regular signup with auto-confirm");
+          
+          const { data: signupData, error: signupError } = await supabase.auth.signUp({
+            email: values.email,
+            password: values.password,
+            options: {
+              emailRedirectTo: null,
+              data: {
+                email_confirmed: true,
+                onboarded: false
+              }
+            }
+          });
+
+          if (signupError) {
+            console.error("Regular signup error details:", signupError);
+            toast.error(signupError.message);
+            setIsLoading(false);
+            return;
+          }
+          
+          // If we have a user but they need confirmation, try to sign them in directly
+          if (signupData.user && !signupData.session) {
+            console.log("User created but no session, attempting direct signin");
+            
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+              email: values.email,
+              password: values.password,
+            });
+            
+            if (signInError) {
+              console.error("Sign-in attempt error:", signInError);
+              toast.error("Account created, but couldn't sign in automatically. Please try signing in manually.");
+              setIsLoading(false);
+              return;
+            }
+          }
+        } else {
+          toast.error(authError.message);
+          setIsLoading(false);
+          return;
+        }
       }
 
+      console.log("User registration successful");
       toast.success("Account created successfully!");
       
       // Show the Typeform after successful account creation
       setShowTypeform(true);
       console.log("Typeform should now be displayed");
     } catch (error) {
-      console.error("Error during sign up:", error);
+      console.error("Unexpected error during sign up:", error);
       toast.error("An error occurred during sign up. Please try again.");
     } finally {
       setIsLoading(false);
@@ -182,6 +222,10 @@ const OnboardingDemo = () => {
                     >
                       {isLoading ? "Creating Account..." : "Create Account"}
                     </Button>
+                  </div>
+                  
+                  <div className="mt-3 text-xs text-center text-gray-500">
+                    <p>Dev mode: User creation with auto-confirmation</p>
                   </div>
                 </form>
               </Form>

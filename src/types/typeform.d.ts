@@ -1,7 +1,6 @@
 
 interface Window {
-  tf?: {
+  tf: {
     createWidget: () => void;
-    [key: string]: any;
   }
 }
