@@ -21,7 +21,13 @@ jest.mock('@typeform/embed-react', () => ({
   PopupButton: ({ children }: { children: React.ReactNode }) => (
     <button data-testid="typeform-popup">{children}</button>
   ),
-  Widget: () => <div data-testid="typeform-widget">Typeform Widget</div>,
+  Widget: (props: any) => (
+    <div data-testid="typeform-widget">
+      Typeform Widget
+      {/* Add a data attribute to verify hidden fields are passed */}
+      {props.hidden && <div data-testid="hidden-fields" data-hidden={JSON.stringify(props.hidden)}></div>}
+    </div>
+  ),
 }));
 
 // Mock Supabase auth
@@ -87,7 +93,7 @@ describe('OnboardingDemo Component', () => {
     });
   });
 
-  test('shows Typeform widget after valid form submission', async () => {
+  test('shows Typeform widget after valid form submission and passes user ID', async () => {
     const mockSignUp = jest.fn().mockResolvedValue({
       data: { user: { id: '123' }, session: {} },
       error: null
@@ -109,6 +115,12 @@ describe('OnboardingDemo Component', () => {
     await waitFor(() => {
       expect(toast).toHaveBeenCalled();
       expect(screen.getByTestId('typeform-widget')).toBeInTheDocument();
+      
+      // Verify userId is passed to Typeform
+      const hiddenFields = screen.getByTestId('hidden-fields');
+      const hiddenData = JSON.parse(hiddenFields.getAttribute('data-hidden') || '{}');
+      expect(hiddenData).toHaveProperty('userId', '123');
+      expect(hiddenData).toHaveProperty('email', 'test@example.com');
     });
   });
 });

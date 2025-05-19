@@ -50,11 +50,16 @@ serve(async (req: Request) => {
       });
     }
 
-    // Extract the email from hidden fields (if available)
+    // Extract user ID and email from hidden fields
+    let userId = null;
     let email = null;
-    if (form_response.hidden && form_response.hidden.email) {
+
+    if (form_response.hidden) {
+      userId = form_response.hidden.userId;
       email = form_response.hidden.email;
     }
+
+    console.log("Extracted hidden fields - userId:", userId, "email:", email);
 
     // Process answers from the form
     const answers = form_response.answers;
@@ -90,7 +95,6 @@ serve(async (req: Request) => {
       }
 
       // Map fields based on question reference
-      // You'll need to customize this mapping based on your Typeform questions
       if (questionRef.includes("first_name")) {
         profileData.first_name = answerValue;
       } else if (questionRef.includes("last_name")) {
@@ -107,36 +111,35 @@ serve(async (req: Request) => {
       }
     });
 
-    // Try to find a user with the provided email
-    let userId = null;
-    if (email) {
-      const { data: userData, error: userError } = await supabase
-        .from("auth")
-        .select("id")
-        .eq("email", email)
-        .single();
-        
-      if (!userError && userData) {
-        userId = userData.id;
-      } else {
-        console.log("Could not find user with email:", email);
-        console.log("Error:", userError);
-      }
-    }
+    console.log("Extracted profile data:", profileData);
 
-    // If we have a user ID, update the profile
+    // Try to find the user
     let result;
+    
+    // If we have a user ID directly, use it first (most reliable)
     if (userId) {
-      // Update existing profile
+      console.log("Using provided userId to update profile:", userId);
       result = await supabase
         .from("profiles")
         .update(profileData)
-        .eq("id", userId);
+        .eq("id", userId)
+        .select();
+      
+      if (result.error) {
+        console.error("Error updating profile with userId:", result.error);
+      } else {
+        console.log("Successfully updated profile with userId");
+      }
+    } 
+    // If no userId but we have email, try to find by querying profiles
+    else if (email) {
+      // We don't attempt to query auth.users directly anymore
+      console.log("No userId provided. Email cannot be used to find the user directly.");
+      result = { error: "No user ID provided in hidden fields" };
     } else {
-      // No user ID, just log the data for now
-      console.log("No user ID found for email:", email);
-      console.log("Form data:", profileData);
-      result = { error: "No user ID found" };
+      // No way to identify the user
+      console.log("No user identification provided");
+      result = { error: "No user identification provided" };
     }
 
     // Return response

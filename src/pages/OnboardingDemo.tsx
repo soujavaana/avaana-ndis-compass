@@ -28,6 +28,7 @@ const registrationFormSchema = z.object({
 const OnboardingDemo = () => {
   const [showTypeform, setShowTypeform] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   
   // Form for user registration
   const registrationForm = useForm<z.infer<typeof registrationFormSchema>>({
@@ -70,6 +71,12 @@ const OnboardingDemo = () => {
         console.error(authError);
         setIsLoading(false);
         return;
+      }
+
+      // Save the user ID for passing to Typeform
+      if (authData && authData.user) {
+        setUserId(authData.user.id);
+        console.log("User created with ID:", authData.user.id);
       }
 
       toast({
@@ -161,11 +168,14 @@ const OnboardingDemo = () => {
             </div>
           ) : (
             <div className="h-[80vh]">
-              {/* Using the Typeform Widget component from the React SDK */}
+              {/* Using the Typeform Widget component from the React SDK with user ID */}
               <Widget
                 id="Ym8rFkcS"
                 height={500}
-                hidden={{ email: registrationForm.getValues("email") }}
+                hidden={{
+                  email: registrationForm.getValues("email"),
+                  userId: userId // Pass the user ID to Typeform
+                }}
                 style={{ height: "100%" }}
                 className="w-full"
               />
