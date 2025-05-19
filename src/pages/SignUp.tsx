@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -79,6 +79,20 @@ const SignUp = () => {
     "Alternative Medicine"
   ];
 
+  // Load Typeform script when needed
+  useEffect(() => {
+    if (showTypeform) {
+      const script = document.createElement('script');
+      script.src = '//embed.typeform.com/next/embed.js';
+      script.async = true;
+      document.body.appendChild(script);
+      
+      return () => {
+        document.body.removeChild(script);
+      };
+    }
+  }, [showTypeform]);
+
   if (showTypeform) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
@@ -102,18 +116,6 @@ const SignUp = () => {
             </Button>
           </div>
         </div>
-        
-        {/* Load the Typeform embed script */}
-        {React.useEffect(() => {
-          const script = document.createElement('script');
-          script.src = '//embed.typeform.com/next/embed.js';
-          script.async = true;
-          document.body.appendChild(script);
-          
-          return () => {
-            document.body.removeChild(script);
-          };
-        }, [])}
       </div>
     );
   }

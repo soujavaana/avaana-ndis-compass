@@ -31,8 +31,8 @@ import SignUp from "./pages/SignUp";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+function App() {
+  return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
@@ -64,7 +64,7 @@ const App = () => (
         <Sonner />
       </BrowserRouter>
     </QueryClientProvider>
-  </ThemeProvider>
-);
+  );
+}
 
 export default App;
