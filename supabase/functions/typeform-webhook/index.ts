@@ -2,10 +2,14 @@
 import { serve } from "https://deno.land/std@0.182.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// Create a Supabase client
+// Create a Supabase client with service role key to bypass RLS
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+// Create a public client for operations that should respect RLS
 const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const publicClient = createClient(supabaseUrl, supabaseAnonKey);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -150,7 +154,8 @@ serve(async (req: Request) => {
         profileData.email = email;
       }
       
-      // Always update the profile if we have a userId, even for partial submissions
+      // IMPORTANT: Always update the profile if we have a userId, even for partial submissions
+      // Now using service role client to bypass RLS
       result = await supabase
         .from("profiles")
         .update(profileData)
@@ -189,6 +194,7 @@ serve(async (req: Request) => {
       logDetails("Attempting to find user by email", { email });
       
       // First, try to find in profiles table by matching on profile data
+      // Use service role client to bypass RLS
       const { data: profileMatches, error: profileError } = await supabase
         .from("profiles")
         .select("*")
@@ -201,7 +207,7 @@ serve(async (req: Request) => {
         foundUserId = profileMatches[0].id;
         logDetails("Found user by email in profiles table", { userId: foundUserId });
         
-        // Update the profile
+        // Update the profile using service role client
         result = await supabase
           .from("profiles")
           .update(profileData)
@@ -227,7 +233,7 @@ serve(async (req: Request) => {
         if (tempLookupError) {
           logDetails("Error looking up potential temporary email record", { error: tempLookupError });
         } else if (existingRecords && existingRecords.length > 0) {
-          // Update the existing record
+          // Update the existing record using service role client
           foundUserId = existingRecords[0].id;
           logDetails("Found existing record with this email", { existingId: foundUserId });
           
