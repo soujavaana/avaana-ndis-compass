@@ -28,6 +28,7 @@ import NotFound from "./pages/NotFound";
 import BusinessGoals from "./pages/BusinessGoals";
 import SignUp from "./pages/SignUp";
 import OnboardingDemo from "./pages/OnboardingDemo";
+import Onboarding1 from "./pages/Onboarding1";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ function App() {
         <Routes>
           <Route path="/signup" element={<SignUp />} />
           <Route path="/onboarding-demo" element={<OnboardingDemo />} />
+          <Route path="/onboarding-1" element={<Onboarding1 />} />
           <Route path="/" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/registrations" element={<Registrations />} />
