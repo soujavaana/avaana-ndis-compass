@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import Layout from '../components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -8,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from '@/components/ui/use-toast';
+import { PopupButton, Widget } from '@typeform/embed-react';
 
 // Simplified form schema - just keeping email field for demonstration
 const formSchema = z.object({
@@ -18,9 +18,7 @@ const formSchema = z.object({
 
 const OnboardingDemo = () => {
   const [showTypeform, setShowTypeform] = useState(false);
-  const typeformContainerRef = useRef<HTMLDivElement>(null);
-  const [typeformScriptLoaded, setTypeformScriptLoaded] = useState(false);
-
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -28,60 +26,9 @@ const OnboardingDemo = () => {
     },
   });
 
-  // This useEffect loads the Typeform script when the component mounts
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = "//embed.typeform.com/next/embed.js";
-    script.async = true;
-    
-    script.onload = () => {
-      console.log("Typeform script loaded");
-      setTypeformScriptLoaded(true);
-    };
-    
-    document.body.appendChild(script);
-    
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
-
-  // This useEffect reinitializes the Typeform when showTypeform changes to true
-  useEffect(() => {
-    if (showTypeform && typeformContainerRef.current && typeformScriptLoaded) {
-      // This helps ensure the Typeform is properly initialized when it becomes visible
-      console.log("Attempting to initialize Typeform");
-      
-      // Use a small delay to ensure the DOM is ready
-      setTimeout(() => {
-        if (window.tf && typeof window.tf.createWidget === 'function') {
-          console.log("Reinitializing Typeform");
-          window.tf.createWidget();
-        } else {
-          console.log("Typeform object not available yet");
-          // Try to load the script again if it's not available
-          const script = document.createElement('script');
-          script.src = "//embed.typeform.com/next/embed.js";
-          script.async = true;
-          document.body.appendChild(script);
-        }
-      }, 500);
-    }
-  }, [showTypeform, typeformScriptLoaded]);
-
   const handleProceed = (values: z.infer<typeof formSchema>) => {
     console.log("Proceeding to Typeform with email:", values.email);
     
-    // Set the typeform URL with email as a hidden field
-    // The ID after data-tf-live is your Typeform ID
-    const typeformElement = document.createElement('div');
-    // Ensure we're using the proper dataset property format
-    typeformElement.dataset.tfLive = "01JVKKXJB3GH774HBBVQT55SD4";
-    // Add the hidden field for email
-    typeformElement.dataset.tfHiddenEmail = values.email;
-
     // Show success toast
     toast({
       title: "Success!",
@@ -130,12 +77,15 @@ const OnboardingDemo = () => {
               </Form>
             </div>
           ) : (
-            <div className="h-[80vh]" ref={typeformContainerRef}>
-              {/* Use a URL parameter to pass the email to Typeform as a hidden field */}
-              <div 
-                data-tf-live="01JVKKXJB3GH774HBBVQT55SD4"
-                data-tf-hidden={`email=${form.getValues("email")}`}
-              ></div>
+            <div className="h-[80vh]">
+              {/* Using the Typeform Widget component from the React SDK */}
+              <Widget
+                id="Ym8rFkcS"
+                height={500}
+                hidden={{ email: form.getValues("email") }}
+                style={{ height: "100%" }}
+                className="w-full"
+              />
             </div>
           )}
         </div>
