@@ -23,6 +23,11 @@ const handleCors = (req: Request) => {
   return null;
 };
 
+// Function to log detailed information for debugging
+const logDetails = (message: string, data: any) => {
+  console.log(`[${new Date().toISOString()}] ${message}`, JSON.stringify(data));
+};
+
 serve(async (req: Request) => {
   // Handle CORS
   const corsResponse = handleCors(req);
@@ -39,7 +44,7 @@ serve(async (req: Request) => {
 
     // Parse the webhook payload from Typeform
     const payload = await req.json();
-    console.log("Received webhook from Typeform:", JSON.stringify(payload));
+    logDetails("Received webhook from Typeform:", payload);
 
     // Extract form response data
     const { form_response } = payload;
@@ -52,7 +57,7 @@ serve(async (req: Request) => {
 
     // Determine if this is a partial response or complete submission
     const isPartialResponse = payload.event_type === "form_response_partial";
-    console.log(`Processing ${isPartialResponse ? "partial" : "complete"} form response`);
+    logDetails(`Processing ${isPartialResponse ? "partial" : "complete"} form response`, { event_type: payload.event_type });
 
     // Extract user ID and email from hidden fields
     let userId = null;
@@ -63,10 +68,10 @@ serve(async (req: Request) => {
       email = form_response.hidden.email;
       
       // Log all hidden fields for debugging
-      console.log("All hidden fields:", JSON.stringify(form_response.hidden));
+      logDetails("All hidden fields:", form_response.hidden);
     }
 
-    console.log("Extracted hidden fields - userId:", userId, "email:", email);
+    logDetails("Extracted hidden fields", { userId, email });
 
     // Process answers from the form
     const answers = form_response.answers || [];
@@ -115,33 +120,26 @@ serve(async (req: Request) => {
       } else if (questionType === "email" && !email) {
         // If email wasn't in hidden fields but is in the form answers
         email = answerValue;
+        profileData.email = answerValue; // Store email in the profile table
       }
       
       // Log mapped field for debugging
-      console.log(`Mapped field ${questionRef} (${questionType}) to value: ${answerValue}`);
+      logDetails(`Mapped field ${questionRef} (${questionType})`, { field: questionRef, type: questionType, value: answerValue });
     });
 
-    console.log("Extracted profile data:", profileData);
+    logDetails("Extracted profile data", profileData);
 
-    // If this is a partial response and we don't have enough data, just acknowledge receipt
-    if (isPartialResponse && Object.keys(profileData).length <= 1) { // Only has updated_at
-      console.log("Partial response with minimal data, acknowledging without database update");
-      return new Response(JSON.stringify({
-        success: true,
-        message: "Partial response acknowledged",
-      }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // Always proceed with user lookup and update, even for partial responses
+    // This way, partial data gets saved and we can track progress
 
     // Try to find the user
     let result;
     let foundUserId = userId;
+    let userIdentified = false;
     
     // If we have a user ID directly, use it first (most reliable)
     if (userId) {
-      console.log("Using provided userId to update profile:", userId);
+      logDetails("Using provided userId to update profile", { userId });
       result = await supabase
         .from("profiles")
         .update(profileData)
@@ -149,14 +147,15 @@ serve(async (req: Request) => {
         .select();
       
       if (result.error) {
-        console.error("Error updating profile with userId:", result.error);
+        logDetails("Error updating profile with userId", { error: result.error });
       } else {
-        console.log("Successfully updated profile with userId:", userId);
+        logDetails("Successfully updated profile with userId", { userId, updatedCount: result.data?.length });
+        userIdentified = true;
       }
     } 
     // If no userId but we have email, try to find by querying auth users
     else if (email) {
-      console.log("Attempting to find user by email:", email);
+      logDetails("Attempting to find user by email", { email });
       
       // First, try to find in profiles table by matching on profile data
       const { data: profileMatches, error: profileError } = await supabase
@@ -166,10 +165,10 @@ serve(async (req: Request) => {
         .limit(1);
         
       if (profileError) {
-        console.error("Error querying profiles by email:", profileError);
+        logDetails("Error querying profiles by email", { error: profileError });
       } else if (profileMatches && profileMatches.length > 0) {
         foundUserId = profileMatches[0].id;
-        console.log("Found user by email in profiles table:", foundUserId);
+        logDetails("Found user by email in profiles table", { userId: foundUserId });
         
         // Update the profile
         result = await supabase
@@ -177,27 +176,86 @@ serve(async (req: Request) => {
           .update(profileData)
           .eq("id", foundUserId)
           .select();
+          
+        userIdentified = true;
       } else {
-        console.log("No matching profile found by email. This might be a new user or partial submission.");
+        // If we don't find by email in profiles, try to find user by email in auth.users table
+        // Since we can't query auth.users directly, we'll use an alternative approach
         
-        // For partial responses without a user ID, we'll just store it temporarily
-        // Or you could create a pending_submissions table to store this data until the user completes the form
-        result = { error: null, data: null };
+        logDetails("No matching profile found by email in profiles table. Attempting to create/update record", { email });
+        
+        // If we have an email but no matching profile, we'll create a temporary/pending record
+        // This helps track partial submissions until we get a user ID
+        // Check if a temp record with this email exists
+        const { data: existingRecords, error: tempLookupError } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("email", email)
+          .limit(1);
+          
+        if (tempLookupError) {
+          logDetails("Error looking up potential temporary email record", { error: tempLookupError });
+        } else if (existingRecords && existingRecords.length > 0) {
+          // Update the existing record
+          foundUserId = existingRecords[0].id;
+          logDetails("Found existing record with this email", { existingId: foundUserId });
+          
+          result = await supabase
+            .from("profiles")
+            .update(profileData)
+            .eq("id", foundUserId)
+            .select();
+            
+          userIdentified = true;
+        } else if (!isPartialResponse) {
+          // For complete submissions with no existing profile, we need to create a new record
+          logDetails("No existing profile found, but we have a complete form submission", { email });
+          
+          // This approach requires that email is added to the profiles table structure
+          // We'll add a random UUID for the id field as a placeholder
+          const randomId = crypto.randomUUID();
+          
+          result = await supabase
+            .from("profiles")
+            .insert({
+              ...profileData,
+              id: randomId,
+              email: email
+            })
+            .select();
+            
+          if (!result.error) {
+            foundUserId = randomId;
+            userIdentified = true;
+            logDetails("Created new profile record with generated ID", { generatedId: randomId });
+          } else {
+            logDetails("Error creating new profile record", { error: result.error });
+          }
+        } else {
+          // For partial submissions with no existing profile, we may not want to create a record yet
+          logDetails("Partial submission with no existing user record", { email });
+          result = { error: null, data: null };
+        }
       }
     } else {
       // No way to identify the user
-      console.log("No user identification provided (no userId or email)");
+      logDetails("No user identification provided (no userId or email)", {});
       result = { error: "No user identification provided" };
     }
 
+    // Whether to acknowledge the submission without an error, even if we couldn't update a profile
+    const acknowledgeSubmission = isPartialResponse || userIdentified;
+    
     // Return response
     return new Response(JSON.stringify({
-      success: !result.error,
-      message: result.error ? result.error.message : "Profile updated successfully",
+      success: acknowledgeSubmission,
+      message: result.error ? result.error.message : (userIdentified ? "Profile updated successfully" : "Acknowledged submission"),
       data: profileData,
       userId: foundUserId,
+      userIdentified,
+      isPartialResponse,
     }), {
-      status: result.error ? 500 : 200,
+      status: result.error && !acknowledgeSubmission ? 500 : 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {

@@ -12,6 +12,7 @@ interface Typeform {
     width?: string | number;
     height?: string | number;
     opacity?: number;
+    source?: string; // Added source parameter for tracking origin
   }) => void;
 }
 

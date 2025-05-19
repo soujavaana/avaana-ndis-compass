@@ -29,6 +29,7 @@ const OnboardingDemo = () => {
   const [showTypeform, setShowTypeform] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string>('');
   
   // Form for user registration
   const registrationForm = useForm<z.infer<typeof registrationFormSchema>>({
@@ -43,6 +44,9 @@ const OnboardingDemo = () => {
   const handleSignUp = async (values: z.infer<typeof registrationFormSchema>) => {
     setIsLoading(true);
     try {
+      // Store the email for later use
+      setUserEmail(values.email);
+      
       // Clean up any existing auth state
       Object.keys(localStorage).forEach((key) => {
         if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
@@ -77,6 +81,19 @@ const OnboardingDemo = () => {
       if (authData && authData.user) {
         setUserId(authData.user.id);
         console.log("User created with ID:", authData.user.id);
+        
+        // Ensure the user profile has the email saved
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({ 
+            id: authData.user.id,
+            email: values.email,
+            updated_at: new Date().toISOString()
+          });
+          
+        if (profileError) {
+          console.error("Error updating profile with email:", profileError);
+        }
       }
 
       toast({
@@ -168,16 +185,18 @@ const OnboardingDemo = () => {
             </div>
           ) : (
             <div className="h-[80vh]">
-              {/* Using the Typeform Widget component from the React SDK with user ID */}
+              {/* Using the Typeform Widget component with URL parameters */}
               <Widget
                 id="Ym8rFkcS"
                 height={500}
                 hidden={{
-                  email: registrationForm.getValues("email"),
-                  userId: userId // Pass the user ID to Typeform
+                  email: userEmail,
+                  userId: userId || ''
                 }}
                 style={{ height: "100%" }}
                 className="w-full"
+                source="onboarding-demo"
+                transitiveSearchParams={['userId', 'email']} // Pass these parameters in the URL
               />
             </div>
           )}

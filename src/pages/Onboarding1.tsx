@@ -60,7 +60,19 @@ const Onboarding1 = () => {
         last_name: lastName,
         phone,
         business_name: businessName,
-        abn: abn?.toString()
+        abn: abn?.toString(),
+        email: email // Add email to ensure it's stored in the profile
+      });
+    } else {
+      console.error("No userId found for profile update. Trying email lookup.");
+      // Try to find by email as a fallback
+      findUserByEmailAndUpdate({
+        first_name: firstName,
+        last_name: lastName,
+        phone,
+        business_name: businessName,
+        abn: abn?.toString(),
+        email: email
       });
     }
     
@@ -68,6 +80,67 @@ const Onboarding1 = () => {
       title: 'Onboarding Complete',
       description: 'Thank you for completing the onboarding process!',
     });
+  };
+  
+  // Find user by email and update profile
+  const findUserByEmailAndUpdate = async (profileData: any) => {
+    if (!email) {
+      console.error("No email provided for lookup");
+      return;
+    }
+    
+    try {
+      // First check if we can find a profile with this email
+      const { data: profiles, error: lookupError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('email', email)
+        .limit(1);
+        
+      if (lookupError) {
+        throw lookupError;
+      }
+      
+      if (profiles && profiles.length > 0) {
+        // Found existing profile with this email, update it
+        const foundUserId = profiles[0].id;
+        console.log(`Found user by email: ${foundUserId}`);
+        
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            ...profileData,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', foundUserId);
+          
+        if (error) throw error;
+        
+        console.log('Profile updated successfully by email lookup');
+      } else {
+        // No existing profile with this email, create one with a random ID
+        const randomId = crypto.randomUUID();
+        
+        const { error } = await supabase
+          .from('profiles')
+          .insert({
+            ...profileData,
+            id: randomId,
+            updated_at: new Date().toISOString()
+          });
+          
+        if (error) throw error;
+        
+        console.log('New profile created with random ID:', randomId);
+      }
+    } catch (error) {
+      console.error('Error in email lookup and update:', error);
+      toast({
+        title: 'Update Failed',
+        description: 'Failed to update your profile. Please try again.',
+        variant: 'destructive'
+      });
+    }
   };
   
   // Update user profile in Supabase
@@ -135,6 +208,19 @@ const Onboarding1 = () => {
         setUserId(authData.user.id);
         console.log("User created with ID:", authData.user.id);
         
+        // Ensure email is saved to the profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({ 
+            id: authData.user.id,
+            email: testEmail,
+            updated_at: new Date().toISOString()
+          });
+          
+        if (profileError) {
+          console.error("Error updating profile with email:", profileError);
+        }
+        
         toast({
           title: "Success!",
           description: "Account created! Loading onboarding form...",
@@ -157,7 +243,7 @@ const Onboarding1 = () => {
   
   // Load and initialize Typeform with JavaScript API
   useEffect(() => {
-    if (!typeformLoaded || !userId || !typeformContainerRef.current) return;
+    if (!typeformLoaded || !typeformContainerRef.current) return;
     
     const script = document.createElement('script');
     script.src = "https://embed.typeform.com/next/embed.js";
@@ -168,12 +254,18 @@ const Onboarding1 = () => {
       if (window.tf && typeformContainerRef.current) {
         const { embed } = window.tf;
         
+        // Add userId to the URL as a query parameter
+        const urlWithParams = new URL(window.location.href);
+        if (userId) urlWithParams.searchParams.set('userId', userId);
+        if (email) urlWithParams.searchParams.set('email', email);
+        window.history.replaceState({}, '', urlWithParams);
+        
         // Create the embed with callbacks
         embed({
           id: 'Ym8rFkcS',
           container: typeformContainerRef.current,
           hidden: { 
-            userId: userId,
+            userId: userId || '',
             email: email
           },
           onSubmit: handleTypeformSubmit,
@@ -183,10 +275,11 @@ const Onboarding1 = () => {
           onQuestionChanged: (data: any) => {
             console.log('Question changed:', data);
           },
-          transitiveSearchParams: ['userId', 'email'],
+          transitiveSearchParams: ['userId', 'email'], // Pass these in the URL
           width: '100%',
           height: 500,
-          opacity: 100
+          opacity: 100,
+          source: 'onboarding1'
         });
       }
     };
@@ -222,7 +315,12 @@ const Onboarding1 = () => {
           ) : (
             <div className="h-[80vh]">
               {/* Typeform will be embedded here */}
-              <div ref={typeformContainerRef} className="w-full h-full"></div>
+              <div 
+                ref={typeformContainerRef} 
+                className="w-full h-full"
+                data-tf-hidden-email={email}
+                data-tf-hidden-userId={userId || ''}
+              ></div>
             </div>
           )}
         </div>
