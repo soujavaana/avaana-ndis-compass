@@ -29,6 +29,7 @@ const OnboardingDemo = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showTypeform, setShowTypeform] = useState(false);
   const typeformContainerRef = useRef<HTMLDivElement>(null);
+  const [typeformScriptLoaded, setTypeformScriptLoaded] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -44,6 +45,12 @@ const OnboardingDemo = () => {
     const script = document.createElement('script');
     script.src = "//embed.typeform.com/next/embed.js";
     script.async = true;
+    
+    script.onload = () => {
+      console.log("Typeform script loaded");
+      setTypeformScriptLoaded(true);
+    };
+    
     document.body.appendChild(script);
     
     return () => {
@@ -55,22 +62,26 @@ const OnboardingDemo = () => {
 
   // This useEffect reinitializes the Typeform when showTypeform changes to true
   useEffect(() => {
-    if (showTypeform && typeformContainerRef.current) {
+    if (showTypeform && typeformContainerRef.current && typeformScriptLoaded) {
       // This helps ensure the Typeform is properly initialized when it becomes visible
-      if (window.tf && window.tf.createWidget) {
-        console.log("Reinitializing Typeform");
-        // Force reinitialize if needed
-        window.tf.createWidget();
-      } else {
-        console.log("Typeform object not available yet");
-        // Try to load the script again if it's not available
-        const script = document.createElement('script');
-        script.src = "//embed.typeform.com/next/embed.js";
-        script.async = true;
-        document.body.appendChild(script);
-      }
+      console.log("Attempting to initialize Typeform");
+      
+      // Use a small delay to ensure the DOM is ready
+      setTimeout(() => {
+        if (window.tf && typeof window.tf.createWidget === 'function') {
+          console.log("Reinitializing Typeform");
+          window.tf.createWidget();
+        } else {
+          console.log("Typeform object not available yet");
+          // Try to load the script again if it's not available
+          const script = document.createElement('script');
+          script.src = "//embed.typeform.com/next/embed.js";
+          script.async = true;
+          document.body.appendChild(script);
+        }
+      }, 500);
     }
-  }, [showTypeform]);
+  }, [showTypeform, typeformScriptLoaded]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
