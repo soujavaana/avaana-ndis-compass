@@ -23,6 +23,15 @@ jest.mock('@typeform/embed-react', () => ({
   Widget: () => <div data-testid="typeform-widget">Typeform Widget</div>,
 }));
 
+// Mock Supabase auth
+jest.mock('@/integrations/supabase/client', () => ({
+  supabase: {
+    auth: {
+      signUp: jest.fn(),
+    },
+  },
+}));
+
 describe('OnboardingDemo Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -68,24 +77,16 @@ describe('OnboardingDemo Component', () => {
     });
   });
 
-  test('passes email as hidden field to Typeform widget', async () => {
+  test('opens signup dialog when clicking sign up link', async () => {
     render(<OnboardingDemo />);
     
-    const testEmail = 'test@example.com';
+    // Click the sign up link
+    fireEvent.click(screen.getByText(/Sign up here/i));
     
-    // Enter valid email
-    fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: testEmail } });
-    
-    // Submit the form
-    fireEvent.click(screen.getByRole('button', { name: /Continue to Onboarding/i }));
-    
-    // Check that the Typeform widget is displayed
+    // Check that the dialog appears
     await waitFor(() => {
-      expect(screen.getByTestId('typeform-widget')).toBeInTheDocument();
+      expect(screen.getByText(/Create an Account/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Confirm Password/i)).toBeInTheDocument();
     });
-    
-    // Note: In a real test, we might want to inspect the props passed to Widget
-    // but this requires more advanced testing techniques like mocking at a lower level
-    // This simplified test just checks that the widget appears after form submission
   });
 });
