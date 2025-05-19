@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Layout from '../components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +28,7 @@ const formSchema = z.object({
 const OnboardingDemo = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showTypeform, setShowTypeform] = useState(false);
+  const typeformContainerRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -38,7 +39,7 @@ const OnboardingDemo = () => {
     },
   });
 
-  // Load Typeform script
+  // This useEffect loads the Typeform script when the component mounts
   useEffect(() => {
     const script = document.createElement('script');
     script.src = "//embed.typeform.com/next/embed.js";
@@ -51,6 +52,25 @@ const OnboardingDemo = () => {
       }
     };
   }, []);
+
+  // This useEffect reinitializes the Typeform when showTypeform changes to true
+  useEffect(() => {
+    if (showTypeform && typeformContainerRef.current) {
+      // This helps ensure the Typeform is properly initialized when it becomes visible
+      if (window.tf && window.tf.createWidget) {
+        console.log("Reinitializing Typeform");
+        // Force reinitialize if needed
+        window.tf.createWidget();
+      } else {
+        console.log("Typeform object not available yet");
+        // Try to load the script again if it's not available
+        const script = document.createElement('script');
+        script.src = "//embed.typeform.com/next/embed.js";
+        script.async = true;
+        document.body.appendChild(script);
+      }
+    }
+  }, [showTypeform]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -72,6 +92,7 @@ const OnboardingDemo = () => {
       
       // Show the Typeform after successful account creation
       setShowTypeform(true);
+      console.log("Typeform should now be displayed");
     } catch (error) {
       console.error("Error during sign up:", error);
       toast.error("An error occurred during sign up. Please try again.");
@@ -148,7 +169,9 @@ const OnboardingDemo = () => {
               </Form>
             </div>
           ) : (
-            <div className="h-[80vh]" data-tf-live="01JVKKXJB3GH774HBBVQT55SD4"></div>
+            <div className="h-[80vh]" ref={typeformContainerRef}>
+              <div data-tf-live="01JVKKXJB3GH774HBBVQT55SD4"></div>
+            </div>
           )}
         </div>
       </div>
