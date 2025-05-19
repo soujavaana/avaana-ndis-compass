@@ -1,11 +1,7 @@
 
-import React, { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
 
 const Index = () => {
-  const location = useLocation();
-  const embedRef = useRef<HTMLDivElement>(null);
-  
   useEffect(() => {
     // Load Typeform embed script
     const script = document.createElement('script');
@@ -25,7 +21,6 @@ const Index = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-4xl">
         <div 
-          ref={embedRef} 
           data-tf-live="01JVKCRM3YDVW44NKP5T5SMKSE"
           className="h-[80vh]"
         ></div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -69,8 +70,8 @@ const SignUp = () => {
 
       toast.success("Account created successfully!");
       
-      // Redirect to Typeform with correct URL format
-      navigate(`/?email=${encodeURIComponent(values.email)}`);
+      // Simply redirect to home page where the Typeform is embedded
+      navigate('/');
     } catch (error) {
       console.error("Error during sign up:", error);
       toast.error("An error occurred during sign up. Please try again.");
