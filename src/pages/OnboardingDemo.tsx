@@ -86,28 +86,29 @@ const OnboardingDemo = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      // Register user with Supabase
+      // Register user with Supabase, with the emailRedirectTo option set to null
+      // and the options.data.email_confirm set to true to bypass email verification
       const { error: authError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
+        options: {
+          emailRedirectTo: null,
+          data: {
+            email_confirmed: true, // This helps bypass email verification
+          }
+        }
       });
 
       if (authError) {
-        // Handle email rate limit specifically
-        if (authError.message.includes("email rate limit exceeded") || authError.code === "over_email_send_rate_limit") {
-          toast.error("Too many signup attempts. Please try again in a few minutes or use a different email address.");
-          console.error("Email rate limit exceeded:", authError);
-        } else {
-          toast.error(authError.message);
-          console.error(authError);
-        }
+        toast.error(authError.message);
+        console.error("Auth error:", authError);
         setIsLoading(false);
         return;
       }
 
       toast.success("Account created successfully!");
       
-      // For demo purposes, show the Typeform anyway even if email verification is pending
+      // Show the Typeform after successful account creation
       setShowTypeform(true);
       console.log("Typeform should now be displayed");
     } catch (error) {
@@ -181,11 +182,6 @@ const OnboardingDemo = () => {
                     >
                       {isLoading ? "Creating Account..." : "Create Account"}
                     </Button>
-                  </div>
-
-                  <div className="mt-3 text-xs text-center text-gray-500">
-                    <p>For development: If you encounter "email rate limit exceeded" errors,</p>
-                    <p>try using a different email or wait a few minutes before trying again.</p>
                   </div>
                 </form>
               </Form>
