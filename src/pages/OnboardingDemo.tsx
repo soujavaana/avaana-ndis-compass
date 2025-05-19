@@ -185,18 +185,18 @@ const OnboardingDemo = () => {
             </div>
           ) : (
             <div className="h-[80vh]">
-              {/* Using the Typeform Widget component with URL parameters */}
+              {/* Using the Typeform Widget component with lowercase userid (Typeform requirement) */}
               <Widget
                 id="Ym8rFkcS"
                 height={500}
                 hidden={{
                   email: userEmail,
-                  userId: userId || ''
+                  userid: userId || '' // Using lowercase 'userid' as per Typeform's requirement
                 }}
                 style={{ height: "100%" }}
                 className="w-full"
                 source="onboarding-demo"
-                transitiveSearchParams={['userId', 'email']} // Pass these parameters in the URL
+                transitiveSearchParams={['userid', 'email']} // Updated to use 'userid' instead of 'userId'
               />
             </div>
           )}

@@ -64,7 +64,8 @@ serve(async (req: Request) => {
     let email = null;
 
     if (form_response.hidden) {
-      userId = form_response.hidden.userId;
+      // Check for both camelCase and lowercase versions of userId
+      userId = form_response.hidden.userId || form_response.hidden.userid;
       email = form_response.hidden.email;
       
       // Log all hidden fields for debugging
