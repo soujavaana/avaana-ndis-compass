@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import OnboardingDemo from '../OnboardingDemo';
 import { toast } from '@/components/ui/use-toast';
+import '@testing-library/jest-dom'; // Add this import for DOM matchers
 
 // Mock the toast
 jest.mock('@/components/ui/use-toast', () => ({
