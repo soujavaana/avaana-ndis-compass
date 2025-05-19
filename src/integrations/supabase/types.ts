@@ -14,6 +14,7 @@ export type Database = {
           abn: string | null
           business_name: string | null
           created_at: string | null
+          email: string | null
           first_name: string | null
           id: string
           last_name: string | null
@@ -24,6 +25,7 @@ export type Database = {
           abn?: string | null
           business_name?: string | null
           created_at?: string | null
+          email?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
@@ -34,6 +36,7 @@ export type Database = {
           abn?: string | null
           business_name?: string | null
           created_at?: string | null
+          email?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null

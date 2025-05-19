@@ -12,10 +12,6 @@ const Header = () => {
     navigate('/communication');
   };
 
-  const handleOnboarding1Click = () => {
-    navigate('/onboarding-1');
-  };
-
   return (
     <header className="w-full bg-[#F4F4F0] px-3 md:px-6 py-3 md:py-4 flex flex-col md:flex-row md:items-center md:justify-between border-b gap-2 md:gap-0 shadow-sm">
       <div className="w-full md:max-w-md">
@@ -38,14 +34,6 @@ const Header = () => {
             Monique Wilson
           </button>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleOnboarding1Click}
-          className="text-sm font-normal hover:text-[#2DCE89] transition-colors"
-        >
-          Onboarding 1
-        </Button>
         <Button variant="ghost" size="icon" className="hover:bg-gray-100">
           <BellIcon size={18} />
         </Button>
