@@ -8,6 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -30,8 +31,8 @@ const formSchema = z.object({
     message: "Business name must be at least 2 characters.",
   }),
   abn: z.string().optional(),
-  serviceCategory: z.string().min(1, {
-    message: "Please select a service category.",
+  serviceCategories: z.array(z.string()).min(1, {
+    message: "Please select at least one service category.",
   }),
   termsAccepted: z.boolean().refine(val => val === true, {
     message: "You must accept the terms to continue.",
@@ -40,6 +41,20 @@ const formSchema = z.object({
   message: "Passwords don't match",
   path: ["confirmPassword"],
 });
+
+const serviceCategories = [
+  { value: "cleaning", label: "🧹 Cleaning" },
+  { value: "gardening", label: "🌿 Gardening" },
+  { value: "household-tasks", label: "🪛 Household tasks" },
+  { value: "home-modifications", label: "🛠️ Home Modifications" },
+  { value: "assistive-products", label: "🪑 Assistive Products" },
+  { value: "dehoarding", label: "📦 De-hoarding / Decluttering" },
+  { value: "social-advice", label: "👩‍⚕️ Professional social advice" },
+  { value: "personal-care", label: "🤝Personal care" },
+  { value: "housing", label: "🏡SIL/Respite Housing" },
+  { value: "therapeutic", label: "💪 Professional Therapeutic Supports" },
+  { value: "nursing", label: "🩺 Nursing" }
+];
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -56,7 +71,7 @@ const SignUp = () => {
       confirmPassword: "",
       businessName: "",
       abn: "",
-      serviceCategory: "",
+      serviceCategories: [],
       termsAccepted: false,
     },
   });
@@ -69,15 +84,6 @@ const SignUp = () => {
   const handleCancelTypeform = () => {
     navigate('/');
   };
-
-  const serviceCategories = [
-    "NDIS Provider",
-    "Healthcare",
-    "Beauty",
-    "Wellness",
-    "Fitness",
-    "Alternative Medicine"
-  ];
 
   // Load Typeform script when needed
   useEffect(() => {
@@ -124,7 +130,7 @@ const SignUp = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-6">
-          <div className="text-2xl font-normal text-[#063e3b]">Happy Horizons NDIS Services</div>
+          <div className="text-2xl font-normal text-[#063e3b]">Avaana NDIS Business Dashboard</div>
           <div>
             <span className="mr-2 text-gray-600">Already have an account?</span>
             <Button variant="link" className="text-[#F1490D] hover:underline">Log in</Button>
@@ -135,7 +141,7 @@ const SignUp = () => {
       <div className="bg-white py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <h1 className="text-2xl font-normal text-gray-900">Create your Happy Horizons NDIS account</h1>
+            <h1 className="text-2xl font-normal text-gray-900">Create your Avaana NDIS Business account</h1>
             <p className="mt-2 text-gray-600">Join us to manage your NDIS services more effectively</p>
           </div>
           
@@ -268,24 +274,48 @@ const SignUp = () => {
                   <div className="mt-6">
                     <FormField
                       control={form.control}
-                      name="serviceCategory"
-                      render={({ field }) => (
+                      name="serviceCategories"
+                      render={() => (
                         <FormItem>
-                          <FormLabel>Service Category</FormLabel>
-                          <FormControl>
-                            <select
-                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                              {...field}
-                            >
-                              <option value="">Select a category</option>
-                              {serviceCategories.map((category) => (
-                                <option key={category} value={category}>
-                                  {category}
-                                </option>
-                              ))}
-                            </select>
-                          </FormControl>
-                          <FormMessage />
+                          <div className="mb-4">
+                            <FormLabel>Service Categories (select all that apply)</FormLabel>
+                            <FormMessage />
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            {serviceCategories.map((category) => (
+                              <FormField
+                                key={category.value}
+                                control={form.control}
+                                name="serviceCategories"
+                                render={({ field }) => {
+                                  return (
+                                    <FormItem
+                                      key={category.value}
+                                      className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-2 hover:bg-gray-50"
+                                    >
+                                      <FormControl>
+                                        <Checkbox
+                                          checked={field.value?.includes(category.value)}
+                                          onCheckedChange={(checked) => {
+                                            return checked
+                                              ? field.onChange([...field.value, category.value])
+                                              : field.onChange(
+                                                  field.value?.filter(
+                                                    (value) => value !== category.value
+                                                  )
+                                                )
+                                          }}
+                                        />
+                                      </FormControl>
+                                      <FormLabel className="font-normal">
+                                        {category.label}
+                                      </FormLabel>
+                                    </FormItem>
+                                  )
+                                }}
+                              />
+                            ))}
+                          </div>
                         </FormItem>
                       )}
                     />
