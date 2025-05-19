@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.182.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -30,6 +29,58 @@ const handleCors = (req: Request) => {
 // Function to log detailed information for debugging
 const logDetails = (message: string, data: any) => {
   console.log(`[${new Date().toISOString()}] ${message}`, JSON.stringify(data));
+};
+
+// Convert Typeform field title to database column name (snake_case)
+const titleToColumnName = (title: string): string | null => {
+  // Known field mappings - direct mapping of Typeform field titles to database column names
+  const knownMappings: Record<string, string> = {
+    "First name": "first_name",
+    "Last name": "last_name",
+    "Phone number": "phone",
+    "Email": "email",
+    "Company": "business_name",
+    "What is your Australian Business Number (ABN) ?": "abn"
+  };
+
+  // Check if we have a direct mapping for this field title
+  if (title in knownMappings) {
+    return knownMappings[title];
+  }
+
+  // For any other field, convert to snake_case but return null for now
+  // as we don't have a place to store them yet
+  return null;
+}
+
+// Extract value from answer based on its type
+const extractAnswerValue = (answer: any): any => {
+  const type = answer.type;
+  
+  switch (type) {
+    case "text":
+    case "email":
+      return answer[type];
+    case "phone_number":
+      return answer.phone_number;
+    case "choice":
+      return answer.choice.label;
+    case "choices":
+      return answer.choices.labels.join(", ");
+    case "number":
+      return answer.number;
+    case "boolean":
+      return answer.boolean;
+    case "date":
+      return answer.date;
+    default:
+      // Default case: try to return the object itself or stringify it
+      try {
+        return typeof answer === 'object' ? answer[type] : answer;
+      } catch (e) {
+        return JSON.stringify(answer);
+      }
+  }
 };
 
 serve(async (req: Request) => {
@@ -81,58 +132,62 @@ serve(async (req: Request) => {
     // Process answers from the form
     const answers = form_response.answers || [];
     
+    // Build a map of field titles to field references for easier lookup
+    const fieldMap: Record<string, string> = {};
+    
+    // Check if definition and fields are available
+    if (form_response.definition && form_response.definition.fields) {
+      form_response.definition.fields.forEach((field: any) => {
+        if (field.title && field.ref) {
+          fieldMap[field.ref] = field.title;
+        }
+      });
+      logDetails("Created field mapping from title to ref", fieldMap);
+    }
+    
     // Initialize profile data object
     const profileData: Record<string, any> = {
       updated_at: new Date().toISOString(),
     };
 
-    // Map answers to profile fields based on question reference or field IDs
+    // An array to keep track of successfully mapped fields
+    const mappedFields: { title: string, column: string, value: any }[] = [];
+    // An array to keep track of fields that couldn't be mapped
+    const unmappedFields: { title: string, value: any }[] = [];
+
+    // Map answers to profile fields based on field titles
     answers.forEach((answer: any) => {
-      const questionRef = answer.field.ref;
-      const questionType = answer.type;
-      let answerValue = null;
-
-      // Extract the answer based on its type
-      switch (questionType) {
-        case "text":
-        case "email":
-          answerValue = answer[questionType];
-          break;
-        case "phone_number":
-          answerValue = answer.phone_number;
-          break;
-        case "choice":
-          answerValue = answer.choice.label;
-          break;
-        case "choices":
-          answerValue = answer.choices.labels.join(", ");
-          break;
-        default:
-          answerValue = JSON.stringify(answer);
-      }
-
-      // Map fields based on question reference
-      if (questionRef.includes("first_name")) {
-        profileData.first_name = answerValue;
-      } else if (questionRef.includes("last_name")) {
-        profileData.last_name = answerValue;
-      } else if (questionRef.includes("phone")) {
-        profileData.phone = answerValue;
-      } else if (questionRef.includes("business_name")) {
-        profileData.business_name = answerValue;
-      } else if (questionRef.includes("abn")) {
-        profileData.abn = answerValue;
-      } else if (questionType === "email" && !email) {
-        // If email wasn't in hidden fields but is in the form answers
-        email = answerValue;
-        profileData.email = answerValue; // Store email in the profile table
+      const fieldRef = answer.field.ref;
+      const fieldTitle = fieldMap[fieldRef] || `Unknown field (${fieldRef})`;
+      const answerValue = extractAnswerValue(answer);
+      
+      // Map to database column name
+      const columnName = titleToColumnName(fieldTitle);
+      
+      if (columnName) {
+        profileData[columnName] = answerValue;
+        mappedFields.push({ title: fieldTitle, column: columnName, value: answerValue });
+        logDetails(`Mapped field "${fieldTitle}" to column "${columnName}"`, { value: answerValue });
+      } else {
+        // Field couldn't be mapped to a known column
+        unmappedFields.push({ title: fieldTitle, value: answerValue });
+        logDetails(`Could not map field "${fieldTitle}" to a database column`, { value: answerValue });
       }
       
-      // Log mapped field for debugging
-      logDetails(`Mapped field ${questionRef} (${questionType})`, { field: questionRef, type: questionType, value: answerValue });
+      // Special handling for email fields to ensure we capture the email
+      if (fieldTitle.toLowerCase().includes("email") && !email && typeof answerValue === 'string') {
+        email = answerValue;
+        profileData.email = answerValue; // Store email in the profile table
+        logDetails("Found email field", { email });
+      }
     });
 
-    logDetails("Extracted profile data", profileData);
+    // Log summary of field mapping
+    logDetails("Field mapping summary", { 
+      mappedFieldsCount: mappedFields.length, 
+      unmappedFieldsCount: unmappedFields.length,
+      profileData
+    });
 
     // Always ensure email is included in profile data if available
     if (email && !profileData.email) {
@@ -288,6 +343,10 @@ serve(async (req: Request) => {
       success: acknowledgeSubmission,
       message: result.error ? result.error.message : (userIdentified ? "Profile updated successfully" : "Acknowledged submission"),
       data: profileData,
+      fieldMappingSummary: {
+        mapped: mappedFields,
+        unmapped: unmappedFields
+      },
       userId: foundUserId,
       userIdentified,
       isPartialResponse,
