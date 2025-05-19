@@ -1,6 +1,8 @@
 
+interface Typeform {
+  createWidget: () => void;
+}
+
 interface Window {
-  tf: {
-    createWidget: () => void;
-  }
+  tf: Typeform;
 }
