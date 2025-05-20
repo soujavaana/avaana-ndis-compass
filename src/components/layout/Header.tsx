@@ -76,14 +76,20 @@ const Header = () => {
     <header className="w-full bg-[#F4F4F0] px-3 md:px-6 py-3 md:py-4 flex flex-col md:flex-row md:items-center md:justify-between border-b gap-2 md:gap-0 shadow-sm">
       <div className="w-full md:max-w-md">
         <div className="relative">
-          
-          
+          <div className="flex items-center relative">
+            <Input
+              type="search"
+              placeholder="Search..."
+              className="pl-10 pr-4 py-2 w-full rounded-lg border-gray-200 focus:border-primary focus:ring-primary"
+            />
+            <SearchIcon size={18} className="absolute left-3 text-gray-400" />
+          </div>
         </div>
       </div>
       <div className="flex items-center justify-between md:justify-end w-full md:w-auto gap-3 md:gap-6">
         <div className="hidden md:flex items-center">
           <span className="text-gray-500 mr-2 text-sm">Welcome</span>
-          <button onClick={handleManagerClick} className="text-sm font-normal hover:text-[#2DCE89] transition-colors">
+          <button onClick={handleManagerClick} className="text-sm font-normal hover:text-primary transition-colors">
             {displayName}
           </button>
           
@@ -104,10 +110,10 @@ const Header = () => {
             </TooltipProvider>
           )}
         </div>
-        <Button variant="ghost" size="icon" className="hover:bg-gray-100">
+        <Button variant="ghost" size="icon" className="hover:bg-gray-100 text-gray-600">
           <BellIcon size={18} />
         </Button>
-        <Button variant="ghost" size="icon" className="hover:bg-gray-100" onClick={handleProfileClick}>
+        <Button variant="ghost" size="icon" className="hover:bg-gray-100 text-gray-600" onClick={handleProfileClick}>
           <UserIcon size={18} />
         </Button>
       </div>

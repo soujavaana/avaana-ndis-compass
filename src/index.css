@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -47,6 +48,54 @@
     @apply text-[24px] leading-[36px];
   }
 
+  h4 {
+    @apply text-[20px] leading-[30px];
+  }
+
+  h5 {
+    @apply text-[18px] leading-[27px];
+  }
+
+  h6 {
+    @apply text-[16px] leading-[24px];
+  }
+
+  p {
+    @apply text-base leading-relaxed text-gray-700;
+  }
+
+  .text-xs {
+    @apply text-[12px] leading-[18px];
+  }
+
+  .text-sm {
+    @apply text-[14px] leading-[21px];
+  }
+
+  .text-base {
+    @apply text-[16px] leading-[24px];
+  }
+
+  .text-lg {
+    @apply text-[18px] leading-[27px];
+  }
+
+  .text-xl {
+    @apply text-[20px] leading-[30px];
+  }
+
+  .text-2xl {
+    @apply text-[24px] leading-[36px];
+  }
+
+  .text-3xl {
+    @apply text-[30px] leading-[45px];
+  }
+
+  .text-4xl {
+    @apply text-[36px] leading-[54px];
+  }
+
   .btn-primary {
     @apply bg-[#2DCE89] text-white px-4 py-2.5 rounded-md hover:bg-[#1AAE6F] transition-all font-medium;
   }
@@ -72,7 +121,7 @@
   }
 
   .avaana-card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-100;
+    @apply bg-white rounded-lg shadow-sm border border-gray-100 p-4;
   }
 
   .accordion {

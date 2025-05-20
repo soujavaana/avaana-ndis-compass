@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -21,6 +22,7 @@ export default {
       fontFamily: {
         recoleta: ['Recoleta', 'serif'],
         avenir: ['Avenir', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -29,32 +31,39 @@ export default {
         background: '#F4F4F0',
         foreground: 'hsl(var(--foreground))',
         primary: {
-          DEFAULT: '#F1490D',
-          foreground: 'hsl(var(--primary-foreground))'
+          DEFAULT: '#2DCE89',
+          hover: '#1AAE6F',
+          light: '#E6F7F0',
+          dark: '#0D8F5F',
+          foreground: '#FFFFFF'
         },
         secondary: {
-          DEFAULT: '#EA580C',
-          foreground: 'hsl(var(--secondary-foreground))'
+          DEFAULT: '#5b7977',
+          hover: '#4a6261',
+          light: '#EDF2F7',
+          foreground: '#FFFFFF'
         },
         destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))'
+          DEFAULT: '#EF4444',
+          hover: '#DC2626',
+          light: '#FEF2F2',
+          foreground: '#FFFFFF'
         },
         muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))'
+          DEFAULT: '#F1F5F9',
+          foreground: '#64748B'
         },
         accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))'
+          DEFAULT: '#F1F5F9',
+          foreground: '#0F172A'
         },
         popover: {
           DEFAULT: 'hsl(var(--popover))',
           foreground: 'hsl(var(--popover-foreground))'
         },
         card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))'
+          DEFAULT: '#FFFFFF',
+          foreground: '#0F172A'
         },
         sidebar: {
           DEFAULT: 'hsl(var(--sidebar-background))',
@@ -67,10 +76,10 @@ export default {
           ring: 'hsl(var(--sidebar-ring))'
         },
         avaana: {
-          primary: '#F1490D',
-          secondary: '#EA580C',
-          light: '#FB923C',
-          accent: '#FFEDD5',
+          primary: '#2DCE89',
+          secondary: '#1AAE6F',
+          light: '#E6F7F0',
+          accent: '#F4F4F0',
           background: '#F6F8FA',
           text: '#333333',
           border: '#E5E7EB',
@@ -78,6 +87,31 @@ export default {
           success: '#2DCE89',
           warning: '#F59E0B',
           error: '#EF4444',
+          cream: '#F4F4F0',
+          orange: {
+            DEFAULT: '#F97316',
+            light: '#FFEDD5',
+          },
+          indigo: {
+            DEFAULT: '#6366F1',
+            light: '#E0E7FF',
+          },
+          purple: {
+            DEFAULT: '#8B5CF6',
+            light: '#EDE9FE',
+          },
+          gray: {
+            50: '#F9FAFB',
+            100: '#F3F4F6',
+            200: '#E5E7EB',
+            300: '#D1D5DB',
+            400: '#9CA3AF',
+            500: '#6B7280',
+            600: '#4B5563',
+            700: '#374151',
+            800: '#1F2937',
+            900: '#111827',
+          }
         }
       },
       borderRadius: {
