@@ -5,31 +5,36 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { 
-  CalendarIcon, 
-  FileTextIcon, 
-  AlertTriangleIcon, 
-  CheckCircleIcon,
-  BookIcon,
-  UsersIcon,
-  ShieldCheckIcon,
-  FileSearchIcon,
-} from 'lucide-react';
-
+import { CalendarIcon, FileTextIcon, AlertTriangleIcon, CheckCircleIcon, BookIcon, UsersIcon, ShieldCheckIcon, FileSearchIcon } from 'lucide-react';
 const Dashboard = () => {
-  const quickLinks = [
-    { name: 'Documents', icon: FileTextIcon, path: '/documents' },
-    { name: 'Frameworks', icon: BookIcon, path: '/compliance/frameworks' },
-    { name: 'People', icon: UsersIcon, path: '/people/employees' },
-    { name: 'Compliance', icon: ShieldCheckIcon, path: '/compliance/controls' },
-    { name: 'Audit', icon: FileSearchIcon, path: '/audit/center' },
-    { name: 'Business Goals', icon: CalendarIcon, path: '/business-goals' },
-  ];
-
-  return (
-    <Layout>
+  const quickLinks = [{
+    name: 'Documents',
+    icon: FileTextIcon,
+    path: '/documents'
+  }, {
+    name: 'Frameworks',
+    icon: BookIcon,
+    path: '/compliance/frameworks'
+  }, {
+    name: 'People',
+    icon: UsersIcon,
+    path: '/people/employees'
+  }, {
+    name: 'Compliance',
+    icon: ShieldCheckIcon,
+    path: '/compliance/controls'
+  }, {
+    name: 'Audit',
+    icon: FileSearchIcon,
+    path: '/audit/center'
+  }, {
+    name: 'Business Goals',
+    icon: CalendarIcon,
+    path: '/business-goals'
+  }];
+  return <Layout>
       <div className="bg-[#063e3b] text-white p-4 rounded-lg mb-6">
-        <h1 className="text-2xl font-bold">Welcome back, Happy Horizons NDIS Services</h1>
+        <h1 className="text-2xl font-bold">Welcome back,</h1>
         <p className="text-sm text-white">You have $350 in credits. Book a Business Goal session now.</p>
       </div>
       
@@ -125,20 +130,16 @@ const Dashboard = () => {
       <div className="mt-6">
         <h2 className="text-xl font-semibold mb-4">Quick Links</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {quickLinks.map((link) => (
-            <Link key={link.path} to={link.path}>
+          {quickLinks.map(link => <Link key={link.path} to={link.path}>
               <Card className="hover:bg-gray-50 transition-colors cursor-pointer h-full">
                 <CardContent className="flex flex-col items-center justify-center py-4">
                   <link.icon className="h-6 w-6 mb-2 text-gray-600" />
                   <span className="text-sm font-medium text-gray-700">{link.name}</span>
                 </CardContent>
               </Card>
-            </Link>
-          ))}
+            </Link>)}
         </div>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Dashboard;
