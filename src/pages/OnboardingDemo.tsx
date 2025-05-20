@@ -139,7 +139,7 @@ const OnboardingDemo = () => {
                   <FormField control={registrationForm.control} name="password" render={({
                 field
               }) => <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        
                         <FormControl>
                           <Input type="password" placeholder="Create a password" {...field} />
                         </FormControl>
@@ -150,7 +150,7 @@ const OnboardingDemo = () => {
                   <FormField control={registrationForm.control} name="confirmPassword" render={({
                 field
               }) => <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
+                        
                         <FormControl>
                           <Input type="password" placeholder="Confirm your password" {...field} />
                         </FormControl>
