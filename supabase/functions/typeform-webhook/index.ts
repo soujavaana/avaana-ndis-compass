@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.182.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -43,6 +44,7 @@ const titleToColumnName = (title: string): string | null => {
     "What is your Australian Business Number (ABN) ?": "abn",
     // Address related fields
     "Address": "address",
+    "Address line 2": "address_line_2",
     "City/Town": "city",
     "State/Region/Province": "state",
     "Zip/Post Code": "postal_code",
@@ -51,7 +53,12 @@ const titleToColumnName = (title: string): string | null => {
     "ACN": "acn",
     "Business Name": "business_name",
     "What's your business telephone number?": "business_phone",
-    "What's your business email address?": "business_email"
+    "What's your business email address?": "business_email",
+    "Enter your registered Business Name": "registered_business_name",
+    "Are you registered for GST?": "is_gst_registered",
+    "How many staff do you have for which the normal duties are likely to require more than incidental contact with people with disability? ": "staff_count",
+    "Do you regularly work with contractors/subcontractors who are likely to require more than incidental contact with people with disability?": "uses_contractors",
+    "Please select a date and time for your first onboarding call.": "calendly_url"
   };
 
   // Check if we have a direct mapping for this field title
@@ -76,6 +83,40 @@ const titleToColumnName = (title: string): string | null => {
   // as we don't have a place to store them yet
   return null;
 }
+
+// Check if a field is related to key personnel
+const isKeyPersonnelField = (title: string): boolean => {
+  return title.includes("Key Personnel") || title.match(/\d+(st|nd|rd|th) Key Personnel/) !== null;
+};
+
+// Extract key personnel number from field title
+const getKeyPersonnelNumber = (title: string): number | null => {
+  const match = title.match(/(\d+)(st|nd|rd|th)/);
+  if (match) {
+    return parseInt(match[1]);
+  }
+  return null;
+};
+
+// Check if a field is related to shareholders
+const isShareholderField = (title: string): boolean => {
+  return title.includes("Shareholder Name");
+};
+
+// Extract shareholder number from field title
+const getShareholderNumber = (title: string): number | null => {
+  const match = title.match(/(First|Second|Third|Fourth) Shareholder/i);
+  if (match) {
+    const positions: Record<string, number> = {
+      'first': 1,
+      'second': 2,
+      'third': 3,
+      'fourth': 4
+    };
+    return positions[match[1].toLowerCase()];
+  }
+  return null;
+};
 
 // Determine field context to handle multiple fields with the same title
 const determineFieldContext = (title: string, allFields: any[], currentIndex: number): string | null => {
@@ -130,6 +171,162 @@ const extractAnswerValue = (answer: any): any => {
         return JSON.stringify(answer);
       }
   }
+};
+
+// Process and save key personnel data
+const processKeyPersonnel = async (
+  userId: string, 
+  answers: any[], 
+  fieldMap: Record<string, string>,
+  form_response: any
+): Promise<void> => {
+  // Group fields by key personnel number
+  const personnelData: Record<number, Record<string, any>> = {};
+  
+  // Process all answers to find key personnel related fields
+  answers.forEach(answer => {
+    const fieldRef = answer.field.ref;
+    const fieldTitle = fieldMap[fieldRef] || `Unknown field (${fieldRef})`;
+    
+    if (isKeyPersonnelField(fieldTitle)) {
+      const keyNumber = getKeyPersonnelNumber(fieldTitle);
+      if (keyNumber) {
+        if (!personnelData[keyNumber]) {
+          personnelData[keyNumber] = { key_number: keyNumber, profile_id: userId };
+        }
+        
+        // Extract specific data based on field title
+        if (fieldTitle.includes("Position")) {
+          personnelData[keyNumber].position = extractAnswerValue(answer);
+        } else if (fieldTitle.includes("Date of Birth")) {
+          personnelData[keyNumber].date_of_birth = extractAnswerValue(answer);
+        } else if (fieldTitle.includes("ownership")) {
+          personnelData[keyNumber].has_ownership = extractAnswerValue(answer);
+        }
+      }
+    } else {
+      // For first name, last name, email, and phone, check if they're part of key personnel
+      // by looking at surrounding answers
+      const keyPersonnelPatterns = [
+        "First name", 
+        "Last name", 
+        "Email", 
+        "Phone number"
+      ];
+      
+      if (keyPersonnelPatterns.includes(fieldTitle)) {
+        // Try to find which key personnel this belongs to by checking nearby fields
+        const answerIndex = answers.findIndex(a => a.field.ref === fieldRef);
+        
+        // Look at fields before and after this one to determine context
+        const nearbyFields = answers
+          .slice(Math.max(0, answerIndex - 5), Math.min(answers.length, answerIndex + 5))
+          .map(a => fieldMap[a.field.ref] || "");
+        
+        const keyPersonnelContext = nearbyFields.find(title => isKeyPersonnelField(title));
+        if (keyPersonnelContext) {
+          const keyNumber = getKeyPersonnelNumber(keyPersonnelContext);
+          if (keyNumber) {
+            if (!personnelData[keyNumber]) {
+              personnelData[keyNumber] = { key_number: keyNumber, profile_id: userId };
+            }
+            
+            // Map field title to column
+            if (fieldTitle === "First name") {
+              personnelData[keyNumber].first_name = extractAnswerValue(answer);
+            } else if (fieldTitle === "Last name") {
+              personnelData[keyNumber].last_name = extractAnswerValue(answer);
+            } else if (fieldTitle === "Email") {
+              personnelData[keyNumber].email = extractAnswerValue(answer);
+            } else if (fieldTitle === "Phone number") {
+              personnelData[keyNumber].phone = extractAnswerValue(answer);
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Save key personnel data
+  const keyPersonnelRecords = Object.values(personnelData);
+  if (keyPersonnelRecords.length > 0) {
+    try {
+      const { data, error } = await supabase
+        .from('key_personnel')
+        .upsert(keyPersonnelRecords, { onConflict: 'profile_id, key_number' });
+      
+      if (error) {
+        logDetails('Error saving key personnel data', error);
+      } else {
+        logDetails('Successfully saved key personnel data', { count: keyPersonnelRecords.length });
+      }
+    } catch (error) {
+      logDetails('Exception while saving key personnel data', error);
+    }
+  }
+};
+
+// Process and save shareholder data
+const processShareholders = async (
+  userId: string, 
+  answers: any[], 
+  fieldMap: Record<string, string>
+): Promise<void> => {
+  const shareholders: { profile_id: string; name: string }[] = [];
+  
+  // Find all shareholder name fields
+  answers.forEach(answer => {
+    const fieldRef = answer.field.ref;
+    const fieldTitle = fieldMap[fieldRef] || `Unknown field (${fieldRef})`;
+    
+    if (isShareholderField(fieldTitle)) {
+      const name = extractAnswerValue(answer);
+      if (name && name.trim()) {
+        shareholders.push({
+          profile_id: userId,
+          name: name.trim()
+        });
+      }
+    }
+  });
+  
+  // Save shareholder data
+  if (shareholders.length > 0) {
+    try {
+      const { data, error } = await supabase
+        .from('shareholders')
+        .upsert(shareholders, { onConflict: 'profile_id, name' });
+      
+      if (error) {
+        logDetails('Error saving shareholder data', error);
+      } else {
+        logDetails('Successfully saved shareholder data', { count: shareholders.length });
+      }
+    } catch (error) {
+      logDetails('Exception while saving shareholder data', error);
+    }
+  }
+};
+
+// Process Calendly URL
+const processCalendlyUrl = (url: string): Record<string, any> => {
+  const result: Record<string, any> = {
+    calendly_url: url
+  };
+  
+  // Try to extract scheduled time if available
+  try {
+    // Calendly URLs might include event details we can parse
+    if (url.includes('scheduled_events')) {
+      // We could extract the event ID and potentially query Calendly API
+      // But for now, just set a flag that there's a scheduled event
+      result.scheduled_at = new Date().toISOString();
+    }
+  } catch (error) {
+    logDetails('Error processing Calendly URL', error);
+  }
+  
+  return result;
 };
 
 // Store all form fields in the form_data table
@@ -275,8 +472,20 @@ serve(async (req: Request) => {
       const columnName = titleToColumnName(fieldTitle);
       
       if (columnName && context === null) {
-        // Only use non-contextual fields (first occurrence of duplicates) for profile
-        profileData[columnName] = answerValue;
+        // Handle special cases for boolean and Calendly values
+        if (fieldTitle === "Are you registered for GST?") {
+          profileData[columnName] = answerValue === "Yes";
+        } else if (fieldTitle === "Do you regularly work with contractors/subcontractors who are likely to require more than incidental contact with people with disability?") {
+          profileData["uses_contractors"] = answerValue === "Yes";
+        } else if (fieldTitle === "Please select a date and time for your first onboarding call.") {
+          // Process Calendly URL
+          const calendlyData = processCalendlyUrl(answerValue);
+          Object.assign(profileData, calendlyData);
+        } else {
+          // Standard field mapping
+          profileData[columnName] = answerValue;
+        }
+        
         mappedFields.push({ title: fieldTitle, column: columnName, value: answerValue, context });
         logDetails(`Mapped field "${fieldTitle}" to column "${columnName}"`, { value: answerValue });
       } else {
@@ -354,6 +563,16 @@ serve(async (req: Request) => {
         userIdentified = true;
       }
       
+      // Process and save related entities
+      if (form_response.definition && form_response.definition.fields) {
+        try {
+          await processKeyPersonnel(userId, answers, fieldMap, form_response);
+          await processShareholders(userId, answers, fieldMap);
+        } catch (error) {
+          logDetails("Error processing related entities", { error });
+        }
+      }
+      
       // Store all form fields in the form_data table
       await storeFormData(userId, form_response, answers);
     } 
@@ -383,6 +602,16 @@ serve(async (req: Request) => {
           .select();
           
         userIdentified = true;
+        
+        // Process and save related entities
+        if (form_response.definition && form_response.definition.fields) {
+          try {
+            await processKeyPersonnel(foundUserId, answers, fieldMap, form_response);
+            await processShareholders(foundUserId, answers, fieldMap);
+          } catch (error) {
+            logDetails("Error processing related entities", { error });
+          }
+        }
         
         // Store all form fields in form_data
         await storeFormData(foundUserId, form_response, answers);
@@ -416,6 +645,16 @@ serve(async (req: Request) => {
             
           userIdentified = true;
           
+          // Process and save related entities
+          if (form_response.definition && form_response.definition.fields) {
+            try {
+              await processKeyPersonnel(foundUserId, answers, fieldMap, form_response);
+              await processShareholders(foundUserId, answers, fieldMap);
+            } catch (error) {
+              logDetails("Error processing related entities", { error });
+            }
+          }
+          
           // Store all form fields in form_data
           await storeFormData(foundUserId, form_response, answers);
         } else if (!isPartialResponse) {
@@ -439,6 +678,16 @@ serve(async (req: Request) => {
             foundUserId = randomId;
             userIdentified = true;
             logDetails("Created new profile record with generated ID", { generatedId: randomId });
+            
+            // Process and save related entities
+            if (form_response.definition && form_response.definition.fields) {
+              try {
+                await processKeyPersonnel(randomId, answers, fieldMap, form_response);
+                await processShareholders(randomId, answers, fieldMap);
+              } catch (error) {
+                logDetails("Error processing related entities", { error });
+              }
+            }
             
             // Store all form fields in form_data
             await storeFormData(randomId, form_response, answers);

@@ -53,6 +53,32 @@ const Onboarding1 = () => {
     const businessName = formData['59ec985f-7383-4ad5-8911-a0d5615f609a']; // Company
     const abn = formData['35981485-49dc-4d4e-97df-2281d82379ed']; // ABN
     
+    // Extract additional fields
+    const address = findValueByRegex(formData, /address/i);
+    const addressLine2 = findValueByRegex(formData, /address.*line.*2/i);
+    const city = findValueByRegex(formData, /city|town/i);
+    const state = findValueByRegex(formData, /state|region|province/i);
+    const postalCode = findValueByRegex(formData, /zip|post.*code/i);
+    const country = findValueByRegex(formData, /country/i);
+    
+    // Business information
+    const acn = findValueByRegex(formData, /acn/i);
+    const entityType = findValueByRegex(formData, /entity.*type|sole.*trader/i);
+    const businessPhone = findValueByRegex(formData, /business.*phone|telephone/i);
+    const businessEmail = findValueByRegex(formData, /business.*email/i);
+    const businessType = findValueByRegex(formData, /physical.*premises|people.*homes/i);
+    const registeredBusinessName = findValueByRegex(formData, /registered.*business.*name/i);
+    
+    // GST information
+    const isGstRegistered = findValueByRegex(formData, /registered.*gst/i) === 'Yes';
+    
+    // Staff information
+    const staffCount = findNumberByRegex(formData, /staff.*count|how.*many.*staff/i);
+    const usesContractors = findValueByRegex(formData, /contractors|subcontractors/i) === 'Yes';
+    
+    // Calendly information
+    const calendlyUrl = findValueByRegex(formData, /select.*date.*time|calendly/i);
+    
     // Update the user's profile in Supabase
     if (userId) {
       updateUserProfile(userId, {
@@ -61,7 +87,24 @@ const Onboarding1 = () => {
         phone,
         business_name: businessName,
         abn: abn?.toString(),
-        email: email // Add email to ensure it's stored in the profile
+        email: email,
+        // Additional fields
+        address,
+        address_line_2: addressLine2,
+        city,
+        state,
+        postal_code: postalCode,
+        country,
+        acn: acn?.toString(),
+        entity_type: entityType,
+        business_phone: businessPhone,
+        business_email: businessEmail,
+        business_type: businessType,
+        registered_business_name: registeredBusinessName,
+        is_gst_registered: isGstRegistered,
+        staff_count: staffCount,
+        uses_contractors: usesContractors,
+        calendly_url: calendlyUrl
       });
     } else {
       console.error("No userId found for profile update. Trying email lookup.");
@@ -72,7 +115,24 @@ const Onboarding1 = () => {
         phone,
         business_name: businessName,
         abn: abn?.toString(),
-        email: email
+        email: email,
+        // Additional fields
+        address,
+        address_line_2: addressLine2,
+        city,
+        state,
+        postal_code: postalCode,
+        country,
+        acn: acn?.toString(),
+        entity_type: entityType,
+        business_phone: businessPhone,
+        business_email: businessEmail,
+        business_type: businessType,
+        registered_business_name: registeredBusinessName,
+        is_gst_registered: isGstRegistered,
+        staff_count: staffCount,
+        uses_contractors: usesContractors,
+        calendly_url: calendlyUrl
       });
     }
     
@@ -80,6 +140,25 @@ const Onboarding1 = () => {
       title: 'Onboarding Complete',
       description: 'Thank you for completing the onboarding process!',
     });
+  };
+  
+  // Helper function to find values in form data by regex
+  const findValueByRegex = (formData: Record<string, any>, regex: RegExp): any => {
+    const matchingKey = Object.keys(formData).find(key => {
+      const fieldValue = formData[key];
+      if (typeof fieldValue === 'string') {
+        return regex.test(fieldValue);
+      }
+      return false;
+    });
+    
+    return matchingKey ? formData[matchingKey] : null;
+  };
+  
+  // Helper function to find number values in form data by regex
+  const findNumberByRegex = (formData: Record<string, any>, regex: RegExp): number | null => {
+    const value = findValueByRegex(formData, regex);
+    return value !== null ? Number(value) : null;
   };
   
   // Find user by email and update profile

@@ -53,15 +53,70 @@ export type Database = {
           },
         ]
       }
+      key_personnel: {
+        Row: {
+          created_at: string
+          date_of_birth: string | null
+          email: string | null
+          first_name: string | null
+          has_ownership: boolean | null
+          id: string
+          key_number: number
+          last_name: string | null
+          phone: string | null
+          position: string | null
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          first_name?: string | null
+          has_ownership?: boolean | null
+          id?: string
+          key_number: number
+          last_name?: string | null
+          phone?: string | null
+          position?: string | null
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          first_name?: string | null
+          has_ownership?: boolean | null
+          id?: string
+          key_number?: number
+          last_name?: string | null
+          phone?: string | null
+          position?: string | null
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "key_personnel_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           abn: string | null
           acn: string | null
           address: string | null
+          address_line_2: string | null
           business_email: string | null
           business_name: string | null
           business_phone: string | null
           business_type: string | null
+          calendly_url: string | null
           city: string | null
           country: string | null
           created_at: string | null
@@ -69,20 +124,27 @@ export type Database = {
           entity_type: string | null
           first_name: string | null
           id: string
+          is_gst_registered: boolean | null
           last_name: string | null
           phone: string | null
           postal_code: string | null
+          registered_business_name: string | null
+          scheduled_at: string | null
+          staff_count: number | null
           state: string | null
           updated_at: string | null
+          uses_contractors: boolean | null
         }
         Insert: {
           abn?: string | null
           acn?: string | null
           address?: string | null
+          address_line_2?: string | null
           business_email?: string | null
           business_name?: string | null
           business_phone?: string | null
           business_type?: string | null
+          calendly_url?: string | null
           city?: string | null
           country?: string | null
           created_at?: string | null
@@ -90,20 +152,27 @@ export type Database = {
           entity_type?: string | null
           first_name?: string | null
           id: string
+          is_gst_registered?: boolean | null
           last_name?: string | null
           phone?: string | null
           postal_code?: string | null
+          registered_business_name?: string | null
+          scheduled_at?: string | null
+          staff_count?: number | null
           state?: string | null
           updated_at?: string | null
+          uses_contractors?: boolean | null
         }
         Update: {
           abn?: string | null
           acn?: string | null
           address?: string | null
+          address_line_2?: string | null
           business_email?: string | null
           business_name?: string | null
           business_phone?: string | null
           business_type?: string | null
+          calendly_url?: string | null
           city?: string | null
           country?: string | null
           created_at?: string | null
@@ -111,11 +180,16 @@ export type Database = {
           entity_type?: string | null
           first_name?: string | null
           id?: string
+          is_gst_registered?: boolean | null
           last_name?: string | null
           phone?: string | null
           postal_code?: string | null
+          registered_business_name?: string | null
+          scheduled_at?: string | null
+          staff_count?: number | null
           state?: string | null
           updated_at?: string | null
+          uses_contractors?: boolean | null
         }
         Relationships: []
       }
@@ -136,6 +210,38 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      shareholders: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shareholders_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_services: {
         Row: {
