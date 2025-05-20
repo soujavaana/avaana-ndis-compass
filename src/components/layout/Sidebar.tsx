@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, ClipboardCheck, ShieldCheck, FileText, Network, MessageSquare, Users, Boxes, AlertTriangle, Lock, FileSearch, BriefcaseBusiness, UserPlus } from 'lucide-react';
-
 const mainNavItems = [{
   name: 'Home',
   icon: LayoutDashboard,
@@ -104,7 +103,6 @@ const mainNavItems = [{
     path: '/people/training'
   }]
 }];
-
 const Sidebar = () => {
   const location = useLocation();
   const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
@@ -134,7 +132,7 @@ const Sidebar = () => {
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center gap-2 px-2 py-1.5 bg-gray-50 rounded-md mb-2">
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-medium truncate">Happy Horizons NDIS</h3>
+            <h3 className="text-sm font-medium truncate">Avaana NDIS Dashboard</h3>
           </div>
         </div>
       </div>
