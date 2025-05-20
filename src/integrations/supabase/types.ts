@@ -9,38 +9,112 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      form_data: {
+        Row: {
+          created_at: string
+          field_reference: string
+          field_title: string
+          field_value: Json
+          form_id: string
+          id: string
+          response_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          field_reference: string
+          field_title: string
+          field_value: Json
+          form_id: string
+          id?: string
+          response_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          field_reference?: string
+          field_title?: string
+          field_value?: Json
+          form_id?: string
+          id?: string
+          response_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "form_data_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           abn: string | null
+          acn: string | null
+          address: string | null
+          business_email: string | null
           business_name: string | null
+          business_phone: string | null
+          business_type: string | null
+          city: string | null
+          country: string | null
           created_at: string | null
           email: string | null
+          entity_type: string | null
           first_name: string | null
           id: string
           last_name: string | null
           phone: string | null
+          postal_code: string | null
+          state: string | null
           updated_at: string | null
         }
         Insert: {
           abn?: string | null
+          acn?: string | null
+          address?: string | null
+          business_email?: string | null
           business_name?: string | null
+          business_phone?: string | null
+          business_type?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           email?: string | null
+          entity_type?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
           phone?: string | null
+          postal_code?: string | null
+          state?: string | null
           updated_at?: string | null
         }
         Update: {
           abn?: string | null
+          acn?: string | null
+          address?: string | null
+          business_email?: string | null
           business_name?: string | null
+          business_phone?: string | null
+          business_type?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           email?: string | null
+          entity_type?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
           phone?: string | null
+          postal_code?: string | null
+          state?: string | null
           updated_at?: string | null
         }
         Relationships: []

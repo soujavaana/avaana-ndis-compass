@@ -5,8 +5,59 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { CalendarIcon, FileTextIcon, AlertTriangleIcon, CheckCircleIcon, BookIcon, UsersIcon, ShieldCheckIcon, FileSearchIcon } from 'lucide-react';
+import { CalendarIcon, FileTextIcon, AlertTriangleIcon, CheckCircleIcon, BookIcon, UsersIcon, ShieldCheckIcon, FileSearchIcon, MapPinIcon } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useEffect, useState } from 'react';
+
+// Define the minimal profile data type
+interface ProfileData {
+  id?: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  business_name?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postal_code?: string | null;
+  country?: string | null;
+}
+
 const Dashboard = () => {
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch current user's profile data
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          // Get profile data
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+            
+          if (error) {
+            console.error('Error fetching profile:', error);
+          } else {
+            setProfile(data);
+          }
+        }
+      } catch (error) {
+        console.error('Error in fetchProfile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProfile();
+  }, []);
+  
   const quickLinks = [{
     name: 'Documents',
     icon: FileTextIcon,
@@ -32,13 +83,24 @@ const Dashboard = () => {
     icon: CalendarIcon,
     path: '/business-goals'
   }];
+
+  // Get user name for welcome message
+  const userName = profile?.first_name || 'User';
+  
+  // Get business location info if available
+  const hasLocation = profile?.city || profile?.state || profile?.postal_code;
+  const locationDisplay = hasLocation 
+    ? `${profile?.city || ''} ${profile?.state || ''} ${profile?.postal_code || ''}`.trim() 
+    : '';
+    
   return <Layout>
       <div className="bg-[#063e3b] text-white p-4 rounded-lg mb-6">
-        <h1 className="text-2xl font-bold">Welcome back,</h1>
+        <h1 className="text-2xl font-bold">Welcome back, {userName}</h1>
         <p className="text-sm text-white">You have $350 in credits. Book a Business Goal session now.</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Keep existing card for Compliance Status */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">Compliance Status</CardTitle>
@@ -49,6 +111,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
+        {/* Keep existing card for Documents Requiring Attention */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">Documents Requiring Attention</CardTitle>
@@ -61,6 +124,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
+        {/* Keep existing card for Days Until Next Audit */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">Days Until Next Audit</CardTitle>
@@ -73,15 +137,25 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
+        {/* Add a new card for Business Location if available */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">Support Tickets</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">
+              {hasLocation ? 'Business Location' : 'Support Tickets'}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center">
-              <CheckCircleIcon className="mr-2 text-avaana-secondary" />
-              <span className="text-2xl font-bold">0</span>
-            </div>
+            {hasLocation ? (
+              <div className="flex items-center">
+                <MapPinIcon className="mr-2 text-avaana-secondary" />
+                <span className="text-sm font-medium">{locationDisplay}</span>
+              </div>
+            ) : (
+              <div className="flex items-center">
+                <CheckCircleIcon className="mr-2 text-avaana-secondary" />
+                <span className="text-2xl font-bold">0</span>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

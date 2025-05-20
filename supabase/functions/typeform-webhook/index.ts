@@ -40,7 +40,18 @@ const titleToColumnName = (title: string): string | null => {
     "Phone number": "phone",
     "Email": "email",
     "Company": "business_name",
-    "What is your Australian Business Number (ABN) ?": "abn"
+    "What is your Australian Business Number (ABN) ?": "abn",
+    // Address related fields
+    "Address": "address",
+    "City/Town": "city",
+    "State/Region/Province": "state",
+    "Zip/Post Code": "postal_code",
+    "Country": "country",
+    // Business information
+    "ACN": "acn",
+    "Business Name": "business_name",
+    "What's your business telephone number?": "business_phone",
+    "What's your business email address?": "business_email"
   };
 
   // Check if we have a direct mapping for this field title
@@ -48,9 +59,47 @@ const titleToColumnName = (title: string): string | null => {
     return knownMappings[title];
   }
 
+  // Handle special cases with additional context
+  if (title === "Are you a sole trader or do you operate your business through an entity (such as a company or trust)?") {
+    return "entity_type";
+  }
+
+  if (title === "Select type of entity") {
+    return "entity_type";
+  }
+
+  if (title === "Do you primarily conduct your business from a fixed physical premises or does your work occur predominantly at other people's homes") {
+    return "business_type";
+  }
+
   // For any other field, convert to snake_case but return null for now
   // as we don't have a place to store them yet
   return null;
+}
+
+// Determine field context to handle multiple fields with the same title
+const determineFieldContext = (title: string, allFields: any[], currentIndex: number): string | null => {
+  // This function helps determine which instance of a repeated field we're dealing with
+  // For example, there might be multiple "Address" fields for different purposes
+
+  // For now, we'll just use the first instance of repeated fields for the profile
+  // but save all data in the form_data table
+  const titleCount = allFields.filter(f => f.title === title).length;
+  
+  if (titleCount <= 1) {
+    return null; // No context needed for unique fields
+  }
+
+  // Count how many times this title has appeared before this index
+  let occurrenceNumber = 0;
+  for (let i = 0; i < currentIndex; i++) {
+    if (allFields[i].title === title) {
+      occurrenceNumber++;
+    }
+  }
+
+  // For now, only use the first occurrence for profile data
+  return occurrenceNumber === 0 ? null : `occurrence_${occurrenceNumber + 1}`;
 }
 
 // Extract value from answer based on its type
@@ -82,6 +131,63 @@ const extractAnswerValue = (answer: any): any => {
       }
   }
 };
+
+// Store all form fields in the form_data table
+const storeFormData = async (userId: string, formResponse: any, answers: any[]): Promise<void> => {
+  if (!userId || !formResponse || !answers || answers.length === 0) {
+    logDetails("Cannot store form data - missing required parameters", { userId, hasFormResponse: !!formResponse, answerCount: answers?.length });
+    return;
+  }
+
+  try {
+    const formId = formResponse.form_id;
+    const responseId = formResponse.token;
+    const fieldMap: Record<string, string> = {};
+    
+    // Build field reference to title map
+    if (formResponse.definition && formResponse.definition.fields) {
+      formResponse.definition.fields.forEach((field: any) => {
+        if (field.title && field.ref) {
+          fieldMap[field.ref] = field.title;
+        }
+      });
+    }
+    
+    // Prepare data for insertion
+    const formDataItems = answers.map(answer => {
+      const fieldRef = answer.field.ref;
+      const fieldTitle = fieldMap[fieldRef] || `Unknown field (${fieldRef})`;
+      const fieldValue = extractAnswerValue(answer);
+      
+      return {
+        user_id: userId,
+        form_id: formId,
+        response_id: responseId,
+        field_title: fieldTitle,
+        field_reference: fieldRef,
+        field_value: typeof fieldValue === 'object' ? fieldValue : { value: fieldValue },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+    });
+    
+    // Insert data in batches to avoid hitting request size limits
+    const batchSize = 50;
+    for (let i = 0; i < formDataItems.length; i += batchSize) {
+      const batch = formDataItems.slice(i, i + batchSize);
+      const { error } = await supabase.from("form_data").insert(batch);
+      
+      if (error) {
+        logDetails(`Error storing form_data batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(formDataItems.length/batchSize)}`, { error });
+      } else {
+        logDetails(`Successfully stored form_data batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(formDataItems.length/batchSize)}`, 
+          { count: batch.length, firstFieldTitle: batch[0]?.field_title });
+      }
+    }
+  } catch (error) {
+    logDetails("Error in storeFormData function", { error });
+  }
+}
 
 serve(async (req: Request) => {
   // Handle CORS
@@ -151,27 +257,33 @@ serve(async (req: Request) => {
     };
 
     // An array to keep track of successfully mapped fields
-    const mappedFields: { title: string, column: string, value: any }[] = [];
+    const mappedFields: { title: string, column: string, value: any, context: string | null }[] = [];
     // An array to keep track of fields that couldn't be mapped
     const unmappedFields: { title: string, value: any }[] = [];
 
     // Map answers to profile fields based on field titles
-    answers.forEach((answer: any) => {
+    answers.forEach((answer: any, index: number) => {
       const fieldRef = answer.field.ref;
       const fieldTitle = fieldMap[fieldRef] || `Unknown field (${fieldRef})`;
       const answerValue = extractAnswerValue(answer);
       
+      // Determine field context for repeated fields
+      const context = form_response.definition && form_response.definition.fields ? 
+        determineFieldContext(fieldTitle, form_response.definition.fields, index) : null;
+      
       // Map to database column name
       const columnName = titleToColumnName(fieldTitle);
       
-      if (columnName) {
+      if (columnName && context === null) {
+        // Only use non-contextual fields (first occurrence of duplicates) for profile
         profileData[columnName] = answerValue;
-        mappedFields.push({ title: fieldTitle, column: columnName, value: answerValue });
+        mappedFields.push({ title: fieldTitle, column: columnName, value: answerValue, context });
         logDetails(`Mapped field "${fieldTitle}" to column "${columnName}"`, { value: answerValue });
       } else {
-        // Field couldn't be mapped to a known column
+        // Field couldn't be mapped to a known column or is not the first occurrence
         unmappedFields.push({ title: fieldTitle, value: answerValue });
-        logDetails(`Could not map field "${fieldTitle}" to a database column`, { value: answerValue });
+        logDetails(`Could not map field "${fieldTitle}" to a database column`, 
+          { value: answerValue, reason: columnName ? "duplicate field" : "no mapping" });
       }
       
       // Special handling for email fields to ensure we capture the email
@@ -194,13 +306,11 @@ serve(async (req: Request) => {
       profileData.email = email;
     }
 
-    // ------------ UPDATED LOGIC FOR HANDLING PARTIAL SUBMISSIONS ------------
-
     let result;
     let foundUserId = userId;
     let userIdentified = false;
     
-    // If we have a user ID directly, use it first (most reliable) - ALWAYS SAVE DATA FOR PARTIAL SUBMISSIONS IF WE HAVE USERID
+    // If we have a user ID directly, use it first (most reliable)
     if (userId) {
       logDetails("Using provided userId to update profile", { userId });
       
@@ -243,6 +353,9 @@ serve(async (req: Request) => {
         logDetails("Successfully updated profile with userId", { userId, updatedCount: result.data?.length });
         userIdentified = true;
       }
+      
+      // Store all form fields in the form_data table
+      await storeFormData(userId, form_response, answers);
     } 
     // If no userId but we have email, try to find by querying auth users
     else if (email) {
@@ -270,6 +383,9 @@ serve(async (req: Request) => {
           .select();
           
         userIdentified = true;
+        
+        // Store all form fields in form_data
+        await storeFormData(foundUserId, form_response, answers);
       } else {
         // If we don't find by email in profiles, try to find user by email in auth.users table
         // Since we can't query auth.users directly, we'll use an alternative approach
@@ -299,6 +415,9 @@ serve(async (req: Request) => {
             .select();
             
           userIdentified = true;
+          
+          // Store all form fields in form_data
+          await storeFormData(foundUserId, form_response, answers);
         } else if (!isPartialResponse) {
           // For complete submissions with no existing profile, we need to create a new record
           logDetails("No existing profile found, but we have a complete form submission", { email });
@@ -320,6 +439,9 @@ serve(async (req: Request) => {
             foundUserId = randomId;
             userIdentified = true;
             logDetails("Created new profile record with generated ID", { generatedId: randomId });
+            
+            // Store all form fields in form_data
+            await storeFormData(randomId, form_response, answers);
           } else {
             logDetails("Error creating new profile record", { error: result.error });
           }
