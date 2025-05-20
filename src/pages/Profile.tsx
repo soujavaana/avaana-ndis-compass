@@ -5,11 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Building2, ImageIcon, MapPin, Phone, Shield, Users, Link as LinkIcon } from 'lucide-react';
+import { Building2, Calendar, ImageIcon, MapPin, Phone, Shield, Users, Link as LinkIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import PageBreadcrumb from '@/components/navigation/PageBreadcrumb';
 
 interface KeyPersonnel {
   id: string;
@@ -122,6 +122,14 @@ const Profile = () => {
     return date.toLocaleDateString();
   };
 
+  // Get service delivery type text
+  const getServiceDeliveryText = (businessType: string | null | undefined) => {
+    if (!businessType) return 'Not specified';
+    if (businessType.includes('Fixed')) return 'Services provided at own premises';
+    if (businessType.includes('people')) return 'Services provided at client locations';
+    return businessType;
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -137,6 +145,9 @@ const Profile = () => {
 
   return (
     <Layout>
+      {/* Breadcrumb */}
+      <PageBreadcrumb items={[{ label: 'Business Profile Details' }]} />
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-[32px] font-[400] leading-[48px] font-recoleta">Business Details</h1>
@@ -163,46 +174,28 @@ const Profile = () => {
 
         <TabsContent value="business" className="space-y-6">
           <Card>
-            <CardHeader className="flex flex-row items-start justify-between">
-              <div>
-                <CardTitle className="text-lg font-medium">ABN details</CardTitle>
-                <p className="text-sm text-gray-500 mt-1">Australian Business Number and registration information.</p>
-              </div>
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                {profile?.abn ? 'Validated' : 'Not Validated'}
-              </Badge>
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">Business Registration</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="abn">ABN<span className="text-red-500">*</span></Label>
-                  <div className="flex gap-2">
-                    <Input id="abn" value={profile?.abn || ''} className="flex-1" />
-                    <Button variant="outline">Verify</Button>
-                  </div>
-                  {profile?.abn && (
-                    <p className="text-xs text-gray-500">Validated on Apr 25, 2025 at 10:07 PM</p>
-                  )}
+                  <Input id="abn" value={profile?.abn || ''} className="flex-1" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="businessName">Business name<span className="text-red-500">*</span></Label>
-                    <Input id="businessName" value={profile?.business_name || ''} placeholder="Enter business name" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="registeredName">Registered business name</Label>
+                    <Label htmlFor="registeredName">Registered business name<span className="text-red-500">*</span></Label>
                     <Input id="registeredName" value={profile?.registered_business_name || ''} placeholder="Enter registered business name" />
                   </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="entityType">Entity type</Label>
                     <Input id="entityType" value={profile?.entity_type || ''} placeholder="Entity type" />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="acn">ACN</Label>
-                    <Input id="acn" value={profile?.acn || ''} placeholder="Enter ACN" />
-                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="acn">ACN</Label>
+                  <Input id="acn" value={profile?.acn || ''} placeholder="Enter ACN" />
                 </div>
                 <div className="flex items-center space-x-2">
                   <input
@@ -253,38 +246,19 @@ const Profile = () => {
             </CardContent>
           </Card>
           
-          {/* Service Delivery Section */}
+          {/* Service Delivery Section - Simplified */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg font-medium">Service delivery</CardTitle>
-              <p className="text-sm text-gray-500">How you provide services.</p>
+              <p className="text-sm text-gray-500">How you provide services</p>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button 
-                  variant={profile?.business_type?.includes('Fixed') ? "default" : "outline"} 
-                  className="h-24 flex-col hover:bg-gray-50"
-                >
-                  <MapPin className="h-5 w-5 mb-2" />
-                  <span className="text-sm font-medium">In person</span>
-                  <span className="text-xs text-gray-500">Clients visit your clinic</span>
-                </Button>
-                <Button 
-                  variant={profile?.business_type?.includes('other people') ? "default" : "outline"} 
-                  className="h-24 flex-col hover:bg-gray-50"
-                >
-                  <Shield className="h-5 w-5 mb-2" />
-                  <span className="text-sm font-medium">Mobile</span>
-                  <span className="text-xs text-gray-500">You visit clients at home</span>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="h-24 flex-col hover:bg-gray-50"
-                >
-                  <Calendar className="h-5 w-5 mb-2" />
-                  <span className="text-sm font-medium">Online</span>
-                  <span className="text-xs text-gray-500">You meet clients online</span>
-                </Button>
+              <div className="space-y-2">
+                <Label htmlFor="serviceType">Service location</Label>
+                <div className="p-3 bg-gray-50 rounded-md flex items-center gap-2">
+                  <MapPin className="text-gray-600" size={18} />
+                  <span>{getServiceDeliveryText(profile?.business_type)}</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -293,7 +267,7 @@ const Profile = () => {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg font-medium">Staff Information</CardTitle>
-              <p className="text-sm text-gray-500">Details about your staffing arrangements.</p>
+              <p className="text-sm text-gray-500">Details about your staffing arrangements</p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -323,7 +297,7 @@ const Profile = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg font-medium">Scheduled Sessions</CardTitle>
-                <p className="text-sm text-gray-500">Your upcoming onboarding sessions.</p>
+                <p className="text-sm text-gray-500">Your upcoming onboarding sessions</p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -349,7 +323,7 @@ const Profile = () => {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg font-medium">Personal Contact Details</CardTitle>
-              <p className="text-sm text-gray-500">Your personal contact information.</p>
+              <p className="text-sm text-gray-500">Your personal contact information</p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -378,7 +352,7 @@ const Profile = () => {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg font-medium">Business Contact Details</CardTitle>
-              <p className="text-sm text-gray-500">Contact information for your business.</p>
+              <p className="text-sm text-gray-500">Contact information for your business</p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -400,7 +374,7 @@ const Profile = () => {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg font-medium">Key Personnel</CardTitle>
-              <p className="text-sm text-gray-500">People with significant involvement in your business.</p>
+              <p className="text-sm text-gray-500">People with significant involvement in your business</p>
             </CardHeader>
             <CardContent>
               {keyPersonnel.length > 0 ? (
@@ -435,19 +409,23 @@ const Profile = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-gray-500 py-4">No key personnel information found.</p>
+                <div className="text-center py-8 bg-gray-50 rounded-md">
+                  <Users className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <h3 className="font-medium text-lg mb-1">No key personnel found</h3>
+                  <p className="text-gray-500 text-sm">Key personnel information will appear here once added</p>
+                </div>
               )}
             </CardContent>
           </Card>
           
           {/* Shareholders */}
-          {shareholders.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-medium">Shareholders</CardTitle>
-                <p className="text-sm text-gray-500">Individuals or entities that hold shares in your business.</p>
-              </CardHeader>
-              <CardContent>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">Shareholders</CardTitle>
+              <p className="text-sm text-gray-500">Individuals or entities that hold shares in your business</p>
+            </CardHeader>
+            <CardContent>
+              {shareholders.length > 0 ? (
                 <div className="space-y-2">
                   {shareholders.map((shareholder) => (
                     <div key={shareholder.id} className="p-3 border rounded-md">
@@ -455,9 +433,15 @@ const Profile = () => {
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              ) : (
+                <div className="text-center py-8 bg-gray-50 rounded-md">
+                  <Users className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <h3 className="font-medium text-lg mb-1">No shareholders found</h3>
+                  <p className="text-gray-500 text-sm">Shareholder information will appear here once added</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </Layout>
