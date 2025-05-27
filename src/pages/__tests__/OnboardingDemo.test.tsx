@@ -1,5 +1,7 @@
+
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/dom';
 import OnboardingDemo from '../OnboardingDemo';
 import { toast } from '@/components/ui/use-toast';
 import '@testing-library/jest-dom'; // Add this import for DOM matchers
