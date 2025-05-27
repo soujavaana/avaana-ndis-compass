@@ -9,6 +9,89 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      close_crm_contacts: {
+        Row: {
+          avatar_url: string | null
+          close_contact_id: string
+          created_at: string
+          email: string | null
+          id: string
+          is_staff: boolean | null
+          name: string
+          phone: string | null
+          role: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          close_contact_id: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_staff?: boolean | null
+          name: string
+          phone?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          close_contact_id?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_staff?: boolean | null
+          name?: string
+          phone?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      conversation_threads: {
+        Row: {
+          close_thread_id: string | null
+          created_at: string
+          id: string
+          last_message_at: string | null
+          staff_contact_id: string
+          subject: string | null
+          unread_count: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          close_thread_id?: string | null
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          staff_contact_id: string
+          subject?: string | null
+          unread_count?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          close_thread_id?: string | null
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          staff_contact_id?: string
+          subject?: string | null
+          unread_count?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_threads_staff_contact_id_fkey"
+            columns: ["staff_contact_id"]
+            isOneToOne: false
+            referencedRelation: "close_crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       form_data: {
         Row: {
           created_at: string
@@ -102,6 +185,56 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          close_message_id: string | null
+          content: string
+          created_at: string
+          delivered_at: string | null
+          id: string
+          message_type: string | null
+          read_at: string | null
+          sender_id: string | null
+          sender_type: string
+          sent_at: string
+          thread_id: string
+        }
+        Insert: {
+          close_message_id?: string | null
+          content: string
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          message_type?: string | null
+          read_at?: string | null
+          sender_id?: string | null
+          sender_type: string
+          sent_at?: string
+          thread_id: string
+        }
+        Update: {
+          close_message_id?: string | null
+          content?: string
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          message_type?: string | null
+          read_at?: string | null
+          sender_id?: string | null
+          sender_type?: string
+          sent_at?: string
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "conversation_threads"
             referencedColumns: ["id"]
           },
         ]

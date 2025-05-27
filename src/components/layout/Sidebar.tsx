@@ -1,14 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ClipboardCheck, ShieldCheck, FileText, Network, MessageSquare, Users, Boxes, AlertTriangle, Lock, FileSearch, BriefcaseBusiness, UserPlus } from 'lucide-react';
+import { LayoutDashboard, ClipboardCheck, ShieldCheck, FileText, Network, MessageSquare, Users, Boxes, AlertTriangle, Lock, FileSearch, BriefcaseBusiness } from 'lucide-react';
+
 const mainNavItems = [{
   name: 'Home',
   icon: LayoutDashboard,
   path: '/'
-}, {
-  name: 'Onboarding (demo)',
-  icon: UserPlus,
-  path: '/onboarding-demo'
 }, {
   name: 'Business Profile',
   icon: Users,
@@ -103,6 +100,7 @@ const mainNavItems = [{
     path: '/people/training'
   }]
 }];
+
 const Sidebar = () => {
   const location = useLocation();
   const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
