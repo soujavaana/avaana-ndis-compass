@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ClipboardCheck, ShieldCheck, FileText, Network, MessageSquare, Users, Boxes, AlertTriangle, Lock, FileSearch, BriefcaseBusiness, UserPlus, Mail } from 'lucide-react';
+import { LayoutDashboard, ClipboardCheck, ShieldCheck, FileText, Network, MessageSquare, Users, Boxes, AlertTriangle, Lock, FileSearch, BriefcaseBusiness, UserPlus } from 'lucide-react';
 const mainNavItems = [{
   name: 'Home',
   icon: LayoutDashboard,
@@ -26,14 +26,6 @@ const mainNavItems = [{
   icon: MessageSquare,
   path: '/communication',
   badge: '1'
-}, {
-  name: 'CRM',
-  icon: Mail,
-  path: '/crm',
-  subItems: [{
-    name: 'Communication Plans',
-    path: '/crm/communication-plans'
-  }]
 }, {
   name: 'Networking',
   icon: Network,

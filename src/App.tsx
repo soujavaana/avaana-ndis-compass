@@ -9,7 +9,6 @@ import Profile from "./pages/Profile";
 import Registrations from "./pages/Registrations";
 import Documents from "./pages/Documents";
 import Communication from "./pages/Communication";
-import CrmCommunicationPlans from "./pages/CrmCommunicationPlans";
 import Networking from "./pages/Networking";
 import Tests from "./pages/Tests";
 import Frameworks from "./pages/compliance/Frameworks";
@@ -46,7 +45,6 @@ function App() {
           <Route path="/registrations" element={<Registrations />} />
           <Route path="/documents" element={<Documents />} />
           <Route path="/communication" element={<Communication />} />
-          <Route path="/crm/communication-plans" element={<CrmCommunicationPlans />} />
           <Route path="/networking" element={<Networking />} />
           <Route path="/tests" element={<Tests />} />
           <Route path="/compliance/frameworks" element={<Frameworks />} />
