@@ -27,6 +27,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { threadId, content, recipientEmail, subject }: SendMessageRequest = await req.json();
 
+    console.log("Sending message via Close CRM:", { threadId, recipientEmail, subject });
+
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
@@ -62,10 +64,13 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (!closeResponse.ok) {
+      const errorText = await closeResponse.text();
+      console.error("Close API error:", closeResponse.status, errorText);
       throw new Error(`Close API error: ${closeResponse.statusText}`);
     }
 
     const emailResult = await closeResponse.json();
+    console.log("Email sent successfully via Close CRM:", emailResult.id);
 
     // Store message in our database
     const { data: messageData, error: messageError } = await supabaseClient

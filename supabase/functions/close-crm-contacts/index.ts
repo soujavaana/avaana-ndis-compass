@@ -46,6 +46,8 @@ const handler = async (req: Request): Promise<Response> => {
     const closeData = await closeResponse.json();
     const contacts = closeData.data || [];
 
+    console.log(`Fetched ${contacts.length} contacts from Close CRM`);
+
     // Update our local contacts table
     for (const contact of contacts) {
       const email = contact.emails?.[0]?.email || null;

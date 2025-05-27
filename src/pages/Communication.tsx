@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { UserIcon, SendIcon, Mail, Phone, Loader2, Plus } from 'lucide-react';
-import { useStaffContacts, useConversationThreads, useMessages, useSendMessage, useCreateThread } from '@/hooks/useCommunication';
+import { UserIcon, SendIcon, Mail, Phone, Loader2, Plus, RefreshCw } from 'lucide-react';
+import { useStaffContacts, useConversationThreads, useMessages, useSendMessage, useCreateThread, useSyncCloseContacts } from '@/hooks/useCommunication';
 import { toast } from '@/hooks/use-toast';
 
 const Communication = () => {
@@ -21,6 +21,7 @@ const Communication = () => {
   const { data: messages, isLoading: messagesLoading } = useMessages(selectedThreadId);
   const sendMessage = useSendMessage();
   const createThread = useCreateThread();
+  const syncContacts = useSyncCloseContacts();
 
   // Select first thread if none selected
   React.useEffect(() => {
@@ -46,7 +47,7 @@ const Communication = () => {
       setMessageContent('');
       toast({
         title: 'Message Sent',
-        description: 'Your message has been sent successfully.',
+        description: 'Your message has been sent successfully via Close CRM.',
       });
     } catch (error: any) {
       toast({
@@ -84,17 +85,48 @@ const Communication = () => {
     }
   };
 
+  const handleSyncContacts = async () => {
+    try {
+      await syncContacts.mutateAsync();
+      toast({
+        title: 'Contacts Synced',
+        description: 'Close CRM contacts have been synced successfully.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Sync Error',
+        description: error.message || 'Failed to sync contacts',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <Layout>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl text-gray-900 font-normal">Communication Center</h1>
-        <Button 
-          onClick={() => setShowNewMessage(true)}
-          className="bg-avaana-primary text-white px-4 py-2 rounded-md hover:bg-avaana-secondary transition-colors"
-        >
-          <Plus size={16} className="mr-2" />
-          New Message
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleSyncContacts}
+            disabled={syncContacts.isPending}
+            variant="outline"
+            className="px-4 py-2 rounded-md"
+          >
+            {syncContacts.isPending ? (
+              <Loader2 size={16} className="mr-2 animate-spin" />
+            ) : (
+              <RefreshCw size={16} className="mr-2" />
+            )}
+            Sync Contacts
+          </Button>
+          <Button 
+            onClick={() => setShowNewMessage(true)}
+            className="bg-avaana-primary text-white px-4 py-2 rounded-md hover:bg-avaana-secondary transition-colors"
+          >
+            <Plus size={16} className="mr-2" />
+            New Message
+          </Button>
+        </div>
       </div>
 
       {/* New Message Modal */}
@@ -198,7 +230,7 @@ const Communication = () => {
                   ))
                 ) : (
                   <div className="p-4 text-center text-gray-500">
-                    No conversations yet
+                    No conversations yet. Click "New Message" to start one.
                   </div>
                 )}
               </div>
@@ -282,7 +314,7 @@ const Communication = () => {
                       ))
                     ) : (
                       <div className="text-center text-gray-500">
-                        No messages in this conversation
+                        No messages in this conversation yet. Start the conversation below!
                       </div>
                     )}
                   </div>
@@ -298,7 +330,7 @@ const Communication = () => {
                     />
                     <Button 
                       onClick={handleSendMessage}
-                      disabled={!messageContent.trim() || sendMessage.isPending}
+                      disabled={!messageContent.trim() || sendMessage.isPending || !selectedStaff.email}
                       className="bg-avaana-primary text-white p-2 rounded-md hover:bg-avaana-secondary transition-colors"
                     >
                       {sendMessage.isPending ? (
@@ -312,7 +344,7 @@ const Communication = () => {
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center text-gray-500">
-                Select a conversation to start messaging
+                Select a conversation to start messaging or create a new one
               </div>
             )}
           </Card>
