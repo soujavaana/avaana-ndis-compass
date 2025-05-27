@@ -133,7 +133,9 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (!contactSearchResponse.ok) {
-      throw new Error(`Contact search error: ${contactSearchResponse.statusText}`);
+      const errorText = await contactSearchResponse.text();
+      console.error("Contact search error response:", errorText);
+      throw new Error(`Contact search error: ${contactSearchResponse.statusText} - ${errorText}`);
     }
 
     const contactData = await contactSearchResponse.json();
@@ -168,12 +170,19 @@ const handler = async (req: Request): Promise<Response> => {
       .eq("id", user.id);
 
     // Fetch Close CRM users for staff mapping
+    console.log("Fetching Close CRM users...");
     const usersResponse = await fetch("https://api.close.com/api/v1/user/", {
       headers: {
         "Authorization": `Basic ${btoa(closeApiKey + ":")}`,
         "Content-Type": "application/json",
       },
     });
+
+    if (!usersResponse.ok) {
+      const errorText = await usersResponse.text();
+      console.error("Users fetch error response:", errorText);
+      throw new Error(`Users fetch error: ${usersResponse.statusText} - ${errorText}`);
+    }
 
     const usersData = await usersResponse.json();
     const closeUsers: { [key: string]: CloseUser } = {};
@@ -184,8 +193,20 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Fetch activities for this contact
-    const activitiesResponse = await fetch(`https://api.close.com/api/v1/activity/?contact_id=${closeContactId}&_limit=200`, {
+    console.log(`Found ${Object.keys(closeUsers).length} Close CRM users`);
+
+    // Fetch activities for this contact - using correct API endpoint and parameters
+    console.log("Fetching activities for contact:", closeContactId);
+    
+    // Try different approaches to fetch activities
+    let activitiesResponse;
+    let activitiesUrl;
+    
+    // First try: Use contact_id parameter (most common)
+    activitiesUrl = `https://api.close.com/api/v1/activity/?contact_id=${closeContactId}`;
+    console.log("Trying activities URL:", activitiesUrl);
+    
+    activitiesResponse = await fetch(activitiesUrl, {
       headers: {
         "Authorization": `Basic ${btoa(closeApiKey + ":")}`,
         "Content-Type": "application/json",
@@ -193,11 +214,47 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (!activitiesResponse.ok) {
-      throw new Error(`Activities fetch error: ${activitiesResponse.statusText}`);
+      // Second try: Use different parameter format
+      activitiesUrl = `https://api.close.com/api/v1/activity/?contact=${closeContactId}`;
+      console.log("First attempt failed, trying alternative URL:", activitiesUrl);
+      
+      activitiesResponse = await fetch(activitiesUrl, {
+        headers: {
+          "Authorization": `Basic ${btoa(closeApiKey + ":")}`,
+          "Content-Type": "application/json",
+        },
+      });
+    }
+
+    if (!activitiesResponse.ok) {
+      // Third try: General activities endpoint without contact filter
+      console.log("Both attempts failed, trying general activities endpoint");
+      activitiesUrl = `https://api.close.com/api/v1/activity/`;
+      
+      activitiesResponse = await fetch(activitiesUrl, {
+        headers: {
+          "Authorization": `Basic ${btoa(closeApiKey + ":")}`,
+          "Content-Type": "application/json",
+        },
+      });
+    }
+
+    if (!activitiesResponse.ok) {
+      const errorText = await activitiesResponse.text();
+      console.error("Activities fetch error response:", errorText);
+      console.error("Final URL attempted:", activitiesUrl);
+      console.error("Response status:", activitiesResponse.status);
+      console.error("Response headers:", Object.fromEntries(activitiesResponse.headers.entries()));
+      throw new Error(`Activities fetch error: ${activitiesResponse.statusText} - ${errorText}`);
     }
 
     const activitiesData = await activitiesResponse.json();
-    const activities: CloseActivity[] = activitiesData.data || [];
+    let activities: CloseActivity[] = activitiesData.data || [];
+
+    // If we got all activities, filter by contact_id
+    if (activitiesUrl.includes('activity/') && !activitiesUrl.includes('contact')) {
+      activities = activities.filter(activity => activity.contact_id === closeContactId);
+    }
 
     console.log(`Found ${activities.length} activities for contact`);
 
