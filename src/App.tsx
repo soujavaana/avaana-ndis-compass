@@ -1,9 +1,17 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import PublicRoute from "@/components/auth/PublicRoute";
 
+// Auth pages
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+
+// Protected pages
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Registrations from "./pages/Registrations";
@@ -26,6 +34,8 @@ import Employees from "./pages/people/Employees";
 import TrainingCampaigns from "./pages/people/TrainingCampaigns";
 import NotFound from "./pages/NotFound";
 import BusinessGoals from "./pages/BusinessGoals";
+
+// Keep existing onboarding pages for now
 import SignUp from "./pages/SignUp";
 import OnboardingDemo from "./pages/OnboardingDemo";
 import Onboarding1 from "./pages/Onboarding1";
@@ -36,35 +46,155 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Routes>
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/onboarding-demo" element={<OnboardingDemo />} />
-          <Route path="/onboarding-1" element={<Onboarding1 />} />
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/registrations" element={<Registrations />} />
-          <Route path="/documents" element={<Documents />} />
-          <Route path="/communication" element={<Communication />} />
-          <Route path="/networking" element={<Networking />} />
-          <Route path="/tests" element={<Tests />} />
-          <Route path="/compliance/frameworks" element={<Frameworks />} />
-          <Route path="/compliance/controls" element={<Controls />} />
-          <Route path="/compliance/policies" element={<Policies />} />
-          <Route path="/compliance/evidence-tasks" element={<EvidenceTasks />} />
-          <Route path="/compliance/cloud" element={<Cloud />} />
-          <Route path="/compliance/vault" element={<Vault />} />
-          <Route path="/risk/vendors" element={<Vendors />} />
-          <Route path="/risk/management" element={<RiskManagement />} />
-          <Route path="/trust/vault" element={<TrustVault />} />
-          <Route path="/audit/center" element={<AuditCenter />} />
-          <Route path="/audit/corrective-action" element={<CorrectiveAction />} />
-          <Route path="/people/employees" element={<Employees />} />
-          <Route path="/people/training" element={<TrainingCampaigns />} />
-          <Route path="/business-goals" element={<BusinessGoals />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
-        <Sonner />
+        <AuthProvider>
+          <Routes>
+            {/* Public auth routes */}
+            <Route path="/auth/login" element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            } />
+            <Route path="/auth/register" element={
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            } />
+            <Route path="/auth/forgot-password" element={
+              <PublicRoute>
+                <ForgotPassword />
+              </PublicRoute>
+            } />
+            
+            {/* Legacy routes - keep for backwards compatibility */}
+            <Route path="/signup" element={
+              <PublicRoute>
+                <SignUp />
+              </PublicRoute>
+            } />
+            <Route path="/onboarding-demo" element={
+              <PublicRoute>
+                <OnboardingDemo />
+              </PublicRoute>
+            } />
+            <Route path="/onboarding-1" element={
+              <PublicRoute>
+                <Onboarding1 />
+              </PublicRoute>
+            } />
+            
+            {/* Protected dashboard routes */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/registrations" element={
+              <ProtectedRoute>
+                <Registrations />
+              </ProtectedRoute>
+            } />
+            <Route path="/documents" element={
+              <ProtectedRoute>
+                <Documents />
+              </ProtectedRoute>
+            } />
+            <Route path="/communication" element={
+              <ProtectedRoute>
+                <Communication />
+              </ProtectedRoute>
+            } />
+            <Route path="/networking" element={
+              <ProtectedRoute>
+                <Networking />
+              </ProtectedRoute>
+            } />
+            <Route path="/tests" element={
+              <ProtectedRoute>
+                <Tests />
+              </ProtectedRoute>
+            } />
+            <Route path="/compliance/frameworks" element={
+              <ProtectedRoute>
+                <Frameworks />
+              </ProtectedRoute>
+            } />
+            <Route path="/compliance/controls" element={
+              <ProtectedRoute>
+                <Controls />
+              </ProtectedRoute>
+            } />
+            <Route path="/compliance/policies" element={
+              <ProtectedRoute>
+                <Policies />
+              </ProtectedRoute>
+            } />
+            <Route path="/compliance/evidence-tasks" element={
+              <ProtectedRoute>
+                <EvidenceTasks />
+              </ProtectedRoute>
+            } />
+            <Route path="/compliance/cloud" element={
+              <ProtectedRoute>
+                <Cloud />
+              </ProtectedRoute>
+            } />
+            <Route path="/compliance/vault" element={
+              <ProtectedRoute>
+                <Vault />
+              </ProtectedRoute>
+            } />
+            <Route path="/risk/vendors" element={
+              <ProtectedRoute>
+                <Vendors />
+              </ProtectedRoute>
+            } />
+            <Route path="/risk/management" element={
+              <ProtectedRoute>
+                <RiskManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/trust/vault" element={
+              <ProtectedRoute>
+                <TrustVault />
+              </ProtectedRoute>
+            } />
+            <Route path="/audit/center" element={
+              <ProtectedRoute>
+                <AuditCenter />
+              </ProtectedRoute>
+            } />
+            <Route path="/audit/corrective-action" element={
+              <ProtectedRoute>
+                <CorrectiveAction />
+              </ProtectedRoute>
+            } />
+            <Route path="/people/employees" element={
+              <ProtectedRoute>
+                <Employees />
+              </ProtectedRoute>
+            } />
+            <Route path="/people/training" element={
+              <ProtectedRoute>
+                <TrainingCampaigns />
+              </ProtectedRoute>
+            } />
+            <Route path="/business-goals" element={
+              <ProtectedRoute>
+                <BusinessGoals />
+              </ProtectedRoute>
+            } />
+            
+            {/* 404 route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+          <Sonner />
+        </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );

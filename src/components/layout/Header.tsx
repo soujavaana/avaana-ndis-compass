@@ -1,12 +1,20 @@
 
 import React from 'react';
-import { BellIcon, UserIcon, SearchIcon, MapPinIcon } from 'lucide-react';
+import { BellIcon, UserIcon, SearchIcon, MapPinIcon, LogOut } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // Define the minimal profile data type
 interface ProfileData {
@@ -22,18 +30,13 @@ interface ProfileData {
 
 const Header = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
 
   // Fetch current user's profile data
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // Get current user
-        const {
-          data: {
-            user
-          }
-        } = await supabase.auth.getUser();
         if (user) {
           // Get profile data
           const {
@@ -55,7 +58,7 @@ const Header = () => {
       }
     };
     fetchProfile();
-  }, []);
+  }, [user]);
   
   const handleManagerClick = () => {
     navigate('/communication');
@@ -65,9 +68,14 @@ const Header = () => {
     navigate('/profile');
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   // Get user or business name for display
   const displayName = profile?.business_name || 
-    (profile?.first_name && profile?.last_name ? `${profile.first_name} ${profile.last_name}` : 'Monique Wilson'); // Default if no profile data
+    (profile?.first_name && profile?.last_name ? `${profile.first_name} ${profile.last_name}` : 
+    (user?.email || 'User'));
 
   // Get location for display
   const location = profile?.city && profile?.state ? `${profile.city}, ${profile.state}` : null;
@@ -113,9 +121,26 @@ const Header = () => {
         <Button variant="ghost" size="icon" className="hover:bg-gray-100 text-gray-600">
           <BellIcon size={18} />
         </Button>
-        <Button variant="ghost" size="icon" className="hover:bg-gray-100 text-gray-600" onClick={handleProfileClick}>
-          <UserIcon size={18} />
-        </Button>
+        
+        {/* User menu dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="hover:bg-gray-100 text-gray-600">
+              <UserIcon size={18} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onClick={handleProfileClick}>
+              <UserIcon className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Sign out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );
