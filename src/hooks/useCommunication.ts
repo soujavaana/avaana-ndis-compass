@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -201,7 +202,7 @@ export const useSendMessage = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session');
 
-      const response = await fetch('/functions/v1/close-crm-send-message', {
+      const response = await fetch('https://vrnjxgfzzbexjaytszvg.supabase.co/functions/v1/close-crm-send-message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -267,7 +268,7 @@ export const useCreateThread = () => {
 export const useSyncCloseContacts = () => {
   return useMutation({
     mutationFn: async () => {
-      const response = await fetch('/functions/v1/close-crm-contacts', {
+      const response = await fetch('https://vrnjxgfzzbexjaytszvg.supabase.co/functions/v1/close-crm-contacts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

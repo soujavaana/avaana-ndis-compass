@@ -49,25 +49,25 @@ const handler = async (req: Request): Promise<Response> => {
 
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Get auth header and set session
+    // Get auth header and extract token
     const authHeader = req.headers.get("authorization");
-    if (!authHeader) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new Error("No authorization header");
     }
 
-    supabaseClient.auth.setSession({
-      access_token: authHeader.replace("Bearer ", ""),
-      refresh_token: "",
-    });
-
-    // Get current user
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    const token = authHeader.replace("Bearer ", "");
+    
+    // Verify the JWT token and get user
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError || !user) {
+      console.error("Auth error:", userError);
       throw new Error("User not authenticated");
     }
+
+    console.log("Authenticated user:", user.email);
 
     // Get user profile
     const { data: profile, error: profileError } = await supabaseClient
@@ -77,10 +77,11 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (profileError || !profile) {
+      console.error("Profile error:", profileError);
       throw new Error("User profile not found");
     }
 
-    console.log("Syncing history for user:", profile.email);
+    console.log("Syncing history for user:", profile.email || user.email);
 
     // Check if already synced recently
     const { data: syncStatus } = await supabaseClient
@@ -112,13 +113,17 @@ const handler = async (req: Request): Promise<Response> => {
     // Search for user in Close CRM by email or phone
     let closeContactId = null;
     const searchParams = new URLSearchParams();
-    if (profile.email) {
-      searchParams.append('query', `email:"${profile.email}"`);
+    const userEmail = profile.email || user.email;
+    
+    if (userEmail) {
+      searchParams.append('query', `email:"${userEmail}"`);
     } else if (profile.phone) {
       searchParams.append('query', `phone:"${profile.phone}"`);
     } else {
       throw new Error("No email or phone found in profile");
     }
+
+    console.log("Searching Close CRM for:", userEmail || profile.phone);
 
     const contactSearchResponse = await fetch(`https://api.close.com/api/v1/contact/?${searchParams}`, {
       headers: {
@@ -301,7 +306,7 @@ const handler = async (req: Request): Promise<Response> => {
       if (activity.type === 'email') {
         content = activity.body_text || activity.body_html || activity.subject || '';
         // Check if this was sent by the user (from user's email)
-        if (activity.from && profile.email && activity.from.includes(profile.email)) {
+        if (activity.from && userEmail && activity.from.includes(userEmail)) {
           senderType = 'user';
         }
       } else if (activity.type === 'sms') {
@@ -365,17 +370,13 @@ const handler = async (req: Request): Promise<Response> => {
     try {
       const supabaseClient = createClient(
         Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
       );
 
       const authHeader = req.headers.get("authorization");
       if (authHeader) {
-        supabaseClient.auth.setSession({
-          access_token: authHeader.replace("Bearer ", ""),
-          refresh_token: "",
-        });
-
-        const { data: { user } } = await supabaseClient.auth.getUser();
+        const token = authHeader.replace("Bearer ", "");
+        const { data: { user } } = await supabaseClient.auth.getUser(token);
         if (user) {
           await supabaseClient
             .from("user_sync_status")
