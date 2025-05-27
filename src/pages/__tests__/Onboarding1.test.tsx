@@ -1,7 +1,5 @@
-
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
-import { screen, fireEvent } from '@testing-library/dom';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Onboarding1 from '../Onboarding1';
 import { toast } from '@/components/ui/use-toast';
 import '@testing-library/jest-dom';

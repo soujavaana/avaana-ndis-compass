@@ -1,7 +1,5 @@
-
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
-import { screen, fireEvent } from '@testing-library/dom';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import SignUp from '../SignUp';
 import { supabase } from '@/integrations/supabase/client';
