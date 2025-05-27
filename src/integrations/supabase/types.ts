@@ -243,6 +243,42 @@ export type Database = {
           },
         ]
       }
+      task_types: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          page_route: string | null
+          priority: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          page_route?: string | null
+          priority?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          page_route?: string | null
+          priority?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_services: {
         Row: {
           id: number
@@ -276,12 +312,62 @@ export type Database = {
           },
         ]
       }
+      user_tasks: {
+        Row: {
+          assigned_at: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          started_at: string | null
+          status: string
+          task_type_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          started_at?: string | null
+          status?: string
+          task_type_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          started_at?: string | null
+          status?: string
+          task_type_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_tasks_task_type_id_fkey"
+            columns: ["task_type_id"]
+            isOneToOne: false
+            referencedRelation: "task_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_task_completion: {
+        Args: { user_uuid: string; task_name: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

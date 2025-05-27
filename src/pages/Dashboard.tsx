@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { CalendarIcon, FileTextIcon, AlertTriangleIcon, CheckCircleIcon, BookIcon, UsersIcon, ShieldCheckIcon, FileSearchIcon, MapPinIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
+import TasksSection from '@/components/tasks/TasksSection';
 
 // Define the minimal profile data type
 interface ProfileData {
@@ -93,13 +94,21 @@ const Dashboard = () => {
     ? `${profile?.city || ''} ${profile?.state || ''} ${profile?.postal_code || ''}`.trim() 
     : '';
     
-  return <Layout>
+  return (
+    <Layout>
+      {/* Welcome Section */}
       <div className="bg-[#063e3b] text-white p-4 rounded-lg mb-6">
         <h1 className="text-2xl font-bold">Welcome back, {userName}</h1>
         <p className="text-sm text-white">You have $350 in credits. Book a Business Goal session now.</p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Tasks Section */}
+      <div className="mb-6">
+        <TasksSection />
+      </div>
+      
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         {/* Keep existing card for Compliance Status */}
         <Card>
           <CardHeader className="pb-2">
@@ -214,6 +223,8 @@ const Dashboard = () => {
             </Link>)}
         </div>
       </div>
-    </Layout>;
+    </Layout>
+  );
 };
+
 export default Dashboard;
