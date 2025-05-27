@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -14,6 +15,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 // Protected pages
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import BusinessProfileOnboarding from "./pages/BusinessProfileOnboarding";
 import Registrations from "./pages/Registrations";
 import Documents from "./pages/Documents";
 import Communication from "./pages/Communication";
@@ -37,7 +39,6 @@ import BusinessGoals from "./pages/BusinessGoals";
 
 // Keep existing onboarding pages for now
 import SignUp from "./pages/SignUp";
-import OnboardingDemo from "./pages/OnboardingDemo";
 import Onboarding1 from "./pages/Onboarding1";
 
 const queryClient = new QueryClient();
@@ -71,11 +72,6 @@ function App() {
                 <SignUp />
               </PublicRoute>
             } />
-            <Route path="/onboarding-demo" element={
-              <PublicRoute>
-                <OnboardingDemo />
-              </PublicRoute>
-            } />
             <Route path="/onboarding-1" element={
               <PublicRoute>
                 <Onboarding1 />
@@ -91,6 +87,11 @@ function App() {
             <Route path="/profile" element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/business-profile-onboarding" element={
+              <ProtectedRoute>
+                <BusinessProfileOnboarding />
               </ProtectedRoute>
             } />
             <Route path="/registrations" element={

@@ -32,7 +32,11 @@ const TaskCard = ({ task, onStatusChange }: TaskCardProps) => {
     if (task.status === 'pending') {
       onStatusChange(task.id, 'in_progress');
     }
-    if (task.task_types.page_route) {
+
+    // Special handling for the Complete Business Profile task
+    if (task.task_types.name === 'complete_business_profile') {
+      navigate('/business-profile-onboarding');
+    } else if (task.task_types.page_route) {
       navigate(task.task_types.page_route);
     }
   };
