@@ -76,10 +76,11 @@ describe('useCommunication hooks', () => {
         'https://vrnjxgfzzbexjaytszvg.supabase.co/functions/v1/close-crm-sync-user-history',
         expect.objectContaining({
           method: 'POST',
-          headers: {
+          headers: expect.objectContaining({
             'Content-Type': 'application/json',
             'Authorization': 'Bearer test-token',
-          },
+            'apikey': expect.any(String),
+          }),
         })
       );
     });
