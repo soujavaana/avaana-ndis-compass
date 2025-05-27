@@ -191,42 +191,54 @@ export type Database = {
       }
       messages: {
         Row: {
+          close_activity_id: string | null
           close_message_id: string | null
           content: string
           created_at: string
           delivered_at: string | null
           id: string
+          is_historical: boolean | null
           message_type: string | null
           read_at: string | null
           sender_id: string | null
           sender_type: string
           sent_at: string
+          staff_email: string | null
+          staff_name: string | null
           thread_id: string
         }
         Insert: {
+          close_activity_id?: string | null
           close_message_id?: string | null
           content: string
           created_at?: string
           delivered_at?: string | null
           id?: string
+          is_historical?: boolean | null
           message_type?: string | null
           read_at?: string | null
           sender_id?: string | null
           sender_type: string
           sent_at?: string
+          staff_email?: string | null
+          staff_name?: string | null
           thread_id: string
         }
         Update: {
+          close_activity_id?: string | null
           close_message_id?: string | null
           content?: string
           created_at?: string
           delivered_at?: string | null
           id?: string
+          is_historical?: boolean | null
           message_type?: string | null
           read_at?: string | null
           sender_id?: string | null
           sender_type?: string
           sent_at?: string
+          staff_email?: string | null
+          staff_name?: string | null
           thread_id?: string
         }
         Relationships: [
@@ -251,6 +263,7 @@ export type Database = {
           business_type: string | null
           calendly_url: string | null
           city: string | null
+          close_contact_id: string | null
           country: string | null
           created_at: string | null
           email: string | null
@@ -279,6 +292,7 @@ export type Database = {
           business_type?: string | null
           calendly_url?: string | null
           city?: string | null
+          close_contact_id?: string | null
           country?: string | null
           created_at?: string | null
           email?: string | null
@@ -307,6 +321,7 @@ export type Database = {
           business_type?: string | null
           calendly_url?: string | null
           city?: string | null
+          close_contact_id?: string | null
           country?: string | null
           created_at?: string | null
           email?: string | null
@@ -444,6 +459,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_sync_status: {
+        Row: {
+          created_at: string
+          id: string
+          last_synced_at: string | null
+          sync_status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          sync_status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          sync_status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_tasks: {
         Row: {

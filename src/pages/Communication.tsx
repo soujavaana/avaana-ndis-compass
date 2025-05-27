@@ -1,12 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { UserIcon, SendIcon, Mail, Phone, Loader2, Plus, RefreshCw } from 'lucide-react';
-import { useStaffContacts, useConversationThreads, useMessages, useSendMessage, useCreateThread, useSyncCloseContacts } from '@/hooks/useCommunication';
+import { UserIcon, SendIcon, Mail, Phone, Loader2, Plus, RefreshCw, History, CheckCircle, AlertCircle } from 'lucide-react';
+import { useStaffContacts, useConversationThreads, useMessages, useSendMessage, useCreateThread, useSyncCloseContacts, useSyncUserHistory, useUserSyncStatus } from '@/hooks/useCommunication';
 import { toast } from '@/hooks/use-toast';
 
 const Communication = () => {
@@ -19,12 +19,22 @@ const Communication = () => {
   const { data: staffContacts, isLoading: staffLoading } = useStaffContacts();
   const { data: threads, isLoading: threadsLoading } = useConversationThreads();
   const { data: messages, isLoading: messagesLoading } = useMessages(selectedThreadId);
+  const { data: syncStatus } = useUserSyncStatus();
   const sendMessage = useSendMessage();
   const createThread = useCreateThread();
   const syncContacts = useSyncCloseContacts();
+  const syncUserHistory = useSyncUserHistory();
+
+  // Auto-sync user history on first load if not already synced
+  useEffect(() => {
+    if (syncStatus === null || syncStatus?.sync_status === 'pending') {
+      console.log('Auto-syncing user history...');
+      syncUserHistory.mutate();
+    }
+  }, [syncStatus]);
 
   // Select first thread if none selected
-  React.useEffect(() => {
+  useEffect(() => {
     if (threads && threads.length > 0 && !selectedThreadId) {
       setSelectedThreadId(threads[0].id);
     }
@@ -101,11 +111,85 @@ const Communication = () => {
     }
   };
 
+  const handleSyncUserHistory = async () => {
+    try {
+      const result = await syncUserHistory.mutateAsync();
+      toast({
+        title: 'History Synced',
+        description: result.message || 'User communication history synced successfully.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Sync Error',
+        description: error.message || 'Failed to sync user history',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const getSyncStatusDisplay = () => {
+    if (!syncStatus) return null;
+    
+    switch (syncStatus.sync_status) {
+      case 'completed':
+        return (
+          <div className="flex items-center gap-2 text-green-600 text-sm">
+            <CheckCircle size={16} />
+            <span>History synced</span>
+            {syncStatus.last_synced_at && (
+              <span className="text-gray-500">
+                ({new Date(syncStatus.last_synced_at).toLocaleDateString()})
+              </span>
+            )}
+          </div>
+        );
+      case 'in_progress':
+        return (
+          <div className="flex items-center gap-2 text-blue-600 text-sm">
+            <Loader2 size={16} className="animate-spin" />
+            <span>Syncing history...</span>
+          </div>
+        );
+      case 'error':
+        return (
+          <div className="flex items-center gap-2 text-red-600 text-sm">
+            <AlertCircle size={16} />
+            <span>Sync failed</span>
+          </div>
+        );
+      case 'no_contact_found':
+        return (
+          <div className="flex items-center gap-2 text-yellow-600 text-sm">
+            <AlertCircle size={16} />
+            <span>No matching contact found</span>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <Layout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl text-gray-900 font-normal">Communication Center</h1>
+        <div>
+          <h1 className="text-3xl text-gray-900 font-normal">Communication Center</h1>
+          {getSyncStatusDisplay()}
+        </div>
         <div className="flex gap-2">
+          <Button 
+            onClick={handleSyncUserHistory}
+            disabled={syncUserHistory.isPending}
+            variant="outline"
+            className="px-4 py-2 rounded-md"
+          >
+            {syncUserHistory.isPending ? (
+              <Loader2 size={16} className="mr-2 animate-spin" />
+            ) : (
+              <History size={16} className="mr-2" />
+            )}
+            Sync My History
+          </Button>
           <Button 
             onClick={handleSyncContacts}
             disabled={syncContacts.isPending}
@@ -300,12 +384,25 @@ const Communication = () => {
                           }`}>
                             <div className="flex justify-between items-start mb-1">
                               <div className="font-normal">
-                                {message.sender_type === 'staff' ? selectedStaff.name : 'You'}
+                                {message.sender_type === 'staff' ? 
+                                  (message.staff_name || selectedStaff.name) : 
+                                  'You'
+                                }
                               </div>
-                              <div className={`text-xs ${
-                                message.sender_type === 'staff' ? 'text-gray-500' : 'text-white/80'
-                              }`}>
-                                {new Date(message.sent_at).toLocaleString()}
+                              <div className="flex flex-col items-end">
+                                <div className={`text-xs ${
+                                  message.sender_type === 'staff' ? 'text-gray-500' : 'text-white/80'
+                                }`}>
+                                  {new Date(message.sent_at).toLocaleString()}
+                                </div>
+                                {message.is_historical && (
+                                  <div className={`text-xs ${
+                                    message.sender_type === 'staff' ? 'text-gray-400' : 'text-white/60'
+                                  } flex items-center gap-1 mt-1`}>
+                                    <History size={10} />
+                                    <span>{message.message_type}</span>
+                                  </div>
+                                )}
                               </div>
                             </div>
                             <div className="whitespace-pre-line">{message.content}</div>

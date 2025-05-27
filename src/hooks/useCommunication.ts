@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,6 +30,18 @@ export interface Message {
   sent_at: string;
   delivered_at: string | null;
   read_at: string | null;
+  is_historical: boolean | null;
+  staff_name: string | null;
+  staff_email: string | null;
+}
+
+export interface UserSyncStatus {
+  id: string;
+  user_id: string;
+  last_synced_at: string | null;
+  sync_status: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export const useStaffContacts = () => {
@@ -89,6 +100,60 @@ export const useMessages = (threadId: string | null) => {
       return data as Message[];
     },
     enabled: !!threadId,
+  });
+};
+
+export const useUserSyncStatus = () => {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['user-sync-status', user?.id],
+    queryFn: async () => {
+      if (!user) throw new Error('No user');
+
+      const { data, error } = await supabase
+        .from('user_sync_status')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "not found"
+      return data as UserSyncStatus | null;
+    },
+    enabled: !!user,
+  });
+};
+
+export const useSyncUserHistory = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session');
+
+      const response = await fetch('/functions/v1/close-crm-sync-user-history', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to sync user history');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalidate and refetch related queries
+      queryClient.invalidateQueries({ queryKey: ['conversation-threads', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['user-sync-status', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
+    },
   });
 };
 
