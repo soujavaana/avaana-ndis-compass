@@ -133,7 +133,9 @@ export const useSyncUserHistory = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session');
 
-      const response = await fetch('/functions/v1/close-crm-sync-user-history', {
+      console.log('Starting sync user history...');
+      
+      const response = await fetch(`https://vrnjxgfzzbexjaytszvg.supabase.co/functions/v1/close-crm-sync-user-history`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -141,18 +143,41 @@ export const useSyncUserHistory = () => {
         },
       });
 
+      console.log('Sync response status:', response.status);
+      console.log('Sync response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to sync user history');
+        const contentType = response.headers.get('content-type');
+        let errorMessage = 'Failed to sync user history';
+        
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const error = await response.json();
+            errorMessage = error.error || errorMessage;
+          } catch (e) {
+            console.error('Failed to parse error response as JSON:', e);
+          }
+        } else {
+          const textError = await response.text();
+          console.error('Non-JSON error response:', textError);
+          errorMessage = textError || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
       }
 
-      return response.json();
+      const result = await response.json();
+      console.log('Sync completed successfully:', result);
+      return result;
     },
     onSuccess: () => {
       // Invalidate and refetch related queries
       queryClient.invalidateQueries({ queryKey: ['conversation-threads', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['user-sync-status', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['messages'] });
+    },
+    onError: (error) => {
+      console.error('Sync error:', error);
     },
   });
 };
