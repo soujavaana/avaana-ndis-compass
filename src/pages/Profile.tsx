@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -162,10 +161,6 @@ const Profile = () => {
             <Building2 className="mr-2 h-4 w-4" />
             Business Information
           </TabsTrigger>
-          <TabsTrigger value="contact">
-            <Phone className="mr-2 h-4 w-4" />
-            Contact Details
-          </TabsTrigger>
           <TabsTrigger value="personnel">
             <Users className="mr-2 h-4 w-4" />
             Key Personnel
@@ -173,6 +168,36 @@ const Profile = () => {
         </TabsList>
 
         <TabsContent value="business" className="space-y-6">
+          {/* Personal Contact Details - moved from contact tab */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">Personal Contact Details</CardTitle>
+              <p className="text-sm text-gray-500">Your personal contact information</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First name<span className="text-red-500">*</span></Label>
+                  <Input id="firstName" value={profile?.first_name || ''} placeholder="Enter first name" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last name<span className="text-red-500">*</span></Label>
+                  <Input id="lastName" value={profile?.last_name || ''} placeholder="Enter last name" />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email address<span className="text-red-500">*</span></Label>
+                  <Input id="email" value={profile?.email || ''} placeholder="Enter email address" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone number<span className="text-red-500">*</span></Label>
+                  <Input id="phone" value={profile?.phone || ''} placeholder="Enter phone number" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle className="text-lg font-medium">Business Registration</CardTitle>
@@ -205,6 +230,26 @@ const Profile = () => {
                     className="rounded border-gray-300"
                   />
                   <Label htmlFor="gstRegistered">Registered for GST</Label>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Business Contact Details - moved from contact tab */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">Business Contact Details</CardTitle>
+              <p className="text-sm text-gray-500">Contact information for your business</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="businessEmail">Business email</Label>
+                  <Input id="businessEmail" value={profile?.business_email || ''} placeholder="Enter business email" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="businessPhone">Business phone</Label>
+                  <Input id="businessPhone" value={profile?.business_phone || ''} placeholder="Enter business phone" />
                 </div>
               </div>
             </CardContent>
@@ -317,56 +362,6 @@ const Profile = () => {
               </CardContent>
             </Card>
           )}
-        </TabsContent>
-
-        <TabsContent value="contact" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-medium">Personal Contact Details</CardTitle>
-              <p className="text-sm text-gray-500">Your personal contact information</p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First name<span className="text-red-500">*</span></Label>
-                  <Input id="firstName" value={profile?.first_name || ''} placeholder="Enter first name" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last name<span className="text-red-500">*</span></Label>
-                  <Input id="lastName" value={profile?.last_name || ''} placeholder="Enter last name" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email address<span className="text-red-500">*</span></Label>
-                  <Input id="email" value={profile?.email || ''} placeholder="Enter email address" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone number<span className="text-red-500">*</span></Label>
-                  <Input id="phone" value={profile?.phone || ''} placeholder="Enter phone number" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-medium">Business Contact Details</CardTitle>
-              <p className="text-sm text-gray-500">Contact information for your business</p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="businessEmail">Business email</Label>
-                  <Input id="businessEmail" value={profile?.business_email || ''} placeholder="Enter business email" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="businessPhone">Business phone</Label>
-                  <Input id="businessPhone" value={profile?.business_phone || ''} placeholder="Enter business phone" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="personnel" className="space-y-6">

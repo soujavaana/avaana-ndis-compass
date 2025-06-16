@@ -83,12 +83,15 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Syncing history for user:", profile.email || user.email);
 
-    // Check if already synced recently
-    const { data: syncStatus } = await supabaseClient
+    // Check if already synced recently - fix the query to handle multiple records
+    const { data: syncStatusRecords } = await supabaseClient
       .from("user_sync_status")
       .select("*")
       .eq("user_id", user.id)
-      .single();
+      .order("updated_at", { ascending: false })
+      .limit(1);
+
+    const syncStatus = syncStatusRecords?.[0];
 
     if (syncStatus?.sync_status === 'completed') {
       console.log("User already synced recently");
@@ -258,14 +261,50 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Found ${activities.length} activities for contact`);
 
-    // Process activities (emails and SMS)
+    // Process activities with detailed logging
     let importedCount = 0;
+    let skippedCount = 0;
     const staffContactsMap = new Map();
+    
+    // Log activity types and details
+    const activityTypeCounts: { [key: string]: number } = {};
+    activities.forEach(activity => {
+      activityTypeCounts[activity.type] = (activityTypeCounts[activity.type] || 0) + 1;
+    });
+    console.log("Activity types found:", activityTypeCounts);
 
     for (const activity of activities) {
-      if (activity.type !== 'email' && activity.type !== 'sms') {
+      console.log(`Processing activity ${activity.id} of type ${activity.type}`);
+      
+      // Enhanced activity type filtering and content extraction
+      let content = '';
+      let messageType = activity.type;
+      
+      if (activity.type === 'email') {
+        content = activity.body_text || activity.body_html || activity.subject || '';
+        if (!content.trim()) {
+          console.log(`Skipping email activity ${activity.id}: no content found`);
+          skippedCount++;
+          continue;
+        }
+      } else if (activity.type === 'sms') {
+        content = activity.text || activity.note || activity.body_text || '';
+        if (!content.trim()) {
+          console.log(`Skipping SMS activity ${activity.id}: no content found`);
+          skippedCount++;
+          continue;
+        }
+      } else if (activity.type === 'call') {
+        // Include call activities with note content
+        content = activity.note || activity.text || `Call activity - ${activity.direction || 'unknown direction'}`;
+        messageType = 'call';
+      } else {
+        console.log(`Skipping activity ${activity.id}: unsupported type ${activity.type}`);
+        skippedCount++;
         continue;
       }
+
+      console.log(`Activity ${activity.id} content length: ${content.length} characters`);
 
       // Skip if already imported
       const { data: existingMessage } = await supabaseClient
@@ -275,6 +314,8 @@ const handler = async (req: Request): Promise<Response> => {
         .single();
 
       if (existingMessage) {
+        console.log(`Skipping activity ${activity.id}: already imported`);
+        skippedCount++;
         continue;
       }
 
@@ -282,10 +323,14 @@ const handler = async (req: Request): Promise<Response> => {
       const staffName = staffUser ? staffUser.display_name || `${staffUser.first_name} ${staffUser.last_name}` : 'Unknown Staff';
       const staffEmail = staffUser?.email || null;
 
+      console.log(`Staff for activity ${activity.id}: ${staffName} (${staffEmail})`);
+
       // Find or create staff contact
       let staffContactId = staffContactsMap.get(activity.user_id);
       
       if (!staffContactId && staffUser) {
+        console.log(`Creating/finding staff contact for ${staffName}`);
+        
         const { data: existingStaffContact } = await supabaseClient
           .from("close_crm_contacts")
           .select("id")
@@ -294,8 +339,9 @@ const handler = async (req: Request): Promise<Response> => {
 
         if (existingStaffContact) {
           staffContactId = existingStaffContact.id;
+          console.log(`Found existing staff contact: ${staffContactId}`);
         } else {
-          const { data: newStaffContact } = await supabaseClient
+          const { data: newStaffContact, error: staffContactError } = await supabaseClient
             .from("close_crm_contacts")
             .insert({
               close_contact_id: activity.user_id,
@@ -307,8 +353,15 @@ const handler = async (req: Request): Promise<Response> => {
             .select()
             .single();
 
+          if (staffContactError) {
+            console.error(`Error creating staff contact for ${staffName}:`, staffContactError);
+            skippedCount++;
+            continue;
+          }
+
           if (newStaffContact) {
             staffContactId = newStaffContact.id;
+            console.log(`Created new staff contact: ${staffContactId}`);
           }
         }
         
@@ -317,62 +370,79 @@ const handler = async (req: Request): Promise<Response> => {
         }
       }
 
+      if (!staffContactId) {
+        console.log(`Skipping activity ${activity.id}: no staff contact available`);
+        skippedCount++;
+        continue;
+      }
+
       // Find or create conversation thread
       let threadId = null;
-      if (staffContactId) {
-        const { data: existingThread } = await supabaseClient
+      const { data: existingThread } = await supabaseClient
+        .from("conversation_threads")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("staff_contact_id", staffContactId)
+        .single();
+
+      if (existingThread) {
+        threadId = existingThread.id;
+        console.log(`Using existing thread: ${threadId}`);
+      } else {
+        const subject = activity.type === 'email' ? 
+          (activity.subject || 'Email Conversation') : 
+          activity.type === 'sms' ? 'SMS Conversation' :
+          'Call Activity';
+
+        const { data: newThread, error: threadError } = await supabaseClient
           .from("conversation_threads")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("staff_contact_id", staffContactId)
+          .insert({
+            user_id: user.id,
+            staff_contact_id: staffContactId,
+            subject,
+            last_message_at: activity.date_created,
+          })
+          .select()
           .single();
 
-        if (existingThread) {
-          threadId = existingThread.id;
-        } else {
-          const subject = activity.type === 'email' ? 
-            (activity.subject || 'Email Conversation') : 
-            'SMS Conversation';
+        if (threadError) {
+          console.error(`Error creating thread for activity ${activity.id}:`, threadError);
+          skippedCount++;
+          continue;
+        }
 
-          const { data: newThread } = await supabaseClient
-            .from("conversation_threads")
-            .insert({
-              user_id: user.id,
-              staff_contact_id: staffContactId,
-              subject,
-              last_message_at: activity.date_created,
-            })
-            .select()
-            .single();
-
-          if (newThread) {
-            threadId = newThread.id;
-          }
+        if (newThread) {
+          threadId = newThread.id;
+          console.log(`Created new thread: ${threadId}`);
         }
       }
 
       if (!threadId) {
-        console.log("Could not create/find thread for activity:", activity.id);
+        console.log(`Skipping activity ${activity.id}: could not create/find thread`);
+        skippedCount++;
         continue;
       }
 
-      // Determine message content and sender
-      let content = '';
+      // Determine sender type
       let senderType = 'staff';
-
       if (activity.type === 'email') {
-        content = activity.body_text || activity.body_html || activity.subject || '';
         // Check if this was sent by the user (from user's email)
         if (activity.from && userEmail && activity.from.includes(userEmail)) {
           senderType = 'user';
         }
       } else if (activity.type === 'sms') {
-        content = activity.text || activity.note || '';
         // For SMS, check direction
         if (activity.direction === 'inbound') {
           senderType = 'user';
         }
+      } else if (activity.type === 'call') {
+        // For calls, direction determines sender
+        if (activity.direction === 'inbound') {
+          senderType = 'user';
+        }
       }
+
+      console.log(`Activity ${activity.id} sender type: ${senderType}`);
 
       // Import message
       const { error: messageError } = await supabaseClient
@@ -382,7 +452,7 @@ const handler = async (req: Request): Promise<Response> => {
           close_activity_id: activity.id,
           sender_type: senderType,
           content,
-          message_type: activity.type,
+          message_type: messageType,
           sent_at: activity.date_created,
           is_historical: true,
           staff_name: staffName,
@@ -390,9 +460,11 @@ const handler = async (req: Request): Promise<Response> => {
         });
 
       if (messageError) {
-        console.error("Error importing message:", messageError);
+        console.error(`Error importing message for activity ${activity.id}:`, messageError);
+        skippedCount++;
       } else {
         importedCount++;
+        console.log(`Successfully imported activity ${activity.id} as message`);
       }
     }
 
@@ -406,14 +478,17 @@ const handler = async (req: Request): Promise<Response> => {
         updated_at: new Date().toISOString(),
       });
 
-    console.log(`Successfully imported ${importedCount} historical messages`);
+    console.log(`Sync completed. Imported: ${importedCount}, Skipped: ${skippedCount}, Total activities: ${activities.length}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         importedCount,
+        skippedCount,
+        totalActivities: activities.length,
         closeContactId,
-        message: `Imported ${importedCount} historical messages`
+        activityTypeCounts,
+        message: `Imported ${importedCount} messages, skipped ${skippedCount} activities`
       }),
       {
         status: 200,
