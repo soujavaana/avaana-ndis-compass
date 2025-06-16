@@ -146,9 +146,11 @@ export type Database = {
           id: string
           key_number: number
           last_name: string | null
+          ownership_percentage: number | null
           phone: string | null
           position: string | null
           profile_id: string
+          start_date: string | null
           updated_at: string
         }
         Insert: {
@@ -160,9 +162,11 @@ export type Database = {
           id?: string
           key_number: number
           last_name?: string | null
+          ownership_percentage?: number | null
           phone?: string | null
           position?: string | null
           profile_id: string
+          start_date?: string | null
           updated_at?: string
         }
         Update: {
@@ -174,9 +178,11 @@ export type Database = {
           id?: string
           key_number?: number
           last_name?: string | null
+          ownership_percentage?: number | null
           phone?: string | null
           position?: string | null
           profile_id?: string
+          start_date?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -257,6 +263,7 @@ export type Database = {
           acn: string | null
           address: string | null
           address_line_2: string | null
+          business_description: string | null
           business_email: string | null
           business_name: string | null
           business_phone: string | null
@@ -270,6 +277,7 @@ export type Database = {
           entity_type: string | null
           first_name: string | null
           id: string
+          industry: string | null
           is_gst_registered: boolean | null
           last_name: string | null
           phone: string | null
@@ -280,12 +288,14 @@ export type Database = {
           state: string | null
           updated_at: string | null
           uses_contractors: boolean | null
+          website: string | null
         }
         Insert: {
           abn?: string | null
           acn?: string | null
           address?: string | null
           address_line_2?: string | null
+          business_description?: string | null
           business_email?: string | null
           business_name?: string | null
           business_phone?: string | null
@@ -299,6 +309,7 @@ export type Database = {
           entity_type?: string | null
           first_name?: string | null
           id: string
+          industry?: string | null
           is_gst_registered?: boolean | null
           last_name?: string | null
           phone?: string | null
@@ -309,12 +320,14 @@ export type Database = {
           state?: string | null
           updated_at?: string | null
           uses_contractors?: boolean | null
+          website?: string | null
         }
         Update: {
           abn?: string | null
           acn?: string | null
           address?: string | null
           address_line_2?: string | null
+          business_description?: string | null
           business_email?: string | null
           business_name?: string | null
           business_phone?: string | null
@@ -328,6 +341,7 @@ export type Database = {
           entity_type?: string | null
           first_name?: string | null
           id?: string
+          industry?: string | null
           is_gst_registered?: boolean | null
           last_name?: string | null
           phone?: string | null
@@ -338,6 +352,7 @@ export type Database = {
           state?: string | null
           updated_at?: string | null
           uses_contractors?: boolean | null
+          website?: string | null
         }
         Relationships: []
       }
