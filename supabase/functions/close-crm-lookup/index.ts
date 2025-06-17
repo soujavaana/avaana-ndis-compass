@@ -24,11 +24,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`🔍 Looking up contact for email: ${email}`);
 
-    // Search for contact by email
+    // Search for contact by email with more specific query
     const searchParams = new URLSearchParams();
-    searchParams.append('query', `email:"${email}"`);
+    searchParams.append('query', `email:${email}`);
     
-    console.log(`🔍 Searching Close CRM with query: email:"${email}"`);
+    console.log(`🔍 Searching Close CRM with query: email:${email}`);
 
     const contactResponse = await fetch(`https://api.close.com/api/v1/contact/?${searchParams}`, {
       headers: {
@@ -63,7 +63,36 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const contact = contactResult.data[0];
+    // Find the exact email match
+    let contact = null;
+    for (const contactCandidate of contactResult.data) {
+      if (contactCandidate.emails) {
+        for (const emailObj of contactCandidate.emails) {
+          if (emailObj.email && emailObj.email.toLowerCase() === email.toLowerCase()) {
+            contact = contactCandidate;
+            break;
+          }
+        }
+      }
+      if (contact) break;
+    }
+
+    if (!contact) {
+      console.log(`❌ No exact email match found for ${email}`);
+      return new Response(
+        JSON.stringify({ 
+          contact: null,
+          activities: [],
+          users: {},
+          message: `No contact found with exact email match: ${email}`
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
     console.log(`✅ Contact found: ${contact.name} (ID: ${contact.id}, Lead ID: ${contact.lead_id})`);
 
     // Fetch Close CRM users for staff mapping
@@ -94,59 +123,105 @@ const handler = async (req: Request): Promise<Response> => {
       console.log(`⚠️ Users fetch failed: ${usersResponse.status}`);
     }
 
-    // Fetch activities using lead_id (which is required by Close CRM API)
-    console.log('📨 Fetching activities for lead...');
+    // Fetch activities using multiple approaches
+    console.log('📨 Fetching activities for contact...');
     
     let activities = [];
-    if (contact.lead_id) {
-      // Try fetching activities with lead_id filter
-      const activitiesResponse = await fetch(`https://api.close.com/api/v1/activity/?lead_id=${contact.lead_id}&_limit=50`, {
+    
+    // Approach 1: Try with contact_id directly
+    console.log(`🔗 Trying activities with contact_id: ${contact.id}`);
+    let activitiesResponse = await fetch(`https://api.close.com/api/v1/activity/?contact_id=${contact.id}&_limit=100`, {
+      headers: {
+        'Authorization': 'Basic ' + btoa(closeApiKey + ':'),
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log(`📨 Activities response status (contact_id): ${activitiesResponse.status}`);
+
+    if (activitiesResponse.ok) {
+      const activitiesResult = await activitiesResponse.json();
+      activities = activitiesResult.data || [];
+      console.log(`📨 Found ${activities.length} activities using contact_id`);
+    } else {
+      // Approach 2: Try with lead_id if contact_id fails
+      if (contact.lead_id) {
+        console.log(`🔗 Trying activities with lead_id: ${contact.lead_id}`);
+        activitiesResponse = await fetch(`https://api.close.com/api/v1/activity/?lead_id=${contact.lead_id}&_limit=100`, {
+          headers: {
+            'Authorization': 'Basic ' + btoa(closeApiKey + ':'),
+            'Content-Type': 'application/json',
+          },
+        });
+
+        console.log(`📨 Activities response status (lead_id): ${activitiesResponse.status}`);
+
+        if (activitiesResponse.ok) {
+          const activitiesResult = await activitiesResponse.json();
+          let leadActivities = activitiesResult.data || [];
+          
+          // Filter activities to only those related to this specific contact
+          activities = leadActivities.filter((activity: any) => {
+            return activity.contact_id === contact.id || 
+                   (activity.to && activity.to.some((toEmail: string) => toEmail.toLowerCase().includes(email.toLowerCase()))) ||
+                   (activity.from && activity.from.toLowerCase().includes(email.toLowerCase()));
+          });
+          
+          console.log(`📨 Found ${activities.length} activities for contact after filtering from ${leadActivities.length} lead activities`);
+        } else {
+          const errorText = await activitiesResponse.text();
+          console.log(`⚠️ Activities fetch error (lead_id): ${errorText}`);
+        }
+      }
+    }
+
+    if (activities.length === 0) {
+      // Approach 3: Search all recent activities and filter by email
+      console.log(`🔗 Trying general activities search and filtering by email`);
+      activitiesResponse = await fetch(`https://api.close.com/api/v1/activity/?_limit=200&date_created__gte=${new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()}`, {
         headers: {
           'Authorization': 'Basic ' + btoa(closeApiKey + ':'),
           'Content-Type': 'application/json',
         },
       });
 
-      console.log(`📨 Activities response status: ${activitiesResponse.status}`);
-
       if (activitiesResponse.ok) {
         const activitiesResult = await activitiesResponse.json();
-        activities = activitiesResult.data || [];
+        let allActivities = activitiesResult.data || [];
         
-        // Filter activities to only those related to this specific contact
-        activities = activities.filter((activity: any) => {
-          return activity.contact_id === contact.id || 
-                 (activity.to && activity.to.includes(email)) ||
-                 (activity.from && activity.from.includes(email));
+        // Filter activities by email or contact_id
+        activities = allActivities.filter((activity: any) => {
+          if (activity.contact_id === contact.id) return true;
+          if (activity.to && activity.to.some((toEmail: string) => toEmail.toLowerCase().includes(email.toLowerCase()))) return true;
+          if (activity.from && activity.from.toLowerCase().includes(email.toLowerCase())) return true;
+          return false;
         });
         
-        console.log(`📨 Found ${activities.length} activities for contact after filtering`);
-        
-        // Log activity types
-        const activityTypes = activities.reduce((acc: any, activity: any) => {
-          acc[activity.type] = (acc[activity.type] || 0) + 1;
-          return acc;
-        }, {});
-        console.log(`📊 Activity types: ${JSON.stringify(activityTypes)}`);
-
-        // Log sample activities for debugging
-        if (activities.length > 0) {
-          console.log(`📋 Sample activities:`, activities.slice(0, 3).map((a: any) => ({
-            id: a.id,
-            type: a.type,
-            date: a.date_created,
-            user_id: a.user_id,
-            user_name: users[a.user_id]?.display_name || 'Unknown',
-            subject: a.subject,
-            hasContent: !!(a.body_text || a.body_html || a.text || a.note)
-          })));
-        }
-      } else {
-        const errorText = await activitiesResponse.text();
-        console.log(`⚠️ Activities fetch error: ${errorText}`);
+        console.log(`📨 Found ${activities.length} activities after filtering ${allActivities.length} recent activities`);
       }
-    } else {
-      console.log(`⚠️ No lead_id found for contact, cannot fetch activities`);
+    }
+
+    // Log activity types and sample activities for debugging
+    const activityTypes = activities.reduce((acc: any, activity: any) => {
+      acc[activity.type] = (acc[activity.type] || 0) + 1;
+      return acc;
+    }, {});
+    console.log(`📊 Activity types: ${JSON.stringify(activityTypes)}`);
+
+    // Log sample activities for debugging
+    if (activities.length > 0) {
+      console.log(`📋 Sample activities:`, activities.slice(0, 3).map((a: any) => ({
+        id: a.id,
+        type: a.type,
+        date: a.date_created,
+        user_id: a.user_id,
+        user_name: users[a.user_id]?.display_name || 'Unknown',
+        subject: a.subject,
+        contact_id: a.contact_id,
+        to: a.to,
+        from: a.from,
+        hasContent: !!(a.body_text || a.body_html || a.text || a.note)
+      })));
     }
 
     return new Response(
