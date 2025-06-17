@@ -67,7 +67,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("User not authenticated");
     }
 
-    console.log("Authenticated user:", user.email);
+    console.log("🔍 Authenticated user:", user.email);
 
     // Get user profile
     const { data: profile, error: profileError } = await supabaseClient
@@ -77,13 +77,18 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (profileError || !profile) {
-      console.error("Profile error:", profileError);
+      console.error("❌ Profile error:", profileError);
       throw new Error("User profile not found");
     }
 
-    console.log("Syncing history for user:", profile.email || user.email);
+    console.log("📋 User profile found:", {
+      email: profile.email || user.email,
+      phone: profile.phone,
+      business_email: profile.business_email,
+      business_phone: profile.business_phone
+    });
 
-    // Check if already synced recently - fix the query to handle multiple records
+    // Check sync status but allow forcing a refresh if requested
     const { data: syncStatusRecords } = await supabaseClient
       .from("user_sync_status")
       .select("*")
@@ -92,11 +97,29 @@ const handler = async (req: Request): Promise<Response> => {
       .limit(1);
 
     const syncStatus = syncStatusRecords?.[0];
+    console.log("📊 Current sync status:", syncStatus);
 
-    if (syncStatus?.sync_status === 'completed') {
-      console.log("User already synced recently");
+    // Check if we should force a refresh (for testing purposes)
+    const requestBody = await req.text();
+    let forceSync = false;
+    
+    if (requestBody) {
+      try {
+        const body = JSON.parse(requestBody);
+        forceSync = body.forceSync === true;
+      } catch (e) {
+        // Ignore JSON parse errors, body might be empty
+      }
+    }
+
+    if (syncStatus?.sync_status === 'completed' && !forceSync) {
+      console.log("✅ User already synced recently - returning existing status");
       return new Response(
-        JSON.stringify({ message: "Already synced", syncStatus }),
+        JSON.stringify({ 
+          message: "Already synced", 
+          syncStatus,
+          hint: "Add 'forceSync: true' to request body to force a refresh"
+        }),
         {
           status: 200,
           headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -105,6 +128,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Update sync status to in_progress
+    console.log("🔄 Setting sync status to in_progress");
     await supabaseClient
       .from("user_sync_status")
       .upsert({
@@ -120,13 +144,13 @@ const handler = async (req: Request): Promise<Response> => {
     
     if (userEmail) {
       searchParams.append('query', `email:"${userEmail}"`);
+      console.log("🔍 Searching Close CRM by email:", userEmail);
     } else if (profile.phone) {
       searchParams.append('query', `phone:"${profile.phone}"`);
+      console.log("🔍 Searching Close CRM by phone:", profile.phone);
     } else {
-      throw new Error("No email or phone found in profile");
+      throw new Error("No email or phone found in profile for Close CRM search");
     }
-
-    console.log("Searching Close CRM for:", userEmail || profile.phone);
 
     const contactSearchResponse = await fetch(`https://api.close.com/api/v1/contact/?${searchParams}`, {
       headers: {
@@ -137,15 +161,19 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!contactSearchResponse.ok) {
       const errorText = await contactSearchResponse.text();
-      console.error("Contact search error response:", errorText);
+      console.error("❌ Contact search error response:", errorText);
       throw new Error(`Contact search error: ${contactSearchResponse.statusText} - ${errorText}`);
     }
 
     const contactData = await contactSearchResponse.json();
     const contacts = contactData.data || [];
+    console.log("📞 Close CRM search results:", {
+      totalFound: contacts.length,
+      contacts: contacts.map((c: any) => ({ id: c.id, name: c.name, emails: c.emails }))
+    });
 
     if (contacts.length === 0) {
-      console.log("No matching contact found in Close CRM");
+      console.log("❌ No matching contact found in Close CRM");
       await supabaseClient
         .from("user_sync_status")
         .upsert({
@@ -155,7 +183,11 @@ const handler = async (req: Request): Promise<Response> => {
         });
 
       return new Response(
-        JSON.stringify({ message: "No matching contact found" }),
+        JSON.stringify({ 
+          message: "No matching contact found in Close CRM",
+          searchCriteria: userEmail ? `email: ${userEmail}` : `phone: ${profile.phone}`,
+          suggestion: "Ensure your email/phone matches what's in Close CRM"
+        }),
         {
           status: 200,
           headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -164,7 +196,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     closeContactId = contacts[0].id;
-    console.log("Found Close contact:", closeContactId);
+    console.log("✅ Found Close contact:", closeContactId);
 
     // Update profile with close_contact_id
     await supabaseClient
@@ -173,7 +205,7 @@ const handler = async (req: Request): Promise<Response> => {
       .eq("id", user.id);
 
     // Fetch Close CRM users for staff mapping
-    console.log("Fetching Close CRM users...");
+    console.log("👥 Fetching Close CRM users...");
     const usersResponse = await fetch("https://api.close.com/api/v1/user/", {
       headers: {
         "Authorization": `Basic ${btoa(closeApiKey + ":")}`,
@@ -183,7 +215,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!usersResponse.ok) {
       const errorText = await usersResponse.text();
-      console.error("Users fetch error response:", errorText);
+      console.error("❌ Users fetch error response:", errorText);
       throw new Error(`Users fetch error: ${usersResponse.statusText} - ${errorText}`);
     }
 
@@ -196,18 +228,14 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    console.log(`Found ${Object.keys(closeUsers).length} Close CRM users`);
+    console.log(`👥 Found ${Object.keys(closeUsers).length} Close CRM users`);
 
-    // Fetch activities for this contact - using correct API endpoint and parameters
-    console.log("Fetching activities for contact:", closeContactId);
+    // Fetch activities for this contact with multiple approaches
+    console.log("📨 Fetching activities for contact:", closeContactId);
     
-    // Try different approaches to fetch activities
     let activitiesResponse;
-    let activitiesUrl;
-    
-    // First try: Use contact_id parameter (most common)
-    activitiesUrl = `https://api.close.com/api/v1/activity/?contact_id=${closeContactId}`;
-    console.log("Trying activities URL:", activitiesUrl);
+    let activitiesUrl = `https://api.close.com/api/v1/activity/?contact_id=${closeContactId}&_limit=100`;
+    console.log("🔗 Trying activities URL:", activitiesUrl);
     
     activitiesResponse = await fetch(activitiesUrl, {
       headers: {
@@ -217,9 +245,9 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (!activitiesResponse.ok) {
-      // Second try: Use different parameter format
-      activitiesUrl = `https://api.close.com/api/v1/activity/?contact=${closeContactId}`;
-      console.log("First attempt failed, trying alternative URL:", activitiesUrl);
+      // Try alternative approach
+      activitiesUrl = `https://api.close.com/api/v1/activity/?contact=${closeContactId}&_limit=100`;
+      console.log("🔗 First attempt failed, trying alternative URL:", activitiesUrl);
       
       activitiesResponse = await fetch(activitiesUrl, {
         headers: {
@@ -230,9 +258,9 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!activitiesResponse.ok) {
-      // Third try: General activities endpoint without contact filter
-      console.log("Both attempts failed, trying general activities endpoint");
-      activitiesUrl = `https://api.close.com/api/v1/activity/`;
+      // Try general activities endpoint and filter
+      console.log("🔗 Both attempts failed, trying general activities endpoint");
+      activitiesUrl = `https://api.close.com/api/v1/activity/?_limit=100`;
       
       activitiesResponse = await fetch(activitiesUrl, {
         headers: {
@@ -244,10 +272,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!activitiesResponse.ok) {
       const errorText = await activitiesResponse.text();
-      console.error("Activities fetch error response:", errorText);
-      console.error("Final URL attempted:", activitiesUrl);
-      console.error("Response status:", activitiesResponse.status);
-      console.error("Response headers:", Object.fromEntries(activitiesResponse.headers.entries()));
+      console.error("❌ Activities fetch error response:", errorText);
+      console.error("❌ Final URL attempted:", activitiesUrl);
+      console.error("❌ Response status:", activitiesResponse.status);
       throw new Error(`Activities fetch error: ${activitiesResponse.statusText} - ${errorText}`);
     }
 
@@ -255,26 +282,40 @@ const handler = async (req: Request): Promise<Response> => {
     let activities: CloseActivity[] = activitiesData.data || [];
 
     // If we got all activities, filter by contact_id
-    if (activitiesUrl.includes('activity/') && !activitiesUrl.includes('contact')) {
+    if (activitiesUrl.includes('activity/?_limit=100')) {
+      const beforeFilter = activities.length;
       activities = activities.filter(activity => activity.contact_id === closeContactId);
+      console.log(`🔍 Filtered activities: ${beforeFilter} -> ${activities.length} for contact ${closeContactId}`);
     }
 
-    console.log(`Found ${activities.length} activities for contact`);
+    console.log(`📨 Found ${activities.length} activities for contact`);
+
+    // Log activity types and sample activities for debugging
+    const activityTypeCounts: { [key: string]: number } = {};
+    activities.forEach(activity => {
+      activityTypeCounts[activity.type] = (activityTypeCounts[activity.type] || 0) + 1;
+    });
+    console.log("📊 Activity types found:", activityTypeCounts);
+
+    // Log first few activities for debugging
+    if (activities.length > 0) {
+      console.log("📋 Sample activities:", activities.slice(0, 3).map(a => ({
+        id: a.id,
+        type: a.type,
+        date: a.date_created,
+        subject: a.subject,
+        hasContent: !!(a.body_text || a.body_html || a.text || a.note)
+      })));
+    }
 
     // Process activities with detailed logging
     let importedCount = 0;
     let skippedCount = 0;
     const staffContactsMap = new Map();
-    
-    // Log activity types and details
-    const activityTypeCounts: { [key: string]: number } = {};
-    activities.forEach(activity => {
-      activityTypeCounts[activity.type] = (activityTypeCounts[activity.type] || 0) + 1;
-    });
-    console.log("Activity types found:", activityTypeCounts);
+    const processingLog: string[] = [];
 
     for (const activity of activities) {
-      console.log(`Processing activity ${activity.id} of type ${activity.type}`);
+      console.log(`🔄 Processing activity ${activity.id} of type ${activity.type}`);
       
       // Enhanced activity type filtering and content extraction
       let content = '';
@@ -283,28 +324,25 @@ const handler = async (req: Request): Promise<Response> => {
       if (activity.type === 'email') {
         content = activity.body_text || activity.body_html || activity.subject || '';
         if (!content.trim()) {
-          console.log(`Skipping email activity ${activity.id}: no content found`);
+          processingLog.push(`⏭️ Skipped email ${activity.id}: no content`);
           skippedCount++;
           continue;
         }
       } else if (activity.type === 'sms') {
         content = activity.text || activity.note || activity.body_text || '';
         if (!content.trim()) {
-          console.log(`Skipping SMS activity ${activity.id}: no content found`);
+          processingLog.push(`⏭️ Skipped SMS ${activity.id}: no content`);
           skippedCount++;
           continue;
         }
       } else if (activity.type === 'call') {
-        // Include call activities with note content
         content = activity.note || activity.text || `Call activity - ${activity.direction || 'unknown direction'}`;
         messageType = 'call';
       } else {
-        console.log(`Skipping activity ${activity.id}: unsupported type ${activity.type}`);
+        processingLog.push(`⏭️ Skipped ${activity.id}: unsupported type ${activity.type}`);
         skippedCount++;
         continue;
       }
-
-      console.log(`Activity ${activity.id} content length: ${content.length} characters`);
 
       // Skip if already imported
       const { data: existingMessage } = await supabaseClient
@@ -314,7 +352,7 @@ const handler = async (req: Request): Promise<Response> => {
         .single();
 
       if (existingMessage) {
-        console.log(`Skipping activity ${activity.id}: already imported`);
+        processingLog.push(`⏭️ Skipped ${activity.id}: already imported`);
         skippedCount++;
         continue;
       }
@@ -323,14 +361,10 @@ const handler = async (req: Request): Promise<Response> => {
       const staffName = staffUser ? staffUser.display_name || `${staffUser.first_name} ${staffUser.last_name}` : 'Unknown Staff';
       const staffEmail = staffUser?.email || null;
 
-      console.log(`Staff for activity ${activity.id}: ${staffName} (${staffEmail})`);
-
       // Find or create staff contact
       let staffContactId = staffContactsMap.get(activity.user_id);
       
       if (!staffContactId && staffUser) {
-        console.log(`Creating/finding staff contact for ${staffName}`);
-        
         const { data: existingStaffContact } = await supabaseClient
           .from("close_crm_contacts")
           .select("id")
@@ -339,7 +373,6 @@ const handler = async (req: Request): Promise<Response> => {
 
         if (existingStaffContact) {
           staffContactId = existingStaffContact.id;
-          console.log(`Found existing staff contact: ${staffContactId}`);
         } else {
           const { data: newStaffContact, error: staffContactError } = await supabaseClient
             .from("close_crm_contacts")
@@ -354,14 +387,13 @@ const handler = async (req: Request): Promise<Response> => {
             .single();
 
           if (staffContactError) {
-            console.error(`Error creating staff contact for ${staffName}:`, staffContactError);
+            console.error(`❌ Error creating staff contact for ${staffName}:`, staffContactError);
             skippedCount++;
             continue;
           }
 
           if (newStaffContact) {
             staffContactId = newStaffContact.id;
-            console.log(`Created new staff contact: ${staffContactId}`);
           }
         }
         
@@ -371,7 +403,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       if (!staffContactId) {
-        console.log(`Skipping activity ${activity.id}: no staff contact available`);
+        processingLog.push(`⏭️ Skipped ${activity.id}: no staff contact available`);
         skippedCount++;
         continue;
       }
@@ -387,7 +419,6 @@ const handler = async (req: Request): Promise<Response> => {
 
       if (existingThread) {
         threadId = existingThread.id;
-        console.log(`Using existing thread: ${threadId}`);
       } else {
         const subject = activity.type === 'email' ? 
           (activity.subject || 'Email Conversation') : 
@@ -406,19 +437,18 @@ const handler = async (req: Request): Promise<Response> => {
           .single();
 
         if (threadError) {
-          console.error(`Error creating thread for activity ${activity.id}:`, threadError);
+          console.error(`❌ Error creating thread for activity ${activity.id}:`, threadError);
           skippedCount++;
           continue;
         }
 
         if (newThread) {
           threadId = newThread.id;
-          console.log(`Created new thread: ${threadId}`);
         }
       }
 
       if (!threadId) {
-        console.log(`Skipping activity ${activity.id}: could not create/find thread`);
+        processingLog.push(`⏭️ Skipped ${activity.id}: could not create/find thread`);
         skippedCount++;
         continue;
       }
@@ -426,23 +456,18 @@ const handler = async (req: Request): Promise<Response> => {
       // Determine sender type
       let senderType = 'staff';
       if (activity.type === 'email') {
-        // Check if this was sent by the user (from user's email)
         if (activity.from && userEmail && activity.from.includes(userEmail)) {
           senderType = 'user';
         }
       } else if (activity.type === 'sms') {
-        // For SMS, check direction
         if (activity.direction === 'inbound') {
           senderType = 'user';
         }
       } else if (activity.type === 'call') {
-        // For calls, direction determines sender
         if (activity.direction === 'inbound') {
           senderType = 'user';
         }
       }
-
-      console.log(`Activity ${activity.id} sender type: ${senderType}`);
 
       // Import message
       const { error: messageError } = await supabaseClient
@@ -460,11 +485,11 @@ const handler = async (req: Request): Promise<Response> => {
         });
 
       if (messageError) {
-        console.error(`Error importing message for activity ${activity.id}:`, messageError);
+        console.error(`❌ Error importing message for activity ${activity.id}:`, messageError);
         skippedCount++;
       } else {
         importedCount++;
-        console.log(`Successfully imported activity ${activity.id} as message`);
+        processingLog.push(`✅ Imported ${activity.id} as ${messageType} from ${senderType}`);
       }
     }
 
@@ -478,7 +503,7 @@ const handler = async (req: Request): Promise<Response> => {
         updated_at: new Date().toISOString(),
       });
 
-    console.log(`Sync completed. Imported: ${importedCount}, Skipped: ${skippedCount}, Total activities: ${activities.length}`);
+    console.log(`✅ Sync completed. Imported: ${importedCount}, Skipped: ${skippedCount}, Total activities: ${activities.length}`);
 
     return new Response(
       JSON.stringify({ 
@@ -488,6 +513,7 @@ const handler = async (req: Request): Promise<Response> => {
         totalActivities: activities.length,
         closeContactId,
         activityTypeCounts,
+        processingLog: processingLog.slice(0, 10), // Include first 10 log entries
         message: `Imported ${importedCount} messages, skipped ${skippedCount} activities`
       }),
       {
@@ -496,7 +522,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error("Error in close-crm-sync-user-history function:", error);
+    console.error("❌ Error in close-crm-sync-user-history function:", error);
     
     // Update sync status to error
     try {
@@ -520,7 +546,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
       }
     } catch (syncError) {
-      console.error("Error updating sync status:", syncError);
+      console.error("❌ Error updating sync status:", syncError);
     }
 
     return new Response(

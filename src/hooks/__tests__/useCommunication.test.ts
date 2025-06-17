@@ -39,13 +39,11 @@ describe('useCommunication hooks', () => {
 
   describe('useSyncUserHistory', () => {
     it('should successfully sync user history', async () => {
-      // Mock session
       mockSupabase.auth.getSession.mockResolvedValue({
         data: { session: { access_token: 'test-token' } },
         error: null,
       } as any);
 
-      // Mock successful API response
       const mockResponse = {
         success: true,
         importedCount: 5,
@@ -64,7 +62,6 @@ describe('useCommunication hooks', () => {
         wrapper: createWrapper(),
       });
 
-      // Trigger the mutation
       result.current.mutate();
 
       await waitFor(() => {

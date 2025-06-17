@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { UserIcon, SendIcon, Mail, Phone, Loader2, Plus, RefreshCw, History, CheckCircle, AlertCircle } from 'lucide-react';
+import { UserIcon, SendIcon, Mail, Phone, Loader2, Plus, RefreshCw, History, CheckCircle, AlertCircle, Bug } from 'lucide-react';
 import { useStaffContacts, useConversationThreads, useMessages, useSendMessage, useCreateThread, useSyncCloseContacts, useSyncUserHistory, useUserSyncStatus } from '@/hooks/useCommunication';
 import { toast } from '@/hooks/use-toast';
 
@@ -127,6 +126,41 @@ const Communication = () => {
     }
   };
 
+  const handleForceSyncUserHistory = async () => {
+    try {
+      // Force sync by modifying the mutation to include forceSync parameter
+      const response = await fetch('https://vrnjxgfzzbexjaytszvg.supabase.co/functions/v1/close-crm-sync-user-history', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await import('@/integrations/supabase/client')).supabase.auth.getSession().then(r => r.data.session?.access_token)}`,
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZybmp4Z2Z6emJleGpheXRzenZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2MjkxOTcsImV4cCI6MjA2MzIwNTE5N30.euI15LNkMP1IMWojTAetE75ecjqrk-2Audt64AyMel4',
+        },
+        body: JSON.stringify({ forceSync: true }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      toast({
+        title: 'Force Sync Completed',
+        description: `${result.message || 'Force sync completed'}${result.importedCount ? ` - ${result.importedCount} new messages imported` : ''}`,
+      });
+
+      // Refresh the data
+      window.location.reload();
+    } catch (error: any) {
+      toast({
+        title: 'Force Sync Error',
+        description: error.message || 'Failed to force sync user history',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const getSyncStatusDisplay = () => {
     if (!syncStatus) return null;
     
@@ -191,6 +225,15 @@ const Communication = () => {
             Sync My History
           </Button>
           <Button 
+            onClick={handleForceSyncUserHistory}
+            disabled={syncUserHistory.isPending}
+            variant="outline"
+            className="px-4 py-2 rounded-md border-orange-300 text-orange-600 hover:bg-orange-50"
+          >
+            <Bug size={16} className="mr-2" />
+            Force Sync (Debug)
+          </Button>
+          <Button 
             onClick={handleSyncContacts}
             disabled={syncContacts.isPending}
             variant="outline"
@@ -213,7 +256,6 @@ const Communication = () => {
         </div>
       </div>
 
-      {/* New Message Modal */}
       {showNewMessage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
           <Card className="w-96">
