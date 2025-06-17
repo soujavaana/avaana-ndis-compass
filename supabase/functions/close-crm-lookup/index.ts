@@ -123,16 +123,16 @@ const handler = async (req: Request): Promise<Response> => {
       console.log(`⚠️ Users fetch failed: ${usersResponse.status}`);
     }
 
-    // Fetch activities - use lead_id as primary method
-    console.log('📨 Fetching activities for lead...');
+    // Fetch activities - use multiple strategies to get ALL activities
+    console.log('📨 Fetching activities for lead and contact...');
     
     let activities = [];
     
+    // Strategy 1: Use lead_id to get all activities for the lead
     if (contact.lead_id) {
       console.log(`🔗 Fetching activities for lead_id: ${contact.lead_id}`);
       
-      // Fetch activities with a higher limit and broader date range
-      const activitiesResponse = await fetch(`https://api.close.com/api/v1/activity/?lead_id=${contact.lead_id}&_limit=500&_offset=0`, {
+      const activitiesResponse = await fetch(`https://api.close.com/api/v1/activity/?lead_id=${contact.lead_id}&_limit=1000&_offset=0`, {
         headers: {
           'Authorization': 'Basic ' + btoa(closeApiKey + ':'),
           'Content-Type': 'application/json',
@@ -145,75 +145,84 @@ const handler = async (req: Request): Promise<Response> => {
         const activitiesResult = await activitiesResponse.json();
         activities = activitiesResult.data || [];
         console.log(`📨 Found ${activities.length} total activities for lead`);
-        
-        // Filter activities that are related to our specific contact email
-        const filteredActivities = activities.filter((activity: any) => {
-          // Include if contact_id matches
-          if (activity.contact_id === contact.id) return true;
-          
-          // Include if email appears in to/from fields
-          if (activity.to && Array.isArray(activity.to)) {
-            if (activity.to.some((toEmail: string) => toEmail.toLowerCase().includes(email.toLowerCase()))) {
-              return true;
-            }
-          }
-          if (activity.from && typeof activity.from === 'string') {
-            if (activity.from.toLowerCase().includes(email.toLowerCase())) {
-              return true;
-            }
-          }
-          
-          // Include if it's a note or call activity (these are typically related to the lead/contact)
-          if (activity.type === 'note' || activity.type === 'call') {
-            return true;
-          }
-          
-          return false;
-        });
-        
-        activities = filteredActivities;
-        console.log(`📨 After filtering: ${activities.length} activities related to contact`);
-        
-        // If still no activities, get all recent activities for the lead (sometimes contact_id isn't set properly)
-        if (activities.length === 0) {
-          console.log(`📨 No filtered activities found, using all lead activities`);
-          activities = activitiesResult.data || [];
-        }
       } else {
         const errorText = await activitiesResponse.text();
         console.log(`⚠️ Activities fetch error: ${errorText}`);
       }
     }
 
-    // If still no activities, try a broader search
+    // Strategy 2: If no activities found, try using contact_id
     if (activities.length === 0) {
-      console.log(`🔗 Trying broader activity search`);
+      console.log(`🔗 Trying contact_id search: ${contact.id}`);
       
-      // Search for activities that mention the email
-      const broadSearchResponse = await fetch(`https://api.close.com/api/v1/activity/?query=${encodeURIComponent(email)}&_limit=100`, {
+      const contactActivitiesResponse = await fetch(`https://api.close.com/api/v1/activity/?contact_id=${contact.id}&_limit=500`, {
         headers: {
           'Authorization': 'Basic ' + btoa(closeApiKey + ':'),
           'Content-Type': 'application/json',
         },
       });
 
-      if (broadSearchResponse.ok) {
-        const broadResult = await broadSearchResponse.json();
-        activities = broadResult.data || [];
-        console.log(`📨 Found ${activities.length} activities via broad search`);
+      if (contactActivitiesResponse.ok) {
+        const contactActivitiesResult = await contactActivitiesResponse.json();
+        activities = contactActivitiesResult.data || [];
+        console.log(`📨 Found ${activities.length} activities via contact_id`);
       }
     }
 
+    // Strategy 3: If still no activities, try broader search by email
+    if (activities.length === 0) {
+      console.log(`🔗 Trying email-based activity search`);
+      
+      const emailActivitiesResponse = await fetch(`https://api.close.com/api/v1/activity/?query=${encodeURIComponent(email)}&_limit=500`, {
+        headers: {
+          'Authorization': 'Basic ' + btoa(closeApiKey + ':'),
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (emailActivitiesResponse.ok) {
+        const emailActivitiesResult = await emailActivitiesResponse.json();
+        activities = emailActivitiesResult.data || [];
+        console.log(`📨 Found ${activities.length} activities via email search`);
+      }
+    }
+
+    // Process and normalize all activities regardless of type
+    const processedActivities = activities.map((activity: any) => {
+      return {
+        id: activity.id,
+        type: activity._type || activity.type || 'unknown',
+        date_created: activity.date_created,
+        user_id: activity.user_id,
+        contact_id: activity.contact_id,
+        lead_id: activity.lead_id,
+        subject: activity.subject,
+        body_text: activity.body_text,
+        body_html: activity.body_html,
+        text: activity.text,
+        note: activity.note,
+        body: activity.body,
+        direction: activity.direction,
+        status: activity.status,
+        duration: activity.duration,
+        phone: activity.phone,
+        to: activity.to,
+        from: activity.from,
+        // Include all raw data for debugging
+        raw_data: activity
+      };
+    });
+
     // Log activity types and sample activities for debugging
-    const activityTypes = activities.reduce((acc: any, activity: any) => {
+    const activityTypes = processedActivities.reduce((acc: any, activity: any) => {
       acc[activity.type] = (acc[activity.type] || 0) + 1;
       return acc;
     }, {});
     console.log(`📊 Activity types: ${JSON.stringify(activityTypes)}`);
 
     // Log sample activities for debugging
-    if (activities.length > 0) {
-      console.log(`📋 Sample activities:`, activities.slice(0, 5).map((a: any) => ({
+    if (processedActivities.length > 0) {
+      console.log(`📋 Sample activities:`, processedActivities.slice(0, 5).map((a: any) => ({
         id: a.id,
         type: a.type,
         date: a.date_created,
@@ -230,9 +239,9 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({ 
         contact,
-        activities,
+        activities: processedActivities,
         users,
-        message: `Found contact ${contact.name} with ${activities.length} activities`
+        message: `Found contact ${contact.name} with ${processedActivities.length} activities`
       }),
       {
         status: 200,

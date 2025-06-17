@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Search, User, Mail, Phone, Calendar, Activity, Users, MessageSquare, FileText, PhoneCall } from 'lucide-react';
+import { Loader2, Search, User, Mail, Phone, Calendar, Activity, Users, MessageSquare, FileText, PhoneCall, Clock, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -23,6 +23,7 @@ interface CloseActivity {
   date_created: string;
   user_id: string;
   contact_id?: string;
+  lead_id?: string;
   to?: string[];
   from?: string;
   subject?: string;
@@ -35,6 +36,7 @@ interface CloseActivity {
   status?: string;
   duration?: number;
   phone?: string;
+  raw_data?: any;
 }
 
 interface CloseUser {
@@ -59,23 +61,38 @@ const CloseCrmDebug = () => {
     console.log(`[Close CRM Debug] ${message}`);
   };
 
-  const getActivityIcon = (type: string) => {
+  const getActivityIcon = (type: string, direction?: string) => {
     switch (type) {
       case 'email':
-        return <Mail size={16} className="text-blue-500" />;
+        return direction === 'outbound' ? 
+          <ArrowUpRight size={16} className="text-blue-500" /> : 
+          <ArrowDownLeft size={16} className="text-blue-600" />;
       case 'sms':
         return <MessageSquare size={16} className="text-green-500" />;
       case 'call':
         return <PhoneCall size={16} className="text-purple-500" />;
       case 'note':
         return <FileText size={16} className="text-gray-500" />;
+      case 'unknown':
+        return <Clock size={16} className="text-yellow-500" />;
       default:
         return <Activity size={16} className="text-gray-400" />;
     }
   };
 
   const getActivityContent = (activity: CloseActivity) => {
-    return activity.body_text || activity.body_html || activity.text || activity.note || activity.body || 'No content available';
+    const content = activity.body_text || activity.body_html || activity.text || activity.note || activity.body;
+    if (content) return content;
+    
+    // If no content, show some basic info from raw data
+    if (activity.raw_data) {
+      const rawData = activity.raw_data;
+      if (rawData.template_name) return `Template: ${rawData.template_name}`;
+      if (rawData.summary) return rawData.summary;
+      if (rawData.description) return rawData.description;
+    }
+    
+    return 'No content available';
   };
 
   const lookupContact = async () => {
@@ -123,7 +140,7 @@ const CloseCrmDebug = () => {
       }
 
       const result = await response.json();
-      addLog(`Lookup completed successfully`);
+      addLog(`Lookup completed: ${JSON.stringify(result)}`);
 
       if (result.contact) {
         setContactData(result.contact);
@@ -265,7 +282,7 @@ const CloseCrmDebug = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity size={20} />
-              Activities & Messages ({activities.length})
+              All Activities & Messages ({activities.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -278,9 +295,12 @@ const CloseCrmDebug = () => {
                   <div key={activity.id} className="border rounded-lg p-4 bg-gray-50">
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex items-center gap-3">
-                        {getActivityIcon(activity.type)}
+                        {getActivityIcon(activity.type, activity.direction)}
                         <div>
-                          <span className="font-medium capitalize">{activity.type}</span>
+                          <span className="font-medium capitalize">{activity.type || 'Unknown'}</span>
+                          {activity.direction && (
+                            <span className="ml-2 text-sm text-gray-500 capitalize">({activity.direction})</span>
+                          )}
                           {user && (
                             <div className="text-sm text-blue-600">
                               by {user.display_name} ({user.email})
@@ -297,13 +317,6 @@ const CloseCrmDebug = () => {
                       <div className="mb-2">
                         <strong className="text-sm">Subject:</strong> 
                         <span className="ml-2">{activity.subject}</span>
-                      </div>
-                    )}
-
-                    {activity.direction && (
-                      <div className="mb-2">
-                        <strong className="text-sm">Direction:</strong> 
-                        <span className="ml-2 capitalize">{activity.direction}</span>
                       </div>
                     )}
 
@@ -346,7 +359,7 @@ const CloseCrmDebug = () => {
                       <div className="mt-3">
                         <strong className="text-sm">Content:</strong>
                         <div className="mt-2 p-3 bg-white rounded border text-sm whitespace-pre-wrap">
-                          {content}
+                          {content.length > 500 ? `${content.substring(0, 500)}...` : content}
                         </div>
                       </div>
                     )}
@@ -354,6 +367,7 @@ const CloseCrmDebug = () => {
                     <div className="text-xs text-gray-400 mt-3 pt-2 border-t">
                       Activity ID: {activity.id} | User ID: {activity.user_id}
                       {activity.contact_id && ` | Contact ID: ${activity.contact_id}`}
+                      {activity.lead_id && ` | Lead ID: ${activity.lead_id}`}
                     </div>
                   </div>
                 );
