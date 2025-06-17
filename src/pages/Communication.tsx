@@ -51,6 +51,14 @@ interface CloseUser {
   display_name: string;
 }
 
+interface StaffConversation {
+  staffUserId: string;
+  staffEmail: string;
+  staffName: string;
+  activities: CloseActivity[];
+  lastActivity: string;
+}
+
 const Communication = () => {
   const { user } = useAuth();
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
@@ -58,12 +66,14 @@ const Communication = () => {
   const [showNewMessage, setShowNewMessage] = useState(false);
   const [newMessageStaff, setNewMessageStaff] = useState('');
   const [newMessageSubject, setNewMessageSubject] = useState('');
+  const [selectedStaffUserId, setSelectedStaffUserId] = useState<string | null>(null);
   
   // Close CRM lookup state
   const [contactData, setContactData] = useState<CloseContact | null>(null);
   const [activities, setActivities] = useState<CloseActivity[]>([]);
   const [users, setUsers] = useState<{ [key: string]: CloseUser }>({});
   const [lookupLoading, setLookupLoading] = useState(false);
+  const [staffConversations, setStaffConversations] = useState<StaffConversation[]>([]);
 
   const { data: staffContacts, isLoading: staffLoading } = useStaffContacts();
   const { data: threads, isLoading: threadsLoading } = useConversationThreads();
@@ -73,6 +83,48 @@ const Communication = () => {
   const createThread = useCreateThread();
   const syncContacts = useSyncCloseContacts();
   const syncUserHistory = useSyncUserHistory();
+
+  // Process activities into staff conversations
+  useEffect(() => {
+    if (activities.length > 0 && Object.keys(users).length > 0) {
+      const staffMap = new Map<string, StaffConversation>();
+      
+      activities.forEach(activity => {
+        const staffUser = users[activity.user_id];
+        if (staffUser && activity.user_id) {
+          if (!staffMap.has(activity.user_id)) {
+            staffMap.set(activity.user_id, {
+              staffUserId: activity.user_id,
+              staffEmail: staffUser.email,
+              staffName: staffUser.display_name || `${staffUser.first_name} ${staffUser.last_name}`,
+              activities: [],
+              lastActivity: activity.date_created,
+            });
+          }
+          
+          const existing = staffMap.get(activity.user_id)!;
+          existing.activities.push(activity);
+          
+          // Update last activity date if this is more recent
+          if (new Date(activity.date_created) > new Date(existing.lastActivity)) {
+            existing.lastActivity = activity.date_created;
+          }
+        }
+      });
+      
+      // Convert to array and sort by last activity
+      const conversations = Array.from(staffMap.values()).sort(
+        (a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()
+      );
+      
+      setStaffConversations(conversations);
+      
+      // Auto-select first staff member if none selected
+      if (conversations.length > 0 && !selectedStaffUserId) {
+        setSelectedStaffUserId(conversations[0].staffUserId);
+      }
+    }
+  }, [activities, users, selectedStaffUserId]);
 
   const getActivityIcon = (type: string, direction?: string) => {
     switch (type) {
@@ -168,6 +220,8 @@ const Communication = () => {
 
   const selectedThread = threads?.find(t => t.id === selectedThreadId);
   const selectedStaff = selectedThread?.close_crm_contacts;
+
+  const selectedStaffConversation = staffConversations.find(conv => conv.staffUserId === selectedStaffUserId);
 
   const handleSendMessage = async () => {
     if (!messageContent.trim() || !selectedThread || !selectedStaff?.email) return;
@@ -454,48 +508,39 @@ const Communication = () => {
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="overflow-y-auto h-[calc(100%-5rem)]">
-                    {threadsLoading ? (
+                    {lookupLoading ? (
                       <div className="p-4 text-center">
                         <Loader2 className="w-6 h-6 animate-spin mx-auto" />
+                        <p className="text-sm text-gray-500 mt-2">Loading conversations...</p>
                       </div>
-                    ) : threads?.length ? (
-                      threads.map(thread => (
-                        <div 
-                          key={thread.id}
-                          className={`cursor-pointer border-b hover:bg-gray-50 ${
-                            selectedThreadId === thread.id ? 'border-l-4 border-avaana-primary bg-gray-50' : ''
-                          }`}
-                          onClick={() => setSelectedThreadId(thread.id)}
-                        >
-                          <div className="p-4">
-                            <div className="flex justify-between">
-                              <div className="font-normal">{thread.close_crm_contacts.name}</div>
+                    ) : staffConversations.length > 0 ? (
+                      <div className="space-y-2 p-2">
+                        {staffConversations.map(conversation => (
+                          <div 
+                            key={conversation.staffUserId}
+                            className={`cursor-pointer rounded-lg border p-3 hover:bg-gray-50 ${
+                              selectedStaffUserId === conversation.staffUserId ? 'border-avaana-primary bg-gray-50' : 'border-gray-200'
+                            }`}
+                            onClick={() => setSelectedStaffUserId(conversation.staffUserId)}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="font-medium text-sm">{conversation.staffName}</div>
                               <div className="text-xs text-gray-500">
-                                {thread.last_message_at ? 
-                                  new Date(thread.last_message_at).toLocaleDateString() : 
-                                  'No messages'
-                                }
+                                {new Date(conversation.lastActivity).toLocaleDateString()}
                               </div>
                             </div>
-                            <div className="text-sm truncate text-gray-600">
-                              {thread.subject || 'No subject'}
+                            <div className="text-xs text-gray-600 mt-1">
+                              {conversation.staffEmail}
                             </div>
-                            <div className="flex justify-between mt-1">
-                              <div className="text-xs text-gray-500">
-                                {thread.close_crm_contacts.role}
-                              </div>
-                              {thread.unread_count > 0 && (
-                                <div className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                  {thread.unread_count}
-                                </div>
-                              )}
+                            <div className="text-xs text-gray-500 mt-1">
+                              {conversation.activities.length} activities
                             </div>
                           </div>
-                        </div>
-                      ))
+                        ))}
+                      </div>
                     ) : (
                       <div className="p-4 text-center text-gray-500">
-                        No conversations yet. Click "New Message" to start one.
+                        No conversations found. Activities will appear here once loaded.
                       </div>
                     )}
                   </div>
@@ -505,7 +550,7 @@ const Communication = () => {
 
             <div className="lg:col-span-3">
               <Card className="h-[calc(100vh-12rem)] flex flex-col">
-                {contactData ? (
+                {selectedStaffConversation ? (
                   <>
                     <CardHeader className="pb-3 border-b">
                       <div className="flex justify-between items-center">
@@ -514,126 +559,72 @@ const Communication = () => {
                             <UserIcon size={20} />
                           </div>
                           <div>
-                            <CardTitle className="text-base font-normal">{contactData.name}</CardTitle>
-                            <div className="flex items-center gap-4 mt-1">
-                              {contactData.emails?.length > 0 && (
-                                <div className="flex items-center gap-1 text-xs text-gray-500">
-                                  <Mail size={12} />
-                                  <span>{contactData.emails[0].email}</span>
-                                </div>
-                              )}
-                              {contactData.phones?.length > 0 && (
-                                <div className="flex items-center gap-1 text-xs text-gray-500">
-                                  <Phone size={12} />
-                                  <span>{contactData.phones[0].phone}</span>
-                                </div>
-                              )}
+                            <CardTitle className="text-base font-normal">{selectedStaffConversation.staffName}</CardTitle>
+                            <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                              <Mail size={12} />
+                              <span>{selectedStaffConversation.staffEmail}</span>
                             </div>
                           </div>
                         </div>
                         <div className="text-sm text-gray-500">
-                          {lookupLoading ? 'Loading activities...' : `${activities.length} activities found`}
+                          {selectedStaffConversation.activities.length} activities
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent className="flex-1 overflow-y-auto p-4">
                       <div className="space-y-4">
-                        {lookupLoading ? (
-                          <div className="text-center">
-                            <Loader2 className="w-6 h-6 animate-spin mx-auto" />
-                            <p className="text-sm text-gray-500 mt-2">Loading your Close CRM activities...</p>
-                          </div>
-                        ) : activities.length > 0 ? (
-                          activities.map((activity) => {
-                            const user = users[activity.user_id];
-                            const content = getActivityContent(activity);
-                            
-                            return (
-                              <div key={activity.id} className="border rounded-lg p-4 bg-gray-50">
-                                <div className="flex justify-between items-start mb-3">
-                                  <div className="flex items-center gap-3">
-                                    {getActivityIcon(activity.type, activity.direction)}
-                                    <div>
-                                      <span className="font-medium capitalize">{activity.type || 'Unknown'}</span>
-                                      {activity.direction && (
-                                        <span className="ml-2 text-sm text-gray-500 capitalize">({activity.direction})</span>
-                                      )}
-                                      {user && (
-                                        <div className="text-sm text-blue-600">
-                                          by {user.display_name} ({user.email})
-                                        </div>
-                                      )}
-                                    </div>
+                        {selectedStaffConversation.activities.map((activity) => {
+                          const content = getActivityContent(activity);
+                          
+                          return (
+                            <div key={activity.id} className="border rounded-lg p-4 bg-gray-50">
+                              <div className="flex justify-between items-start mb-3">
+                                <div className="flex items-center gap-3">
+                                  {getActivityIcon(activity.type, activity.direction)}
+                                  <div>
+                                    <span className="font-medium capitalize">{activity.type || 'Unknown'}</span>
+                                    {activity.direction && (
+                                      <span className="ml-2 text-sm text-gray-500 capitalize">({activity.direction})</span>
+                                    )}
                                   </div>
-                                  <span className="text-sm text-gray-500">
-                                    {new Date(activity.date_created).toLocaleString()}
-                                  </span>
                                 </div>
-
-                                {activity.subject && (
-                                  <div className="mb-2">
-                                    <strong className="text-sm">Subject:</strong> 
-                                    <span className="ml-2">{activity.subject}</span>
-                                  </div>
-                                )}
-
-                                {activity.status && (
-                                  <div className="mb-2">
-                                    <strong className="text-sm">Status:</strong> 
-                                    <span className="ml-2 capitalize">{activity.status}</span>
-                                  </div>
-                                )}
-
-                                {activity.duration && (
-                                  <div className="mb-2">
-                                    <strong className="text-sm">Duration:</strong> 
-                                    <span className="ml-2">{activity.duration} seconds</span>
-                                  </div>
-                                )}
-
-                                {activity.phone && (
-                                  <div className="mb-2">
-                                    <strong className="text-sm">Phone:</strong> 
-                                    <span className="ml-2">{activity.phone}</span>
-                                  </div>
-                                )}
-
-                                {activity.to && activity.to.length > 0 && (
-                                  <div className="mb-2">
-                                    <strong className="text-sm">To:</strong> 
-                                    <span className="ml-2">{activity.to.join(', ')}</span>
-                                  </div>
-                                )}
-
-                                {activity.from && (
-                                  <div className="mb-2">
-                                    <strong className="text-sm">From:</strong> 
-                                    <span className="ml-2">{activity.from}</span>
-                                  </div>
-                                )}
-
-                                {content && content !== 'No content available' && (
-                                  <div className="mt-3">
-                                    <strong className="text-sm">Content:</strong>
-                                    <div className="mt-2 p-3 bg-white rounded border text-sm whitespace-pre-wrap">
-                                      {content.length > 500 ? `${content.substring(0, 500)}...` : content}
-                                    </div>
-                                  </div>
-                                )}
-
-                                <div className="text-xs text-gray-400 mt-3 pt-2 border-t">
-                                  Activity ID: {activity.id} | User ID: {activity.user_id}
-                                  {activity.contact_id && ` | Contact ID: ${activity.contact_id}`}
-                                  {activity.lead_id && ` | Lead ID: ${activity.lead_id}`}
-                                </div>
+                                <span className="text-sm text-gray-500">
+                                  {new Date(activity.date_created).toLocaleString()}
+                                </span>
                               </div>
-                            );
-                          })
-                        ) : (
-                          <div className="text-center text-gray-500">
-                            No activities found for your account in Close CRM.
-                          </div>
-                        )}
+
+                              {activity.subject && (
+                                <div className="mb-2">
+                                  <strong className="text-sm">Subject:</strong> 
+                                  <span className="ml-2">{activity.subject}</span>
+                                </div>
+                              )}
+
+                              {activity.to && activity.to.length > 0 && (
+                                <div className="mb-2">
+                                  <strong className="text-sm">To:</strong> 
+                                  <span className="ml-2">{activity.to.join(', ')}</span>
+                                </div>
+                              )}
+
+                              {activity.from && (
+                                <div className="mb-2">
+                                  <strong className="text-sm">From:</strong> 
+                                  <span className="ml-2">{activity.from}</span>
+                                </div>
+                              )}
+
+                              {content && content !== 'No content available' && (
+                                <div className="mt-3">
+                                  <strong className="text-sm">Content:</strong>
+                                  <div className="mt-2 p-3 bg-white rounded border text-sm whitespace-pre-wrap">
+                                    {content.length > 500 ? `${content.substring(0, 500)}...` : content}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     </CardContent>
                   </>
@@ -642,10 +633,10 @@ const Communication = () => {
                     {lookupLoading ? (
                       <div className="text-center">
                         <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
-                        <p>Looking up your Close CRM contact...</p>
+                        <p>Loading your communication history...</p>
                       </div>
                     ) : (
-                      <p>No Close CRM contact found for your account</p>
+                      <p>Select a staff member to view your conversation history</p>
                     )}
                   </div>
                 )}
