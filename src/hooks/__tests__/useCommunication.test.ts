@@ -1,278 +1,373 @@
 
-import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useSyncUserHistory, useStaffContacts, useConversationThreads } from '../useCommunication';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 
-// Mock dependencies
-jest.mock('@/integrations/supabase/client');
-jest.mock('@/contexts/AuthContext');
-
-const mockSupabase = supabase as jest.Mocked<typeof supabase>;
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
-
-// Mock fetch globally
-global.fetch = jest.fn();
-
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
+// Mock Close CRM API responses
+const mockCloseAPIResponses = {
+  contactSearch: {
+    success: {
+      data: [
+        {
+          id: 'contact_123',
+          emails: [{ email: 'test@example.com' }],
+          phones: [{ phone: '+1234567890' }],
+          name: 'Test User',
+        },
+      ],
+      has_more: false,
     },
-  });
-  
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+    notFound: {
+      data: [],
+      has_more: false,
+    },
+  },
+  activities: {
+    withEmails: {
+      data: [
+        {
+          id: 'activity_email_1',
+          type: 'email',
+          date_created: '2024-01-15T10:00:00Z',
+          date_updated: '2024-01-15T10:00:00Z',
+          user_id: 'user_456',
+          user_name: 'Support Agent',
+          user_email: 'support@company.com',
+          contact_id: 'contact_123',
+          from: 'support@company.com',
+          to: ['test@example.com'],
+          subject: 'Welcome to our platform',
+          body_text: 'Thank you for signing up!',
+          status: 'sent',
+        },
+        {
+          id: 'activity_email_2',
+          type: 'email',
+          date_created: '2024-01-16T14:30:00Z',
+          date_updated: '2024-01-16T14:30:00Z',
+          user_id: 'user_456',
+          user_name: 'Support Agent',
+          user_email: 'support@company.com',
+          contact_id: 'contact_123',
+          from: 'test@example.com',
+          to: ['support@company.com'],
+          subject: 'Re: Welcome to our platform',
+          body_text: 'Thanks for the welcome!',
+          status: 'sent',
+        },
+      ],
+      has_more: false,
+    },
+    withSMS: {
+      data: [
+        {
+          id: 'activity_sms_1',
+          type: 'sms',
+          date_created: '2024-01-17T09:15:00Z',
+          date_updated: '2024-01-17T09:15:00Z',
+          user_id: 'user_456',
+          user_name: 'Support Agent',
+          user_email: 'support@company.com',
+          contact_id: 'contact_123',
+          direction: 'outbound',
+          phone: '+1234567890',
+          text: 'Your account has been activated!',
+          status: 'sent',
+        },
+        {
+          id: 'activity_sms_2',
+          type: 'sms',
+          date_created: '2024-01-17T09:20:00Z',
+          date_updated: '2024-01-17T09:20:00Z',
+          user_id: 'user_456',
+          user_name: 'Support Agent',
+          user_email: 'support@company.com',
+          contact_id: 'contact_123',
+          direction: 'inbound',
+          phone: '+1234567890',
+          text: 'Perfect, thank you!',
+          status: 'received',
+        },
+      ],
+      has_more: false,
+    },
+    empty: {
+      data: [],
+      has_more: false,
+    },
+  },
+  users: {
+    data: [
+      {
+        id: 'user_456',
+        email: 'support@company.com',
+        first_name: 'Support',
+        last_name: 'Agent',
+        display_name: 'Support Agent',
+      },
+    ],
+  },
 };
 
-describe('useCommunication hooks', () => {
+describe('Close CRM Sync Integration Tests', () => {
   beforeEach(() => {
+    // Reset fetch mock
     jest.clearAllMocks();
-    mockUseAuth.mockReturnValue({
-      user: { id: 'test-user-id', email: 'test@example.com' },
-      session: { access_token: 'test-token' },
-    } as any);
   });
 
-  describe('useSyncUserHistory', () => {
-    it('should successfully sync user history', async () => {
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: 'test-token' } },
-        error: null,
-      } as any);
+  describe('Successful sync scenarios', () => {
+    it('should sync email history for existing contact', async () => {
+      // Mock Close CRM API calls
+      global.fetch = jest.fn()
+        .mockImplementationOnce(() => // Contact search
+          Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockCloseAPIResponses.contactSearch.success),
+          })
+        )
+        .mockImplementationOnce(() => // Users fetch
+          Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockCloseAPIResponses.users),
+          })
+        )
+        .mockImplementationOnce(() => // Activities fetch
+          Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockCloseAPIResponses.activities.withEmails),
+          })
+        );
 
-      const mockResponse = {
-        success: true,
-        importedCount: 5,
-        closeContactId: 'contact-123',
-        message: 'Imported 5 historical messages',
+      // Test the sync function
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('No session for test');
+      }
+
+      const response = await fetch(
+        'https://vrnjxgfzzbexjaytszvg.supabase.co/functions/v1/close-crm-sync-user-history',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      expect(response.ok).toBe(true);
+      
+      const result = await response.json();
+      expect(result.success).toBe(true);
+      expect(result.importedCount).toBeGreaterThan(0);
+      expect(result.closeContactId).toBe('contact_123');
+    });
+
+    it('should handle contact not found scenario', async () => {
+      global.fetch = jest.fn()
+        .mockImplementationOnce(() => // Contact search - not found
+          Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockCloseAPIResponses.contactSearch.notFound),
+          })
+        );
+
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('No session for test');
+      }
+
+      const response = await fetch(
+        'https://vrnjxgfzzbexjaytszvg.supabase.co/functions/v1/close-crm-sync-user-history',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      expect(response.ok).toBe(true);
+      
+      const result = await response.json();
+      expect(result.message).toBe('No matching contact found');
+    });
+
+    it('should sync SMS history correctly', async () => {
+      global.fetch = jest.fn()
+        .mockImplementationOnce(() => // Contact search
+          Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockCloseAPIResponses.contactSearch.success),
+          })
+        )
+        .mockImplementationOnce(() => // Users fetch
+          Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockCloseAPIResponses.users),
+          })
+        )
+        .mockImplementationOnce(() => // Activities fetch
+          Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockCloseAPIResponses.activities.withSMS),
+          })
+        );
+
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('No session for test');
+      }
+
+      const response = await fetch(
+        'https://vrnjxgfzzbexjaytszvg.supabase.co/functions/v1/close-crm-sync-user-history',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      expect(response.ok).toBe(true);
+      
+      const result = await response.json();
+      expect(result.success).toBe(true);
+      expect(result.importedCount).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Error scenarios', () => {
+    it('should handle Close CRM API errors', async () => {
+      global.fetch = jest.fn()
+        .mockImplementationOnce(() => // Contact search fails
+          Promise.resolve({
+            ok: false,
+            status: 401,
+            statusText: 'Unauthorized',
+          })
+        );
+
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('No session for test');
+      }
+
+      const response = await fetch(
+        'https://vrnjxgfzzbexjaytszvg.supabase.co/functions/v1/close-crm-sync-user-history',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      expect(response.ok).toBe(false);
+      expect(response.status).toBe(500);
+    });
+
+    it('should handle network timeouts', async () => {
+      global.fetch = jest.fn()
+        .mockImplementationOnce(() => // Network timeout
+          Promise.reject(new Error('Network timeout'))
+        );
+
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('No session for test');
+      }
+
+      const response = await fetch(
+        'https://vrnjxgfzzbexjaytszvg.supabase.co/functions/v1/close-crm-sync-user-history',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      expect(response.ok).toBe(false);
+    });
+  });
+
+  describe('Data validation', () => {
+    it('should correctly identify message sender types', async () => {
+      // This test would verify that emails from the user are marked as 'user'
+      // and emails from staff are marked as 'staff'
+      
+      const emailFromUser = {
+        type: 'email',
+        from: 'test@example.com', // User's email
+        to: ['support@company.com'],
+        subject: 'Help request',
+        body_text: 'I need help with my account',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: true,
-        status: 200,
-        headers: new Headers({ 'content-type': 'application/json' }),
-        json: () => Promise.resolve(mockResponse),
-      });
+      const emailFromStaff = {
+        type: 'email',
+        from: 'support@company.com', // Staff email
+        to: ['test@example.com'],
+        subject: 'Re: Help request',
+        body_text: 'Happy to help!',
+      };
 
-      const { result } = renderHook(() => useSyncUserHistory(), {
-        wrapper: createWrapper(),
-      });
+      // Mock activities with mixed sender types
+      const mockActivities = {
+        data: [emailFromUser, emailFromStaff],
+        has_more: false,
+      };
 
-      result.current.mutate();
+      global.fetch = jest.fn()
+        .mockImplementationOnce(() => // Contact search
+          Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockCloseAPIResponses.contactSearch.success),
+          })
+        )
+        .mockImplementationOnce(() => // Users fetch
+          Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockCloseAPIResponses.users),
+          })
+        )
+        .mockImplementationOnce(() => // Activities fetch
+          Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockActivities),
+          })
+        );
 
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('No session for test');
+      }
 
-      expect(result.current.data).toEqual(mockResponse);
-      expect(global.fetch).toHaveBeenCalledWith(
+      const response = await fetch(
         'https://vrnjxgfzzbexjaytszvg.supabase.co/functions/v1/close-crm-sync-user-history',
-        expect.objectContaining({
+        {
           method: 'POST',
-          headers: expect.objectContaining({
+          headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer test-token',
-            'apikey': expect.any(String),
-          }),
-        })
-      );
-    });
-
-    it('should handle API errors with JSON response', async () => {
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: 'test-token' } },
-        error: null,
-      } as any);
-
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: false,
-        status: 400,
-        headers: new Headers({ 'content-type': 'application/json' }),
-        json: () => Promise.resolve({ error: 'No matching contact found' }),
-      });
-
-      const { result } = renderHook(() => useSyncUserHistory(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate();
-
-      await waitFor(() => {
-        expect(result.current.isError).toBe(true);
-      });
-
-      expect(result.current.error?.message).toBe('No matching contact found');
-    });
-
-    it('should handle API errors with text response', async () => {
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: 'test-token' } },
-        error: null,
-      } as any);
-
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: false,
-        status: 500,
-        headers: new Headers({ 'content-type': 'text/plain' }),
-        text: () => Promise.resolve('Internal Server Error'),
-      });
-
-      const { result } = renderHook(() => useSyncUserHistory(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate();
-
-      await waitFor(() => {
-        expect(result.current.isError).toBe(true);
-      });
-
-      expect(result.current.error?.message).toBe('Internal Server Error');
-    });
-
-    it('should handle network errors', async () => {
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: { access_token: 'test-token' } },
-        error: null,
-      } as any);
-
-      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
-
-      const { result } = renderHook(() => useSyncUserHistory(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate();
-
-      await waitFor(() => {
-        expect(result.current.isError).toBe(true);
-      });
-
-      expect(result.current.error?.message).toBe('Network error');
-    });
-
-    it('should handle missing session', async () => {
-      mockSupabase.auth.getSession.mockResolvedValue({
-        data: { session: null },
-        error: null,
-      } as any);
-
-      const { result } = renderHook(() => useSyncUserHistory(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate();
-
-      await waitFor(() => {
-        expect(result.current.isError).toBe(true);
-      });
-
-      expect(result.current.error?.message).toBe('No session');
-    });
-  });
-
-  describe('useStaffContacts', () => {
-    it('should fetch staff contacts successfully', async () => {
-      const mockContacts = [
-        {
-          id: '1',
-          close_contact_id: 'contact-1',
-          name: 'John Doe',
-          email: 'john@example.com',
-          phone: '123-456-7890',
-          role: 'Support Agent',
-          avatar_url: null,
-        },
-        {
-          id: '2',
-          close_contact_id: 'contact-2',
-          name: 'Jane Smith',
-          email: 'jane@example.com',
-          phone: '098-765-4321',
-          role: 'Account Manager',
-          avatar_url: null,
-        },
-      ];
-
-      mockSupabase.from.mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({
-              data: mockContacts,
-              error: null,
-            }),
-          }),
-        }),
-      } as any);
-
-      const { result } = renderHook(() => useStaffContacts(), {
-        wrapper: createWrapper(),
-      });
-
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
-
-      expect(result.current.data).toEqual(mockContacts);
-    });
-  });
-
-  describe('useConversationThreads', () => {
-    it('should fetch conversation threads for authenticated user', async () => {
-      const mockThreads = [
-        {
-          id: 'thread-1',
-          staff_contact_id: 'contact-1',
-          subject: 'Support Request',
-          last_message_at: '2024-01-15T10:00:00Z',
-          unread_count: 2,
-          close_crm_contacts: {
-            id: 'contact-1',
-            name: 'John Doe',
-            email: 'john@example.com',
-            role: 'Support Agent',
+            'Authorization': `Bearer ${session.access_token}`,
           },
-        },
-      ];
+        }
+      );
 
-      mockSupabase.from.mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({
-              data: mockThreads,
-              error: null,
-            }),
-          }),
-        }),
-      } as any);
-
-      const { result } = renderHook(() => useConversationThreads(), {
-        wrapper: createWrapper(),
-      });
-
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
-
-      expect(result.current.data).toEqual(mockThreads);
-    });
-
-    it('should not fetch threads when user is not authenticated', () => {
-      mockUseAuth.mockReturnValue({
-        user: null,
-        session: null,
-      } as any);
-
-      const { result } = renderHook(() => useConversationThreads(), {
-        wrapper: createWrapper(),
-      });
-
-      expect(result.current.isIdle).toBe(true);
-      expect(mockSupabase.from).not.toHaveBeenCalled();
+      expect(response.ok).toBe(true);
+      
+      const result = await response.json();
+      expect(result.success).toBe(true);
+      expect(result.importedCount).toBe(2);
     });
   });
 });

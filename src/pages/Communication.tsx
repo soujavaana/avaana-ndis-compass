@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { UserIcon, SendIcon, Mail, Phone, Loader2, Plus, RefreshCw, History, Che
 import { useStaffContacts, useConversationThreads, useMessages, useSendMessage, useCreateThread, useSyncCloseContacts, useSyncUserHistory, useUserSyncStatus } from '@/hooks/useCommunication';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import CloseCrmDebug from '@/components/communication/CloseCrmDebug';
 
 const Communication = () => {
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
@@ -264,239 +264,252 @@ const Communication = () => {
         </div>
       </div>
 
-      {showNewMessage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-          <Card className="w-96">
-            <CardHeader>
-              <CardTitle>New Message</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Staff Member</label>
-                <select 
-                  value={newMessageStaff} 
-                  onChange={(e) => setNewMessageStaff(e.target.value)}
-                  className="w-full mt-1 p-2 border rounded-md"
-                >
-                  <option value="">Select staff member...</option>
-                  {staffContacts?.map(staff => (
-                    <option key={staff.id} value={staff.id}>
-                      {staff.name} - {staff.role}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Subject</label>
-                <Input 
-                  value={newMessageSubject}
-                  onChange={(e) => setNewMessageSubject(e.target.value)}
-                  placeholder="Enter subject..."
-                  className="mt-1"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handleCreateNewThread}
-                  disabled={!newMessageStaff || !newMessageSubject.trim() || createThread.isPending}
-                >
-                  {createThread.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Create
-                </Button>
-                <Button variant="outline" onClick={() => setShowNewMessage(false)}>
-                  Cancel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-1">
-          <Card className="h-[calc(100vh-12rem)]">
-            <CardHeader className="pb-3">
-              <CardTitle className="font-normal">Conversations</CardTitle>
-              <div className="mt-2">
-                <Input placeholder="Search messages..." />
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="overflow-y-auto h-[calc(100%-5rem)]">
-                {threadsLoading ? (
-                  <div className="p-4 text-center">
-                    <Loader2 className="w-6 h-6 animate-spin mx-auto" />
-                  </div>
-                ) : threads?.length ? (
-                  threads.map(thread => (
-                    <div 
-                      key={thread.id}
-                      className={`cursor-pointer border-b hover:bg-gray-50 ${
-                        selectedThreadId === thread.id ? 'border-l-4 border-avaana-primary bg-gray-50' : ''
-                      }`}
-                      onClick={() => setSelectedThreadId(thread.id)}
+      <Tabs defaultValue="messages" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="messages">Messages</TabsTrigger>
+          <TabsTrigger value="debug">Debug & Lookup</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="messages" className="mt-6">
+          {showNewMessage && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+              <Card className="w-96">
+                <CardHeader>
+                  <CardTitle>New Message</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Staff Member</label>
+                    <select 
+                      value={newMessageStaff} 
+                      onChange={(e) => setNewMessageStaff(e.target.value)}
+                      className="w-full mt-1 p-2 border rounded-md"
                     >
-                      <div className="p-4">
-                        <div className="flex justify-between">
-                          <div className="font-normal">{thread.close_crm_contacts.name}</div>
-                          <div className="text-xs text-gray-500">
-                            {thread.last_message_at ? 
-                              new Date(thread.last_message_at).toLocaleDateString() : 
-                              'No messages'
-                            }
-                          </div>
-                        </div>
-                        <div className="text-sm truncate text-gray-600">
-                          {thread.subject || 'No subject'}
-                        </div>
-                        <div className="flex justify-between mt-1">
-                          <div className="text-xs text-gray-500">
-                            {thread.close_crm_contacts.role}
-                          </div>
-                          {thread.unread_count > 0 && (
-                            <div className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                              {thread.unread_count}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="p-4 text-center text-gray-500">
-                    No conversations yet. Click "New Message" to start one.
+                      <option value="">Select staff member...</option>
+                      {staffContacts?.map(staff => (
+                        <option key={staff.id} value={staff.id}>
+                          {staff.name} - {staff.role}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                  <div>
+                    <label className="text-sm font-medium">Subject</label>
+                    <Input 
+                      value={newMessageSubject}
+                      onChange={(e) => setNewMessageSubject(e.target.value)}
+                      placeholder="Enter subject..."
+                      className="mt-1"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleCreateNewThread}
+                      disabled={!newMessageStaff || !newMessageSubject.trim() || createThread.isPending}
+                    >
+                      {createThread.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                      Create
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowNewMessage(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
-        <div className="lg:col-span-3">
-          <Card className="h-[calc(100vh-12rem)] flex flex-col">
-            {selectedStaff ? (
-              <>
-                <CardHeader className="pb-3 border-b">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-avaana-primary h-10 w-10 rounded-full flex items-center justify-center text-white">
-                        <UserIcon size={20} />
-                      </div>
-                      <div>
-                        <CardTitle className="text-base font-normal">{selectedStaff.name}</CardTitle>
-                        <div className="text-sm text-gray-500">{selectedStaff.role}</div>
-                        <div className="flex items-center gap-4 mt-1">
-                          {selectedStaff.email && (
-                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                              <Mail size={12} />
-                              <span>{selectedStaff.email}</span>
-                            </div>
-                          )}
-                          {selectedStaff.phone && (
-                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                              <Phone size={12} />
-                              <span>{selectedStaff.phone}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <Tabs defaultValue="messages" className="w-[320px]">
-                        <TabsList className="bg-gray-100 grid w-full grid-cols-3 rounded-lg h-8">
-                          <TabsTrigger value="messages" className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7">
-                            Messages
-                          </TabsTrigger>
-                          <TabsTrigger value="files" className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7">
-                            Files
-                          </TabsTrigger>
-                          <TabsTrigger value="tasks" className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7">
-                            Tasks
-                          </TabsTrigger>
-                        </TabsList>
-                      </Tabs>
-                    </div>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-1">
+              <Card className="h-[calc(100vh-12rem)]">
+                <CardHeader className="pb-3">
+                  <CardTitle className="font-normal">Conversations</CardTitle>
+                  <div className="mt-2">
+                    <Input placeholder="Search messages..." />
                   </div>
                 </CardHeader>
-                <CardContent className="flex-1 overflow-y-auto p-4">
-                  <div className="space-y-4">
-                    {messagesLoading ? (
-                      <div className="text-center">
+                <CardContent className="p-0">
+                  <div className="overflow-y-auto h-[calc(100%-5rem)]">
+                    {threadsLoading ? (
+                      <div className="p-4 text-center">
                         <Loader2 className="w-6 h-6 animate-spin mx-auto" />
                       </div>
-                    ) : messages?.length ? (
-                      messages.map(message => (
-                        <div key={message.id} className={`flex ${message.sender_type === 'staff' ? 'justify-start' : 'justify-end'}`}>
-                          <div className={`max-w-[70%] rounded-lg p-4 ${
-                            message.sender_type === 'staff' 
-                              ? 'bg-gray-100 text-gray-800' 
-                              : 'bg-avaana-primary text-white'
-                          }`}>
-                            <div className="flex justify-between items-start mb-1">
-                              <div className="font-normal">
-                                {message.sender_type === 'staff' ? 
-                                  (message.staff_name || selectedStaff.name) : 
-                                  'You'
+                    ) : threads?.length ? (
+                      threads.map(thread => (
+                        <div 
+                          key={thread.id}
+                          className={`cursor-pointer border-b hover:bg-gray-50 ${
+                            selectedThreadId === thread.id ? 'border-l-4 border-avaana-primary bg-gray-50' : ''
+                          }`}
+                          onClick={() => setSelectedThreadId(thread.id)}
+                        >
+                          <div className="p-4">
+                            <div className="flex justify-between">
+                              <div className="font-normal">{thread.close_crm_contacts.name}</div>
+                              <div className="text-xs text-gray-500">
+                                {thread.last_message_at ? 
+                                  new Date(thread.last_message_at).toLocaleDateString() : 
+                                  'No messages'
                                 }
                               </div>
-                              <div className="flex flex-col items-end">
-                                <div className={`text-xs ${
-                                  message.sender_type === 'staff' ? 'text-gray-500' : 'text-white/80'
-                                }`}>
-                                  {new Date(message.sent_at).toLocaleString()}
-                                </div>
-                                {message.is_historical && (
-                                  <div className={`text-xs ${
-                                    message.sender_type === 'staff' ? 'text-gray-400' : 'text-white/60'
-                                  } flex items-center gap-1 mt-1`}>
-                                    <History size={10} />
-                                    <span>{message.message_type}</span>
-                                  </div>
-                                )}
-                              </div>
                             </div>
-                            <div className="whitespace-pre-line">{message.content}</div>
+                            <div className="text-sm truncate text-gray-600">
+                              {thread.subject || 'No subject'}
+                            </div>
+                            <div className="flex justify-between mt-1">
+                              <div className="text-xs text-gray-500">
+                                {thread.close_crm_contacts.role}
+                              </div>
+                              {thread.unread_count > 0 && (
+                                <div className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                  {thread.unread_count}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))
                     ) : (
-                      <div className="text-center text-gray-500">
-                        No messages in this conversation yet. Start the conversation below!
+                      <div className="p-4 text-center text-gray-500">
+                        No conversations yet. Click "New Message" to start one.
                       </div>
                     )}
                   </div>
                 </CardContent>
-                <div className="p-4 border-t">
-                  <div className="flex gap-2">
-                    <Input 
-                      placeholder="Type your message..." 
-                      className="flex-1"
-                      value={messageContent}
-                      onChange={(e) => setMessageContent(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-                    />
-                    <Button 
-                      onClick={handleSendMessage}
-                      disabled={!messageContent.trim() || sendMessage.isPending || !selectedStaff.email}
-                      className="bg-avaana-primary text-white p-2 rounded-md hover:bg-avaana-secondary transition-colors"
-                    >
-                      {sendMessage.isPending ? (
-                        <Loader2 size={20} className="animate-spin" />
-                      ) : (
-                        <SendIcon size={20} />
-                      )}
-                    </Button>
+              </Card>
+            </div>
+
+            <div className="lg:col-span-3">
+              <Card className="h-[calc(100vh-12rem)] flex flex-col">
+                {selectedStaff ? (
+                  <>
+                    <CardHeader className="pb-3 border-b">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-avaana-primary h-10 w-10 rounded-full flex items-center justify-center text-white">
+                            <UserIcon size={20} />
+                          </div>
+                          <div>
+                            <CardTitle className="text-base font-normal">{selectedStaff.name}</CardTitle>
+                            <div className="text-sm text-gray-500">{selectedStaff.role}</div>
+                            <div className="flex items-center gap-4 mt-1">
+                              {selectedStaff.email && (
+                                <div className="flex items-center gap-1 text-xs text-gray-500">
+                                  <Mail size={12} />
+                                  <span>{selectedStaff.email}</span>
+                                </div>
+                              )}
+                              {selectedStaff.phone && (
+                                <div className="flex items-center gap-1 text-xs text-gray-500">
+                                  <Phone size={12} />
+                                  <span>{selectedStaff.phone}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <Tabs defaultValue="messages" className="w-[320px]">
+                            <TabsList className="bg-gray-100 grid w-full grid-cols-3 rounded-lg h-8">
+                              <TabsTrigger value="messages" className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7">
+                                Messages
+                              </TabsTrigger>
+                              <TabsTrigger value="files" className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7">
+                                Files
+                              </TabsTrigger>
+                              <TabsTrigger value="tasks" className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7">
+                                Tasks
+                              </TabsTrigger>
+                            </TabsList>
+                          </Tabs>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex-1 overflow-y-auto p-4">
+                      <div className="space-y-4">
+                        {messagesLoading ? (
+                          <div className="text-center">
+                            <Loader2 className="w-6 h-6 animate-spin mx-auto" />
+                          </div>
+                        ) : messages?.length ? (
+                          messages.map(message => (
+                            <div key={message.id} className={`flex ${message.sender_type === 'staff' ? 'justify-start' : 'justify-end'}`}>
+                              <div className={`max-w-[70%] rounded-lg p-4 ${
+                                message.sender_type === 'staff' 
+                                  ? 'bg-gray-100 text-gray-800' 
+                                  : 'bg-avaana-primary text-white'
+                              }`}>
+                                <div className="flex justify-between items-start mb-1">
+                                  <div className="font-normal">
+                                    {message.sender_type === 'staff' ? 
+                                      (message.staff_name || selectedStaff.name) : 
+                                      'You'
+                                    }
+                                  </div>
+                                  <div className="flex flex-col items-end">
+                                    <div className={`text-xs ${
+                                      message.sender_type === 'staff' ? 'text-gray-500' : 'text-white/80'
+                                    }`}>
+                                      {new Date(message.sent_at).toLocaleString()}
+                                    </div>
+                                    {message.is_historical && (
+                                      <div className={`text-xs ${
+                                        message.sender_type === 'staff' ? 'text-gray-400' : 'text-white/60'
+                                      } flex items-center gap-1 mt-1`}>
+                                        <History size={10} />
+                                        <span>{message.message_type}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="whitespace-pre-line">{message.content}</div>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center text-gray-500">
+                            No messages in this conversation yet. Start the conversation below!
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                    <div className="p-4 border-t">
+                      <div className="flex gap-2">
+                        <Input 
+                          placeholder="Type your message..." 
+                          className="flex-1"
+                          value={messageContent}
+                          onChange={(e) => setMessageContent(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                        />
+                        <Button 
+                          onClick={handleSendMessage}
+                          disabled={!messageContent.trim() || sendMessage.isPending || !selectedStaff.email}
+                          className="bg-avaana-primary text-white p-2 rounded-md hover:bg-avaana-secondary transition-colors"
+                        >
+                          {sendMessage.isPending ? (
+                            <Loader2 size={20} className="animate-spin" />
+                          ) : (
+                            <SendIcon size={20} />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center text-gray-500">
+                    Select a conversation to start messaging or create a new one
                   </div>
-                </div>
-              </>
-            ) : (
-              <div className="flex-1 flex items-center justify-center text-gray-500">
-                Select a conversation to start messaging or create a new one
-              </div>
-            )}
-          </Card>
-        </div>
-      </div>
+                )}
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="debug" className="mt-6">
+          <CloseCrmDebug />
+        </TabsContent>
+      </Tabs>
     </Layout>
   );
 };
