@@ -121,7 +121,7 @@ const Profile = () => {
 
       <Tabs defaultValue="business">
         <TabsList className="mb-6">
-          <TabsTrigger value="business">
+          <TabsTrigger value="business" className="bg-avaana-warning">
             <Building2 className="mr-2 h-4 w-4" />
             Business Information
           </TabsTrigger>
