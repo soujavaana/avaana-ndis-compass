@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Search, User, Mail, Phone, Calendar, Activity, Users } from 'lucide-react';
+import { Loader2, Search, User, Mail, Phone, Calendar, Activity, Users, MessageSquare, FileText, PhoneCall } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -27,10 +27,14 @@ interface CloseActivity {
   from?: string;
   subject?: string;
   body_text?: string;
+  body_html?: string;
   text?: string;
   note?: string;
+  body?: string;
   direction?: string;
   status?: string;
+  duration?: number;
+  phone?: string;
 }
 
 interface CloseUser {
@@ -53,6 +57,25 @@ const CloseCrmDebug = () => {
     const timestamp = new Date().toLocaleTimeString();
     setLogs(prev => [...prev, `[${timestamp}] ${message}`]);
     console.log(`[Close CRM Debug] ${message}`);
+  };
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'email':
+        return <Mail size={16} className="text-blue-500" />;
+      case 'sms':
+        return <MessageSquare size={16} className="text-green-500" />;
+      case 'call':
+        return <PhoneCall size={16} className="text-purple-500" />;
+      case 'note':
+        return <FileText size={16} className="text-gray-500" />;
+      default:
+        return <Activity size={16} className="text-gray-400" />;
+    }
+  };
+
+  const getActivityContent = (activity: CloseActivity) => {
+    return activity.body_text || activity.body_html || activity.text || activity.note || activity.body || 'No content available';
   };
 
   const lookupContact = async () => {
@@ -100,7 +123,7 @@ const CloseCrmDebug = () => {
       }
 
       const result = await response.json();
-      addLog(`Lookup completed: ${JSON.stringify(result)}`);
+      addLog(`Lookup completed successfully`);
 
       if (result.contact) {
         setContactData(result.contact);
@@ -166,7 +189,7 @@ const CloseCrmDebug = () => {
             </Button>
           </div>
           <p className="text-sm text-gray-600">
-            This tool uses a Supabase Edge Function to safely call the Close CRM API and fetch activities using the lead_id.
+            This tool uses a Supabase Edge Function to safely call the Close CRM API and fetch all lead activities.
           </p>
         </CardContent>
       </Card>
@@ -242,53 +265,95 @@ const CloseCrmDebug = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity size={20} />
-              Recent Activities ({activities.length})
+              Activities & Messages ({activities.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 max-h-80 overflow-y-auto">
+            <div className="space-y-4 max-h-96 overflow-y-auto">
               {activities.map((activity) => {
                 const user = users[activity.user_id];
+                const content = getActivityContent(activity);
+                
                 return (
-                  <div key={activity.id} className="border rounded p-3 bg-gray-50">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{activity.type}</span>
-                        {user && (
-                          <span className="text-sm text-blue-600">
-                            by {user.display_name}
-                          </span>
-                        )}
+                  <div key={activity.id} className="border rounded-lg p-4 bg-gray-50">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center gap-3">
+                        {getActivityIcon(activity.type)}
+                        <div>
+                          <span className="font-medium capitalize">{activity.type}</span>
+                          {user && (
+                            <div className="text-sm text-blue-600">
+                              by {user.display_name} ({user.email})
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <span className="text-sm text-gray-500">
                         {new Date(activity.date_created).toLocaleString()}
                       </span>
                     </div>
+
                     {activity.subject && (
-                      <div className="text-sm"><strong>Subject:</strong> {activity.subject}</div>
+                      <div className="mb-2">
+                        <strong className="text-sm">Subject:</strong> 
+                        <span className="ml-2">{activity.subject}</span>
+                      </div>
                     )}
+
                     {activity.direction && (
-                      <div className="text-sm"><strong>Direction:</strong> {activity.direction}</div>
+                      <div className="mb-2">
+                        <strong className="text-sm">Direction:</strong> 
+                        <span className="ml-2 capitalize">{activity.direction}</span>
+                      </div>
                     )}
+
                     {activity.status && (
-                      <div className="text-sm"><strong>Status:</strong> {activity.status}</div>
+                      <div className="mb-2">
+                        <strong className="text-sm">Status:</strong> 
+                        <span className="ml-2 capitalize">{activity.status}</span>
+                      </div>
                     )}
+
+                    {activity.duration && (
+                      <div className="mb-2">
+                        <strong className="text-sm">Duration:</strong> 
+                        <span className="ml-2">{activity.duration} seconds</span>
+                      </div>
+                    )}
+
+                    {activity.phone && (
+                      <div className="mb-2">
+                        <strong className="text-sm">Phone:</strong> 
+                        <span className="ml-2">{activity.phone}</span>
+                      </div>
+                    )}
+
                     {activity.to && activity.to.length > 0 && (
-                      <div className="text-sm"><strong>To:</strong> {activity.to.join(', ')}</div>
+                      <div className="mb-2">
+                        <strong className="text-sm">To:</strong> 
+                        <span className="ml-2">{activity.to.join(', ')}</span>
+                      </div>
                     )}
+
                     {activity.from && (
-                      <div className="text-sm"><strong>From:</strong> {activity.from}</div>
+                      <div className="mb-2">
+                        <strong className="text-sm">From:</strong> 
+                        <span className="ml-2">{activity.from}</span>
+                      </div>
                     )}
-                    {(activity.body_text || activity.text || activity.note) && (
-                      <div className="text-sm mt-2">
-                        <strong>Content:</strong>
-                        <div className="mt-1 p-2 bg-white rounded border text-xs">
-                          {activity.body_text || activity.text || activity.note}
+
+                    {content && content !== 'No content available' && (
+                      <div className="mt-3">
+                        <strong className="text-sm">Content:</strong>
+                        <div className="mt-2 p-3 bg-white rounded border text-sm whitespace-pre-wrap">
+                          {content}
                         </div>
                       </div>
                     )}
-                    <div className="text-xs text-gray-400 mt-2">
+
+                    <div className="text-xs text-gray-400 mt-3 pt-2 border-t">
                       Activity ID: {activity.id} | User ID: {activity.user_id}
+                      {activity.contact_id && ` | Contact ID: ${activity.contact_id}`}
                     </div>
                   </div>
                 );
