@@ -123,72 +123,166 @@ const handler = async (req: Request): Promise<Response> => {
       console.log(`⚠️ Users fetch failed: ${usersResponse.status}`);
     }
 
-    // Fetch activities - use multiple strategies to get ALL activities
+    // Fetch activities using multiple comprehensive strategies
     console.log('📨 Fetching activities for lead and contact...');
     
-    let activities = [];
+    let allActivities = [];
+    const activityIds = new Set(); // To avoid duplicates
     
-    // Strategy 1: Use lead_id to get all activities for the lead
+    // Strategy 1: Fetch activities by lead_id with pagination
     if (contact.lead_id) {
       console.log(`🔗 Fetching activities for lead_id: ${contact.lead_id}`);
       
-      const activitiesResponse = await fetch(`https://api.close.com/api/v1/activity/?lead_id=${contact.lead_id}&_limit=1000&_offset=0`, {
-        headers: {
-          'Authorization': 'Basic ' + btoa(closeApiKey + ':'),
-          'Content-Type': 'application/json',
-        },
-      });
+      let offset = 0;
+      const limit = 100; // Max allowed by Close API
+      let hasMore = true;
+      
+      while (hasMore) {
+        const activitiesResponse = await fetch(
+          `https://api.close.com/api/v1/activity/?lead_id=${contact.lead_id}&_limit=${limit}&_offset=${offset}`,
+          {
+            headers: {
+              'Authorization': 'Basic ' + btoa(closeApiKey + ':'),
+              'Content-Type': 'application/json',
+            },
+          }
+        );
 
-      console.log(`📨 Activities response status: ${activitiesResponse.status}`);
+        console.log(`📨 Activities response status (offset ${offset}): ${activitiesResponse.status}`);
 
-      if (activitiesResponse.ok) {
-        const activitiesResult = await activitiesResponse.json();
-        activities = activitiesResult.data || [];
-        console.log(`📨 Found ${activities.length} total activities for lead`);
-      } else {
-        const errorText = await activitiesResponse.text();
-        console.log(`⚠️ Activities fetch error: ${errorText}`);
+        if (activitiesResponse.ok) {
+          const activitiesResult = await activitiesResponse.json();
+          const activities = activitiesResult.data || [];
+          
+          console.log(`📨 Found ${activities.length} activities at offset ${offset}`);
+          
+          // Add unique activities
+          activities.forEach((activity: any) => {
+            if (!activityIds.has(activity.id)) {
+              activityIds.add(activity.id);
+              allActivities.push(activity);
+            }
+          });
+          
+          // Check if we got the full limit, indicating there might be more
+          hasMore = activities.length === limit;
+          offset += limit;
+        } else {
+          const errorText = await activitiesResponse.text();
+          console.log(`⚠️ Activities fetch error at offset ${offset}: ${errorText}`);
+          hasMore = false;
+        }
       }
     }
 
-    // Strategy 2: If no activities found, try using contact_id
-    if (activities.length === 0) {
+    // Strategy 2: Fetch activities by contact_id if we have fewer than expected
+    if (allActivities.length < 10) {
       console.log(`🔗 Trying contact_id search: ${contact.id}`);
       
-      const contactActivitiesResponse = await fetch(`https://api.close.com/api/v1/activity/?contact_id=${contact.id}&_limit=500`, {
-        headers: {
-          'Authorization': 'Basic ' + btoa(closeApiKey + ':'),
-          'Content-Type': 'application/json',
-        },
-      });
+      const contactActivitiesResponse = await fetch(
+        `https://api.close.com/api/v1/activity/?contact_id=${contact.id}&_limit=100`,
+        {
+          headers: {
+            'Authorization': 'Basic ' + btoa(closeApiKey + ':'),
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       if (contactActivitiesResponse.ok) {
         const contactActivitiesResult = await contactActivitiesResponse.json();
-        activities = contactActivitiesResult.data || [];
-        console.log(`📨 Found ${activities.length} activities via contact_id`);
+        const activities = contactActivitiesResult.data || [];
+        
+        activities.forEach((activity: any) => {
+          if (!activityIds.has(activity.id)) {
+            activityIds.add(activity.id);
+            allActivities.push(activity);
+          }
+        });
+        
+        console.log(`📨 Found ${activities.length} additional activities via contact_id`);
       }
     }
 
-    // Strategy 3: If still no activities, try broader search by email
-    if (activities.length === 0) {
-      console.log(`🔗 Trying email-based activity search`);
+    // Strategy 3: Try broader activity search with different parameters
+    if (allActivities.length < 10) {
+      console.log(`🔗 Trying broader activity search`);
       
-      const emailActivitiesResponse = await fetch(`https://api.close.com/api/v1/activity/?query=${encodeURIComponent(email)}&_limit=500`, {
-        headers: {
-          'Authorization': 'Basic ' + btoa(closeApiKey + ':'),
-          'Content-Type': 'application/json',
-        },
-      });
+      // Try searching by email in activity content
+      const emailSearchResponse = await fetch(
+        `https://api.close.com/api/v1/activity/?query=${encodeURIComponent(email)}&_limit=100`,
+        {
+          headers: {
+            'Authorization': 'Basic ' + btoa(closeApiKey + ':'),
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      if (emailActivitiesResponse.ok) {
-        const emailActivitiesResult = await emailActivitiesResponse.json();
-        activities = emailActivitiesResult.data || [];
-        console.log(`📨 Found ${activities.length} activities via email search`);
+      if (emailSearchResponse.ok) {
+        const emailSearchResult = await emailSearchResponse.json();
+        const activities = emailSearchResult.data || [];
+        
+        // Filter activities that are related to our contact or lead
+        const relevantActivities = activities.filter((activity: any) => 
+          activity.contact_id === contact.id || 
+          activity.lead_id === contact.lead_id ||
+          (activity.to && activity.to.includes(email)) ||
+          (activity.from === email)
+        );
+        
+        relevantActivities.forEach((activity: any) => {
+          if (!activityIds.has(activity.id)) {
+            activityIds.add(activity.id);
+            allActivities.push(activity);
+          }
+        });
+        
+        console.log(`📨 Found ${relevantActivities.length} relevant activities via email search`);
       }
     }
 
-    // Process and normalize all activities regardless of type
-    const processedActivities = activities.map((activity: any) => {
+    // Strategy 4: Try searching by phone number if available
+    if (allActivities.length < 10 && contact.phones && contact.phones.length > 0) {
+      for (const phoneObj of contact.phones) {
+        const phone = phoneObj.phone;
+        console.log(`🔗 Trying phone search: ${phone}`);
+        
+        const phoneSearchResponse = await fetch(
+          `https://api.close.com/api/v1/activity/?query=${encodeURIComponent(phone)}&_limit=100`,
+          {
+            headers: {
+              'Authorization': 'Basic ' + btoa(closeApiKey + ':'),
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (phoneSearchResponse.ok) {
+          const phoneSearchResult = await phoneSearchResponse.json();
+          const activities = phoneSearchResult.data || [];
+          
+          // Filter activities that are related to our contact or lead
+          const relevantActivities = activities.filter((activity: any) => 
+            activity.contact_id === contact.id || 
+            activity.lead_id === contact.lead_id ||
+            (activity.phone && activity.phone.includes(phone.replace(/\D/g, '')))
+          );
+          
+          relevantActivities.forEach((activity: any) => {
+            if (!activityIds.has(activity.id)) {
+              activityIds.add(activity.id);
+              allActivities.push(activity);
+            }
+          });
+          
+          console.log(`📨 Found ${relevantActivities.length} relevant activities via phone search`);
+        }
+      }
+    }
+
+    // Process and normalize all activities
+    const processedActivities = allActivities.map((activity: any) => {
       return {
         id: activity.id,
         type: activity._type || activity.type || 'unknown',
@@ -213,6 +307,9 @@ const handler = async (req: Request): Promise<Response> => {
       };
     });
 
+    // Sort activities by date (newest first)
+    processedActivities.sort((a, b) => new Date(b.date_created).getTime() - new Date(a.date_created).getTime());
+
     // Log activity types and sample activities for debugging
     const activityTypes = processedActivities.reduce((acc: any, activity: any) => {
       acc[activity.type] = (acc[activity.type] || 0) + 1;
@@ -235,6 +332,8 @@ const handler = async (req: Request): Promise<Response> => {
         hasContent: !!(a.body_text || a.body_html || a.text || a.note || a.body)
       })));
     }
+
+    console.log(`✅ Total activities found: ${processedActivities.length}`);
 
     return new Response(
       JSON.stringify({ 
