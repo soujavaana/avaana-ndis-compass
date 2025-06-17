@@ -4,18 +4,66 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { UserIcon, SendIcon, Mail, Phone, Loader2, Plus, RefreshCw, History, CheckCircle, AlertCircle, Bug } from 'lucide-react';
+import { UserIcon, SendIcon, Mail, Phone, Loader2, Plus, RefreshCw, History, CheckCircle, AlertCircle, Bug, Activity, MessageSquare, FileText, PhoneCall, Clock, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { useStaffContacts, useConversationThreads, useMessages, useSendMessage, useCreateThread, useSyncCloseContacts, useSyncUserHistory, useUserSyncStatus } from '@/hooks/useCommunication';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import CloseCrmDebug from '@/components/communication/CloseCrmDebug';
 
+interface CloseContact {
+  id: string;
+  name: string;
+  lead_id: string;
+  emails: Array<{ email: string; type: string }>;
+  phones: Array<{ phone: string; type: string }>;
+  date_created: string;
+  date_updated: string;
+}
+
+interface CloseActivity {
+  id: string;
+  type: string;
+  date_created: string;
+  user_id: string;
+  contact_id?: string;
+  lead_id?: string;
+  to?: string[];
+  from?: string;
+  subject?: string;
+  body_text?: string;
+  body_html?: string;
+  text?: string;
+  note?: string;
+  body?: string;
+  direction?: string;
+  status?: string;
+  duration?: number;
+  phone?: string;
+  raw_data?: any;
+}
+
+interface CloseUser {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  display_name: string;
+}
+
 const Communication = () => {
+  const { user } = useAuth();
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
   const [messageContent, setMessageContent] = useState('');
   const [showNewMessage, setShowNewMessage] = useState(false);
   const [newMessageStaff, setNewMessageStaff] = useState('');
   const [newMessageSubject, setNewMessageSubject] = useState('');
+  
+  // Close CRM lookup state
+  const [contactData, setContactData] = useState<CloseContact | null>(null);
+  const [activities, setActivities] = useState<CloseActivity[]>([]);
+  const [users, setUsers] = useState<{ [key: string]: CloseUser }>({});
+  const [lookupLoading, setLookupLoading] = useState(false);
 
   const { data: staffContacts, isLoading: staffLoading } = useStaffContacts();
   const { data: threads, isLoading: threadsLoading } = useConversationThreads();
@@ -25,6 +73,83 @@ const Communication = () => {
   const createThread = useCreateThread();
   const syncContacts = useSyncCloseContacts();
   const syncUserHistory = useSyncUserHistory();
+
+  const getActivityIcon = (type: string, direction?: string) => {
+    switch (type) {
+      case 'email':
+        return direction === 'outbound' ? 
+          <ArrowUpRight size={16} className="text-blue-500" /> : 
+          <ArrowDownLeft size={16} className="text-blue-600" />;
+      case 'sms':
+        return <MessageSquare size={16} className="text-green-500" />;
+      case 'call':
+        return <PhoneCall size={16} className="text-purple-500" />;
+      case 'note':
+        return <FileText size={16} className="text-gray-500" />;
+      case 'unknown':
+        return <Clock size={16} className="text-yellow-500" />;
+      default:
+        return <Activity size={16} className="text-gray-400" />;
+    }
+  };
+
+  const getActivityContent = (activity: CloseActivity) => {
+    const content = activity.body_text || activity.body_html || activity.text || activity.note || activity.body;
+    if (content) return content;
+    
+    if (activity.raw_data) {
+      const rawData = activity.raw_data;
+      if (rawData.template_name) return `Template: ${rawData.template_name}`;
+      if (rawData.summary) return rawData.summary;
+      if (rawData.description) return rawData.description;
+    }
+    
+    return 'No content available';
+  };
+
+  // Auto-lookup contact data when component mounts
+  useEffect(() => {
+    const lookupUserContact = async () => {
+      if (!user?.email) return;
+
+      setLookupLoading(true);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+          throw new Error('No valid session found');
+        }
+
+        const response = await fetch('https://vrnjxgfzzbexjaytszvg.supabase.co/functions/v1/close-crm-lookup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZybmp4Z2Z6emJleGpheXRzenZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2MjkxOTcsImV4cCI6MjA2MzIwNTE5N30.euI15LNkMP1IMWojTAetE75ecjqrk-2Audt64AyMel4',
+          },
+          body: JSON.stringify({ email: user.email }),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.contact) {
+            setContactData(result.contact);
+          }
+          if (result.activities) {
+            setActivities(result.activities);
+          }
+          if (result.users) {
+            setUsers(result.users);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to lookup contact:', error);
+      } finally {
+        setLookupLoading(false);
+      }
+    };
+
+    lookupUserContact();
+  }, [user?.email]);
 
   // Auto-sync user history on first load if not already synced
   useEffect(() => {
@@ -157,7 +282,6 @@ const Communication = () => {
         description: `${result.message || 'Force sync completed'}${result.importedCount ? ` - ${result.importedCount} new messages imported` : ''}`,
       });
 
-      // Refresh the data
       window.location.reload();
     } catch (error: any) {
       console.error('Force sync error:', error);
@@ -381,7 +505,7 @@ const Communication = () => {
 
             <div className="lg:col-span-3">
               <Card className="h-[calc(100vh-12rem)] flex flex-col">
-                {selectedStaff ? (
+                {contactData ? (
                   <>
                     <CardHeader className="pb-3 border-b">
                       <div className="flex justify-between items-center">
@@ -390,115 +514,139 @@ const Communication = () => {
                             <UserIcon size={20} />
                           </div>
                           <div>
-                            <CardTitle className="text-base font-normal">{selectedStaff.name}</CardTitle>
-                            <div className="text-sm text-gray-500">{selectedStaff.role}</div>
+                            <CardTitle className="text-base font-normal">{contactData.name}</CardTitle>
                             <div className="flex items-center gap-4 mt-1">
-                              {selectedStaff.email && (
+                              {contactData.emails?.length > 0 && (
                                 <div className="flex items-center gap-1 text-xs text-gray-500">
                                   <Mail size={12} />
-                                  <span>{selectedStaff.email}</span>
+                                  <span>{contactData.emails[0].email}</span>
                                 </div>
                               )}
-                              {selectedStaff.phone && (
+                              {contactData.phones?.length > 0 && (
                                 <div className="flex items-center gap-1 text-xs text-gray-500">
                                   <Phone size={12} />
-                                  <span>{selectedStaff.phone}</span>
+                                  <span>{contactData.phones[0].phone}</span>
                                 </div>
                               )}
                             </div>
                           </div>
                         </div>
-                        <div>
-                          <Tabs defaultValue="messages" className="w-[320px]">
-                            <TabsList className="bg-gray-100 grid w-full grid-cols-3 rounded-lg h-8">
-                              <TabsTrigger value="messages" className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7">
-                                Messages
-                              </TabsTrigger>
-                              <TabsTrigger value="files" className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7">
-                                Files
-                              </TabsTrigger>
-                              <TabsTrigger value="tasks" className="text-xs rounded-md data-[state=active]:bg-white data-[state=active]:text-avaana-primary h-7">
-                                Tasks
-                              </TabsTrigger>
-                            </TabsList>
-                          </Tabs>
+                        <div className="text-sm text-gray-500">
+                          {lookupLoading ? 'Loading activities...' : `${activities.length} activities found`}
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent className="flex-1 overflow-y-auto p-4">
                       <div className="space-y-4">
-                        {messagesLoading ? (
+                        {lookupLoading ? (
                           <div className="text-center">
                             <Loader2 className="w-6 h-6 animate-spin mx-auto" />
+                            <p className="text-sm text-gray-500 mt-2">Loading your Close CRM activities...</p>
                           </div>
-                        ) : messages?.length ? (
-                          messages.map(message => (
-                            <div key={message.id} className={`flex ${message.sender_type === 'staff' ? 'justify-start' : 'justify-end'}`}>
-                              <div className={`max-w-[70%] rounded-lg p-4 ${
-                                message.sender_type === 'staff' 
-                                  ? 'bg-gray-100 text-gray-800' 
-                                  : 'bg-avaana-primary text-white'
-                              }`}>
-                                <div className="flex justify-between items-start mb-1">
-                                  <div className="font-normal">
-                                    {message.sender_type === 'staff' ? 
-                                      (message.staff_name || selectedStaff.name) : 
-                                      'You'
-                                    }
-                                  </div>
-                                  <div className="flex flex-col items-end">
-                                    <div className={`text-xs ${
-                                      message.sender_type === 'staff' ? 'text-gray-500' : 'text-white/80'
-                                    }`}>
-                                      {new Date(message.sent_at).toLocaleString()}
+                        ) : activities.length > 0 ? (
+                          activities.map((activity) => {
+                            const user = users[activity.user_id];
+                            const content = getActivityContent(activity);
+                            
+                            return (
+                              <div key={activity.id} className="border rounded-lg p-4 bg-gray-50">
+                                <div className="flex justify-between items-start mb-3">
+                                  <div className="flex items-center gap-3">
+                                    {getActivityIcon(activity.type, activity.direction)}
+                                    <div>
+                                      <span className="font-medium capitalize">{activity.type || 'Unknown'}</span>
+                                      {activity.direction && (
+                                        <span className="ml-2 text-sm text-gray-500 capitalize">({activity.direction})</span>
+                                      )}
+                                      {user && (
+                                        <div className="text-sm text-blue-600">
+                                          by {user.display_name} ({user.email})
+                                        </div>
+                                      )}
                                     </div>
-                                    {message.is_historical && (
-                                      <div className={`text-xs ${
-                                        message.sender_type === 'staff' ? 'text-gray-400' : 'text-white/60'
-                                      } flex items-center gap-1 mt-1`}>
-                                        <History size={10} />
-                                        <span>{message.message_type}</span>
-                                      </div>
-                                    )}
                                   </div>
+                                  <span className="text-sm text-gray-500">
+                                    {new Date(activity.date_created).toLocaleString()}
+                                  </span>
                                 </div>
-                                <div className="whitespace-pre-line">{message.content}</div>
+
+                                {activity.subject && (
+                                  <div className="mb-2">
+                                    <strong className="text-sm">Subject:</strong> 
+                                    <span className="ml-2">{activity.subject}</span>
+                                  </div>
+                                )}
+
+                                {activity.status && (
+                                  <div className="mb-2">
+                                    <strong className="text-sm">Status:</strong> 
+                                    <span className="ml-2 capitalize">{activity.status}</span>
+                                  </div>
+                                )}
+
+                                {activity.duration && (
+                                  <div className="mb-2">
+                                    <strong className="text-sm">Duration:</strong> 
+                                    <span className="ml-2">{activity.duration} seconds</span>
+                                  </div>
+                                )}
+
+                                {activity.phone && (
+                                  <div className="mb-2">
+                                    <strong className="text-sm">Phone:</strong> 
+                                    <span className="ml-2">{activity.phone}</span>
+                                  </div>
+                                )}
+
+                                {activity.to && activity.to.length > 0 && (
+                                  <div className="mb-2">
+                                    <strong className="text-sm">To:</strong> 
+                                    <span className="ml-2">{activity.to.join(', ')}</span>
+                                  </div>
+                                )}
+
+                                {activity.from && (
+                                  <div className="mb-2">
+                                    <strong className="text-sm">From:</strong> 
+                                    <span className="ml-2">{activity.from}</span>
+                                  </div>
+                                )}
+
+                                {content && content !== 'No content available' && (
+                                  <div className="mt-3">
+                                    <strong className="text-sm">Content:</strong>
+                                    <div className="mt-2 p-3 bg-white rounded border text-sm whitespace-pre-wrap">
+                                      {content.length > 500 ? `${content.substring(0, 500)}...` : content}
+                                    </div>
+                                  </div>
+                                )}
+
+                                <div className="text-xs text-gray-400 mt-3 pt-2 border-t">
+                                  Activity ID: {activity.id} | User ID: {activity.user_id}
+                                  {activity.contact_id && ` | Contact ID: ${activity.contact_id}`}
+                                  {activity.lead_id && ` | Lead ID: ${activity.lead_id}`}
+                                </div>
                               </div>
-                            </div>
-                          ))
+                            );
+                          })
                         ) : (
                           <div className="text-center text-gray-500">
-                            No messages in this conversation yet. Start the conversation below!
+                            No activities found for your account in Close CRM.
                           </div>
                         )}
                       </div>
                     </CardContent>
-                    <div className="p-4 border-t">
-                      <div className="flex gap-2">
-                        <Input 
-                          placeholder="Type your message..." 
-                          className="flex-1"
-                          value={messageContent}
-                          onChange={(e) => setMessageContent(e.target.value)}
-                          onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-                        />
-                        <Button 
-                          onClick={handleSendMessage}
-                          disabled={!messageContent.trim() || sendMessage.isPending || !selectedStaff.email}
-                          className="bg-avaana-primary text-white p-2 rounded-md hover:bg-avaana-secondary transition-colors"
-                        >
-                          {sendMessage.isPending ? (
-                            <Loader2 size={20} className="animate-spin" />
-                          ) : (
-                            <SendIcon size={20} />
-                          )}
-                        </Button>
-                      </div>
-                    </div>
                   </>
                 ) : (
                   <div className="flex-1 flex items-center justify-center text-gray-500">
-                    Select a conversation to start messaging or create a new one
+                    {lookupLoading ? (
+                      <div className="text-center">
+                        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
+                        <p>Looking up your Close CRM contact...</p>
+                      </div>
+                    ) : (
+                      <p>No Close CRM contact found for your account</p>
+                    )}
                   </div>
                 )}
               </Card>
