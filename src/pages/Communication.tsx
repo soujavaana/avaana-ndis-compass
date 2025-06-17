@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { UserIcon, SendIcon, Mail, Phone, Loader2, Plus, RefreshCw, History, CheckCircle, AlertCircle, Bug, Activity, MessageSquare, FileText, PhoneCall, Clock, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
-import { useStaffContacts, useConversationThreads, useMessages, useSendMessage, useCreateThread, useSyncCloseContacts, useSyncUserHistory, useUserSyncStatus } from '@/hooks/useCommunication';
+import { Textarea } from '@/components/ui/textarea';
+import { UserIcon, SendIcon, Mail, Phone, Loader2, Plus, ArrowUpRight, ArrowDownLeft, MessageSquare } from 'lucide-react';
+import { useStaffContacts, useConversationThreads, useMessages, useSendMessage, useCreateThread } from '@/hooks/useCommunication';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -67,6 +69,8 @@ const Communication = () => {
   const [newMessageStaff, setNewMessageStaff] = useState('');
   const [newMessageSubject, setNewMessageSubject] = useState('');
   const [selectedStaffUserId, setSelectedStaffUserId] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState('');
+  const [isSendingReply, setIsSendingReply] = useState(false);
   
   // Close CRM lookup state
   const [contactData, setContactData] = useState<CloseContact | null>(null);
@@ -78,18 +82,38 @@ const Communication = () => {
   const { data: staffContacts, isLoading: staffLoading } = useStaffContacts();
   const { data: threads, isLoading: threadsLoading } = useConversationThreads();
   const { data: messages, isLoading: messagesLoading } = useMessages(selectedThreadId);
-  const { data: syncStatus } = useUserSyncStatus();
   const sendMessage = useSendMessage();
   const createThread = useCreateThread();
-  const syncContacts = useSyncCloseContacts();
-  const syncUserHistory = useSyncUserHistory();
 
-  // Process activities into staff conversations
+  // Filter activities to only include Email and SMS with successful status
+  const filterCommunicationActivities = (activities: CloseActivity[]) => {
+    return activities.filter(activity => {
+      const type = activity.type?.toLowerCase();
+      const status = activity.status?.toLowerCase();
+      
+      // Only include Email and SMS activities
+      if (type !== 'email' && type !== 'sms') {
+        return false;
+      }
+      
+      // Only include successfully sent activities (exclude drafts, failed, etc.)
+      if (status && !['sent', 'delivered', 'opened', 'clicked'].includes(status)) {
+        return false;
+      }
+      
+      return true;
+    });
+  };
+
+  // Process activities into staff conversations with filtering
   useEffect(() => {
     if (activities.length > 0 && Object.keys(users).length > 0) {
+      // Filter activities first
+      const filteredActivities = filterCommunicationActivities(activities);
+      
       const staffMap = new Map<string, StaffConversation>();
       
-      activities.forEach(activity => {
+      filteredActivities.forEach(activity => {
         const staffUser = users[activity.user_id];
         if (staffUser && activity.user_id) {
           if (!staffMap.has(activity.user_id)) {
@@ -127,21 +151,15 @@ const Communication = () => {
   }, [activities, users, selectedStaffUserId]);
 
   const getActivityIcon = (type: string, direction?: string) => {
-    switch (type) {
+    switch (type?.toLowerCase()) {
       case 'email':
         return direction === 'outbound' ? 
           <ArrowUpRight size={16} className="text-blue-500" /> : 
           <ArrowDownLeft size={16} className="text-blue-600" />;
       case 'sms':
         return <MessageSquare size={16} className="text-green-500" />;
-      case 'call':
-        return <PhoneCall size={16} className="text-purple-500" />;
-      case 'note':
-        return <FileText size={16} className="text-gray-500" />;
-      case 'unknown':
-        return <Clock size={16} className="text-yellow-500" />;
       default:
-        return <Activity size={16} className="text-gray-400" />;
+        return <Mail size={16} className="text-gray-400" />;
     }
   };
 
@@ -203,14 +221,6 @@ const Communication = () => {
     lookupUserContact();
   }, [user?.email]);
 
-  // Auto-sync user history on first load if not already synced
-  useEffect(() => {
-    if (syncStatus === null || syncStatus?.sync_status === 'pending') {
-      console.log('Auto-syncing user history...');
-      syncUserHistory.mutate();
-    }
-  }, [syncStatus]);
-
   // Select first thread if none selected
   useEffect(() => {
     if (threads && threads.length > 0 && !selectedThreadId) {
@@ -220,7 +230,6 @@ const Communication = () => {
 
   const selectedThread = threads?.find(t => t.id === selectedThreadId);
   const selectedStaff = selectedThread?.close_crm_contacts;
-
   const selectedStaffConversation = staffConversations.find(conv => conv.staffUserId === selectedStaffUserId);
 
   const handleSendMessage = async () => {
@@ -245,6 +254,51 @@ const Communication = () => {
         description: error.message || 'Failed to send message',
         variant: 'destructive',
       });
+    }
+  };
+
+  const handleSendReply = async () => {
+    if (!replyContent.trim() || !selectedStaffConversation) return;
+
+    setIsSendingReply(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('No valid session found');
+      }
+
+      const response = await fetch('https://vrnjxgfzzbexjaytszvg.supabase.co/functions/v1/close-crm-send-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZybmp4Z2Z6emJleGpheXRzenZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2MjkxOTcsImV4cCI6MjA2MzIwNTE5N30.euI15LNkMP1IMWojTAetE75ecjqrk-2Audt64AyMel4',
+        },
+        body: JSON.stringify({
+          content: replyContent.trim(),
+          recipientEmail: selectedStaffConversation.staffEmail,
+          subject: `Reply from ${contactData?.name || user?.email}`,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to send message');
+      }
+
+      setReplyContent('');
+      toast({
+        title: 'Reply Sent',
+        description: `Your message has been sent to ${selectedStaffConversation.staffName}.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to send reply',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSendingReply(false);
     }
   };
 
@@ -275,163 +329,13 @@ const Communication = () => {
     }
   };
 
-  const handleSyncContacts = async () => {
-    try {
-      await syncContacts.mutateAsync();
-      toast({
-        title: 'Contacts Synced',
-        description: 'Close CRM contacts have been synced successfully.',
-      });
-    } catch (error: any) {
-      toast({
-        title: 'Sync Error',
-        description: error.message || 'Failed to sync contacts',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleSyncUserHistory = async () => {
-    try {
-      const result = await syncUserHistory.mutateAsync();
-      toast({
-        title: 'History Synced',
-        description: result.message || 'User communication history synced successfully.',
-      });
-    } catch (error: any) {
-      toast({
-        title: 'Sync Error',
-        description: error.message || 'Failed to sync user history',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleForceSyncUserHistory = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        throw new Error('No valid session found');
-      }
-
-      const response = await fetch('https://vrnjxgfzzbexjaytszvg.supabase.co/functions/v1/close-crm-sync-user-history', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZybmp4Z2Z6emJleGpheXRzenZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2MjkxOTcsImV4cCI6MjA2MzIwNTE5N30.euI15LNkMP1IMWojTAetE75ecjqrk-2Audt64AyMel4',
-        },
-        body: JSON.stringify({ forceSync: true }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-
-      const result = await response.json();
-      
-      toast({
-        title: 'Force Sync Completed',
-        description: `${result.message || 'Force sync completed'}${result.importedCount ? ` - ${result.importedCount} new messages imported` : ''}`,
-      });
-
-      window.location.reload();
-    } catch (error: any) {
-      console.error('Force sync error:', error);
-      toast({
-        title: 'Force Sync Error',
-        description: error.message || 'Failed to force sync user history',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const getSyncStatusDisplay = () => {
-    if (!syncStatus) return null;
-    
-    switch (syncStatus.sync_status) {
-      case 'completed':
-        return (
-          <div className="flex items-center gap-2 text-green-600 text-sm">
-            <CheckCircle size={16} />
-            <span>History synced</span>
-            {syncStatus.last_synced_at && (
-              <span className="text-gray-500">
-                ({new Date(syncStatus.last_synced_at).toLocaleDateString()})
-              </span>
-            )}
-          </div>
-        );
-      case 'in_progress':
-        return (
-          <div className="flex items-center gap-2 text-blue-600 text-sm">
-            <Loader2 size={16} className="animate-spin" />
-            <span>Syncing history...</span>
-          </div>
-        );
-      case 'error':
-        return (
-          <div className="flex items-center gap-2 text-red-600 text-sm">
-            <AlertCircle size={16} />
-            <span>Sync failed</span>
-          </div>
-        );
-      case 'no_contact_found':
-        return (
-          <div className="flex items-center gap-2 text-yellow-600 text-sm">
-            <AlertCircle size={16} />
-            <span>No matching contact found</span>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <Layout>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl text-gray-900 font-normal">Communication Center</h1>
-          {getSyncStatusDisplay()}
         </div>
         <div className="flex gap-2">
-          <Button 
-            onClick={handleSyncUserHistory}
-            disabled={syncUserHistory.isPending}
-            variant="outline"
-            className="px-4 py-2 rounded-md"
-          >
-            {syncUserHistory.isPending ? (
-              <Loader2 size={16} className="mr-2 animate-spin" />
-            ) : (
-              <History size={16} className="mr-2" />
-            )}
-            Sync My History
-          </Button>
-          <Button 
-            onClick={handleForceSyncUserHistory}
-            disabled={syncUserHistory.isPending}
-            variant="outline"
-            className="px-4 py-2 rounded-md border-orange-300 text-orange-600 hover:bg-orange-50"
-          >
-            <Bug size={16} className="mr-2" />
-            Force Sync (Debug)
-          </Button>
-          <Button 
-            onClick={handleSyncContacts}
-            disabled={syncContacts.isPending}
-            variant="outline"
-            className="px-4 py-2 rounded-md"
-          >
-            {syncContacts.isPending ? (
-              <Loader2 size={16} className="mr-2 animate-spin" />
-            ) : (
-              <RefreshCw size={16} className="mr-2" />
-            )}
-            Sync Contacts
-          </Button>
           <Button 
             onClick={() => setShowNewMessage(true)}
             className="bg-avaana-primary text-white px-4 py-2 rounded-md hover:bg-avaana-secondary transition-colors"
@@ -533,14 +437,14 @@ const Communication = () => {
                               {conversation.staffEmail}
                             </div>
                             <div className="text-xs text-gray-500 mt-1">
-                              {conversation.activities.length} activities
+                              {conversation.activities.length} messages
                             </div>
                           </div>
                         ))}
                       </div>
                     ) : (
                       <div className="p-4 text-center text-gray-500">
-                        No conversations found. Activities will appear here once loaded.
+                        No conversations found. Messages will appear here once loaded.
                       </div>
                     )}
                   </div>
@@ -567,7 +471,7 @@ const Communication = () => {
                           </div>
                         </div>
                         <div className="text-sm text-gray-500">
-                          {selectedStaffConversation.activities.length} activities
+                          {selectedStaffConversation.activities.length} messages
                         </div>
                       </div>
                     </CardHeader>
@@ -582,7 +486,7 @@ const Communication = () => {
                                 <div className="flex items-center gap-3">
                                   {getActivityIcon(activity.type, activity.direction)}
                                   <div>
-                                    <span className="font-medium capitalize">{activity.type || 'Unknown'}</span>
+                                    <span className="font-medium capitalize">{activity.type || 'Message'}</span>
                                     {activity.direction && (
                                       <span className="ml-2 text-sm text-gray-500 capitalize">({activity.direction})</span>
                                     )}
@@ -616,7 +520,7 @@ const Communication = () => {
 
                               {content && content !== 'No content available' && (
                                 <div className="mt-3">
-                                  <strong className="text-sm">Content:</strong>
+                                  <strong className="text-sm">Message:</strong>
                                   <div className="mt-2 p-3 bg-white rounded border text-sm whitespace-pre-wrap">
                                     {content.length > 500 ? `${content.substring(0, 500)}...` : content}
                                   </div>
@@ -627,6 +531,37 @@ const Communication = () => {
                         })}
                       </div>
                     </CardContent>
+                    
+                    {/* Reply Section */}
+                    <div className="border-t p-4">
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700">
+                            Reply to {selectedStaffConversation.staffName}
+                          </label>
+                        </div>
+                        <Textarea
+                          value={replyContent}
+                          onChange={(e) => setReplyContent(e.target.value)}
+                          placeholder="Type your message here..."
+                          className="min-h-[100px] resize-none"
+                        />
+                        <div className="flex justify-end">
+                          <Button
+                            onClick={handleSendReply}
+                            disabled={!replyContent.trim() || isSendingReply}
+                            className="bg-avaana-primary text-white hover:bg-avaana-secondary"
+                          >
+                            {isSendingReply ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <SendIcon className="w-4 h-4 mr-2" />
+                            )}
+                            Send Reply
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                   </>
                 ) : (
                   <div className="flex-1 flex items-center justify-center text-gray-500">
