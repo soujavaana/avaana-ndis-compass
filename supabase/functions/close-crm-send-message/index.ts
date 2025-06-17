@@ -8,7 +8,6 @@ const corsHeaders = {
 };
 
 interface SendMessageRequest {
-  threadId: string;
   content: string;
   recipientEmail: string;
   subject?: string;
@@ -25,34 +24,50 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Close API key not configured");
     }
 
-    const { threadId, content, recipientEmail, subject }: SendMessageRequest = await req.json();
+    const { content, recipientEmail, subject }: SendMessageRequest = await req.json();
 
-    console.log("Sending message via Close CRM:", { threadId, recipientEmail, subject });
+    console.log("Sending message via Close CRM:", { recipientEmail, subject });
 
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-    );
-
-    // Get auth header from request
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader) {
-      throw new Error("No authorization header");
-    }
-
-    // Set auth for supabase client
-    supabaseClient.auth.setSession({
-      access_token: authHeader.replace("Bearer ", ""),
-      refresh_token: "",
+    // First, we need to find the lead_id for the recipient
+    const contactResponse = await fetch(`https://api.close.com/api/v1/contact/?query=email:"${recipientEmail}"`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Basic ${btoa(closeApiKey + ":")}`,
+        "Content-Type": "application/json",
+      },
     });
 
-    // Send email via Close CRM
+    if (!contactResponse.ok) {
+      throw new Error(`Failed to find contact: ${contactResponse.statusText}`);
+    }
+
+    const contactData = await contactResponse.json();
+    console.log("Contact search result:", contactData);
+
+    if (!contactData.data || contactData.data.length === 0) {
+      throw new Error(`No contact found for email: ${recipientEmail}`);
+    }
+
+    const contact = contactData.data[0];
+    const leadId = contact.lead_id;
+
+    if (!leadId) {
+      throw new Error("No lead_id found for contact");
+    }
+
+    console.log("Found lead_id:", leadId);
+
+    // Send email via Close CRM with the lead_id
     const emailData = {
       to: [recipientEmail],
       subject: subject || "Message from Avaana Dashboard",
       body_text: content,
       status: "sent",
+      lead_id: leadId,
+      direction: "incoming", // This makes it appear as an incoming message to the staff
     };
+
+    console.log("Sending email with data:", emailData);
 
     const closeResponse = await fetch("https://api.close.com/api/v1/activity/email/", {
       method: "POST",
@@ -72,42 +87,9 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResult = await closeResponse.json();
     console.log("Email sent successfully via Close CRM:", emailResult.id);
 
-    // Store message in our database
-    const { data: messageData, error: messageError } = await supabaseClient
-      .from("messages")
-      .insert({
-        thread_id: threadId,
-        close_message_id: emailResult.id,
-        sender_type: "user",
-        content,
-        message_type: "email",
-        sent_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-
-    if (messageError) {
-      console.error("Error storing message:", messageError);
-      throw messageError;
-    }
-
-    // Update thread's last message time
-    const { error: threadError } = await supabaseClient
-      .from("conversation_threads")
-      .update({
-        last_message_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", threadId);
-
-    if (threadError) {
-      console.error("Error updating thread:", threadError);
-    }
-
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: messageData,
         closeResult: emailResult 
       }),
       {
