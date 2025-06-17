@@ -1,4 +1,3 @@
-
 import '@testing-library/jest-dom';
 
 // Mock console methods to reduce noise in tests
@@ -19,20 +18,22 @@ afterEach(() => {
 });
 
 // Mock IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
-  disconnect() {}
-  observe() {}
-  unobserve() {}
-};
+global.IntersectionObserver = jest.fn().mockImplementation((callback, options) => ({
+  root: null,
+  rootMargin: '0px',
+  thresholds: [0],
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+  takeRecords: jest.fn(() => []),
+}));
 
 // Mock ResizeObserver
-global.ResizeObserver = class ResizeObserver {
-  constructor() {}
-  disconnect() {}
-  observe() {}
-  unobserve() {}
-};
+global.ResizeObserver = jest.fn().mockImplementation((callback) => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {

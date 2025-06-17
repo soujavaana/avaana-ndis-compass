@@ -13,6 +13,10 @@ import { useProfile, useUpdateProfile, useKeyPersonnel, useShareholders, useDele
 import AddPersonnelModal from '@/components/modals/AddPersonnelModal';
 import AddShareholderModal from '@/components/modals/AddShareholderModal';
 import { useToast } from '@/hooks/use-toast';
+import { Database } from '@/integrations/supabase/types';
+
+type ProfileData = Database['public']['Tables']['profiles']['Row'];
+
 const Profile = () => {
   const {
     data: profile,
@@ -32,12 +36,14 @@ const Profile = () => {
   } = useToast();
   const [isPersonnelModalOpen, setIsPersonnelModalOpen] = useState(false);
   const [isShareholderModalOpen, setIsShareholderModalOpen] = useState(false);
-  const [formData, setFormData] = useState(profile || {});
+  const [formData, setFormData] = useState<Partial<ProfileData>>(profile || {});
+  
   React.useEffect(() => {
     if (profile) {
       setFormData(profile);
     }
   }, [profile]);
+  
   const handleSave = async () => {
     try {
       await updateProfileMutation.mutateAsync(formData);
@@ -53,6 +59,7 @@ const Profile = () => {
       });
     }
   };
+  
   const handleDeletePersonnel = async (id: string) => {
     try {
       await deletePersonnelMutation.mutateAsync(id);
@@ -68,6 +75,7 @@ const Profile = () => {
       });
     }
   };
+  
   const handleDeleteShareholder = async (id: string) => {
     try {
       await deleteShareholderMutation.mutateAsync(id);
@@ -83,17 +91,20 @@ const Profile = () => {
       });
     }
   };
+  
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString();
   };
+  
   const getServiceDeliveryText = (businessType: string | null | undefined) => {
     if (!businessType) return 'Not specified';
     if (businessType.includes('Fixed')) return 'Services provided at own premises';
     if (businessType.includes('people')) return 'Services provided at client locations';
     return businessType;
   };
+  
   if (isLoading) {
     return <Layout>
         <div className="flex items-center justify-center h-[calc(100vh-200px)]">
@@ -104,6 +115,7 @@ const Profile = () => {
         </div>
       </Layout>;
   }
+  
   return <Layout>
       <PageBreadcrumb items={[{
       label: 'Business Profile Details'
