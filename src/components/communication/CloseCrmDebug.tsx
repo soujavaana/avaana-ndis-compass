@@ -64,64 +64,33 @@ const CloseCrmDebug = () => {
         throw new Error('No valid session found');
       }
 
-      addLog('Valid session found, proceeding with Close CRM lookup...');
+      addLog('Valid session found, calling Close CRM lookup edge function...');
 
-      // Search for contact by email
-      const searchParams = new URLSearchParams();
-      searchParams.append('query', `email:"${email}"`);
-      
-      addLog(`Searching Close CRM with query: email:"${email}"`);
-
-      const contactResponse = await fetch(`https://api.close.com/api/v1/contact/?${searchParams}`, {
+      // Use Supabase Edge Function to avoid CORS issues
+      const response = await fetch('https://vrnjxgfzzbexjaytszvg.supabase.co/functions/v1/close-crm-lookup', {
+        method: 'POST',
         headers: {
-          'Authorization': 'Basic ' + btoa('sk_test_VHaUc1t0SLKCWqQ3zFHAAU:'),
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZybmp4Z2Z6emJleGpheXRzenZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2MjkxOTcsImV4cCI6MjA2MzIwNTE5N30.euI15LNkMP1IMWojTAetE75ecjqrk-2Audt64AyMel4',
         },
+        body: JSON.stringify({ email }),
       });
 
-      addLog(`Contact search response status: ${contactResponse.status}`);
+      addLog(`Edge function response status: ${response.status}`);
 
-      if (!contactResponse.ok) {
-        const errorText = await contactResponse.text();
-        addLog(`Contact search error: ${errorText}`);
-        throw new Error(`Contact search failed: ${contactResponse.status} - ${errorText}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        addLog(`Edge function error: ${errorText}`);
+        throw new Error(`Lookup failed: ${response.status} - ${errorText}`);
       }
 
-      const contactResult = await contactResponse.json();
-      addLog(`Found ${contactResult.data?.length || 0} contacts`);
+      const result = await response.json();
+      addLog(`Lookup completed: ${JSON.stringify(result)}`);
 
-      if (contactResult.data && contactResult.data.length > 0) {
-        const contact = contactResult.data[0];
-        setContactData(contact);
-        addLog(`Contact found: ${contact.name} (ID: ${contact.id})`);
-
-        // Fetch activities for this contact
-        addLog('Fetching activities for contact...');
-        
-        const activitiesResponse = await fetch(`https://api.close.com/api/v1/activity/?contact_id=${contact.id}&_limit=20`, {
-          headers: {
-            'Authorization': 'Basic ' + btoa('sk_test_VHaUc1t0SLKCWqQ3zFHAAU:'),
-            'Content-Type': 'application/json',
-          },
-        });
-
-        addLog(`Activities response status: ${activitiesResponse.status}`);
-
-        if (activitiesResponse.ok) {
-          const activitiesResult = await activitiesResponse.json();
-          setActivities(activitiesResult.data || []);
-          addLog(`Found ${activitiesResult.data?.length || 0} activities`);
-          
-          // Log activity types
-          const activityTypes = activitiesResult.data?.reduce((acc: any, activity: CloseActivity) => {
-            acc[activity.type] = (acc[activity.type] || 0) + 1;
-            return acc;
-          }, {});
-          addLog(`Activity types: ${JSON.stringify(activityTypes)}`);
-        } else {
-          const errorText = await activitiesResponse.text();
-          addLog(`Activities fetch error: ${errorText}`);
-        }
+      if (result.contact) {
+        setContactData(result.contact);
+        addLog(`Contact found: ${result.contact.name} (ID: ${result.contact.id})`);
       } else {
         addLog('No contact found with that email address');
         toast({
@@ -129,6 +98,18 @@ const CloseCrmDebug = () => {
           description: `No contact found in Close CRM for email: ${email}`,
           variant: 'destructive',
         });
+      }
+
+      if (result.activities) {
+        setActivities(result.activities);
+        addLog(`Found ${result.activities.length} activities`);
+        
+        // Log activity types
+        const activityTypes = result.activities.reduce((acc: any, activity: CloseActivity) => {
+          acc[activity.type] = (acc[activity.type] || 0) + 1;
+          return acc;
+        }, {});
+        addLog(`Activity types: ${JSON.stringify(activityTypes)}`);
       }
 
     } catch (error: any) {
@@ -166,6 +147,9 @@ const CloseCrmDebug = () => {
               Lookup
             </Button>
           </div>
+          <p className="text-sm text-gray-600">
+            This tool uses a Supabase Edge Function to safely call the Close CRM API without CORS issues.
+          </p>
         </CardContent>
       </Card>
 
