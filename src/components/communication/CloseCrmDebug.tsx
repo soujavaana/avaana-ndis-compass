@@ -3,13 +3,14 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Search, User, Mail, Phone, Calendar, Activity } from 'lucide-react';
+import { Loader2, Search, User, Mail, Phone, Calendar, Activity, Users } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 interface CloseContact {
   id: string;
   name: string;
+  lead_id: string;
   emails: Array<{ email: string; type: string }>;
   phones: Array<{ phone: string; type: string }>;
   date_created: string;
@@ -20,6 +21,10 @@ interface CloseActivity {
   id: string;
   type: string;
   date_created: string;
+  user_id: string;
+  contact_id?: string;
+  to?: string[];
+  from?: string;
   subject?: string;
   body_text?: string;
   text?: string;
@@ -28,11 +33,20 @@ interface CloseActivity {
   status?: string;
 }
 
+interface CloseUser {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  display_name: string;
+}
+
 const CloseCrmDebug = () => {
   const [email, setEmail] = useState('ndis12345@gmail.com');
   const [loading, setLoading] = useState(false);
   const [contactData, setContactData] = useState<CloseContact | null>(null);
   const [activities, setActivities] = useState<CloseActivity[]>([]);
+  const [users, setUsers] = useState<{ [key: string]: CloseUser }>({});
   const [logs, setLogs] = useState<string[]>([]);
 
   const addLog = (message: string) => {
@@ -54,6 +68,7 @@ const CloseCrmDebug = () => {
     setLoading(true);
     setContactData(null);
     setActivities([]);
+    setUsers({});
     setLogs([]);
 
     try {
@@ -66,7 +81,6 @@ const CloseCrmDebug = () => {
 
       addLog('Valid session found, calling Close CRM lookup edge function...');
 
-      // Use Supabase Edge Function to avoid CORS issues
       const response = await fetch('https://vrnjxgfzzbexjaytszvg.supabase.co/functions/v1/close-crm-lookup', {
         method: 'POST',
         headers: {
@@ -90,7 +104,7 @@ const CloseCrmDebug = () => {
 
       if (result.contact) {
         setContactData(result.contact);
-        addLog(`Contact found: ${result.contact.name} (ID: ${result.contact.id})`);
+        addLog(`Contact found: ${result.contact.name} (ID: ${result.contact.id}, Lead ID: ${result.contact.lead_id})`);
       } else {
         addLog('No contact found with that email address');
         toast({
@@ -104,12 +118,16 @@ const CloseCrmDebug = () => {
         setActivities(result.activities);
         addLog(`Found ${result.activities.length} activities`);
         
-        // Log activity types
         const activityTypes = result.activities.reduce((acc: any, activity: CloseActivity) => {
           acc[activity.type] = (acc[activity.type] || 0) + 1;
           return acc;
         }, {});
         addLog(`Activity types: ${JSON.stringify(activityTypes)}`);
+      }
+
+      if (result.users) {
+        setUsers(result.users);
+        addLog(`Found ${Object.keys(result.users).length} Close CRM users`);
       }
 
     } catch (error: any) {
@@ -148,7 +166,7 @@ const CloseCrmDebug = () => {
             </Button>
           </div>
           <p className="text-sm text-gray-600">
-            This tool uses a Supabase Edge Function to safely call the Close CRM API without CORS issues.
+            This tool uses a Supabase Edge Function to safely call the Close CRM API and fetch activities using the lead_id.
           </p>
         </CardContent>
       </Card>
@@ -164,7 +182,8 @@ const CloseCrmDebug = () => {
           <CardContent>
             <div className="space-y-3">
               <div><strong>Name:</strong> {contactData.name}</div>
-              <div><strong>ID:</strong> {contactData.id}</div>
+              <div><strong>Contact ID:</strong> {contactData.id}</div>
+              <div><strong>Lead ID:</strong> {contactData.lead_id}</div>
               <div className="flex items-center gap-2">
                 <Mail size={16} />
                 <strong>Emails:</strong>
@@ -194,6 +213,30 @@ const CloseCrmDebug = () => {
         </Card>
       )}
 
+      {Object.keys(users).length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users size={20} />
+              Close CRM Users ({Object.keys(users).length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              {Object.values(users).map((user) => (
+                <div key={user.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                  <div>
+                    <span className="font-medium">{user.display_name}</span>
+                    <span className="text-sm text-gray-500 ml-2">{user.email}</span>
+                  </div>
+                  <span className="text-xs text-gray-400">{user.id}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {activities.length > 0 && (
         <Card>
           <CardHeader>
@@ -203,31 +246,53 @@ const CloseCrmDebug = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 max-h-60 overflow-y-auto">
-              {activities.map((activity) => (
-                <div key={activity.id} className="border rounded p-3 bg-gray-50">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="font-medium">{activity.type}</span>
-                    <span className="text-sm text-gray-500">
-                      {new Date(activity.date_created).toLocaleString()}
-                    </span>
-                  </div>
-                  {activity.subject && (
-                    <div className="text-sm"><strong>Subject:</strong> {activity.subject}</div>
-                  )}
-                  {activity.direction && (
-                    <div className="text-sm"><strong>Direction:</strong> {activity.direction}</div>
-                  )}
-                  {activity.status && (
-                    <div className="text-sm"><strong>Status:</strong> {activity.status}</div>
-                  )}
-                  {(activity.body_text || activity.text || activity.note) && (
-                    <div className="text-sm mt-2">
-                      <strong>Content:</strong> {activity.body_text || activity.text || activity.note}
+            <div className="space-y-3 max-h-80 overflow-y-auto">
+              {activities.map((activity) => {
+                const user = users[activity.user_id];
+                return (
+                  <div key={activity.id} className="border rounded p-3 bg-gray-50">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{activity.type}</span>
+                        {user && (
+                          <span className="text-sm text-blue-600">
+                            by {user.display_name}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-sm text-gray-500">
+                        {new Date(activity.date_created).toLocaleString()}
+                      </span>
                     </div>
-                  )}
-                </div>
-              ))}
+                    {activity.subject && (
+                      <div className="text-sm"><strong>Subject:</strong> {activity.subject}</div>
+                    )}
+                    {activity.direction && (
+                      <div className="text-sm"><strong>Direction:</strong> {activity.direction}</div>
+                    )}
+                    {activity.status && (
+                      <div className="text-sm"><strong>Status:</strong> {activity.status}</div>
+                    )}
+                    {activity.to && activity.to.length > 0 && (
+                      <div className="text-sm"><strong>To:</strong> {activity.to.join(', ')}</div>
+                    )}
+                    {activity.from && (
+                      <div className="text-sm"><strong>From:</strong> {activity.from}</div>
+                    )}
+                    {(activity.body_text || activity.text || activity.note) && (
+                      <div className="text-sm mt-2">
+                        <strong>Content:</strong>
+                        <div className="mt-1 p-2 bg-white rounded border text-xs">
+                          {activity.body_text || activity.text || activity.note}
+                        </div>
+                      </div>
+                    )}
+                    <div className="text-xs text-gray-400 mt-2">
+                      Activity ID: {activity.id} | User ID: {activity.user_id}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
