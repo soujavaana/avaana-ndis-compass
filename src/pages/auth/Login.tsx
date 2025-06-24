@@ -8,7 +8,8 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/contexts/AuthContext';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const formSchema = z.object({
   email: z.string().email({
@@ -25,6 +26,7 @@ const Login = () => {
   const { signIn } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const from = location.state?.from?.pathname || '/';
 
@@ -38,11 +40,13 @@ const Login = () => {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    setAuthError(null);
     try {
       await signIn(values.email, values.password);
       navigate(from, { replace: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
+      setAuthError(error.message || "Failed to sign in. Please check your credentials and try again.");
     } finally {
       setIsLoading(false);
     }
@@ -55,6 +59,13 @@ const Login = () => {
           <h1 className="text-2xl font-normal text-gray-900">Welcome back</h1>
           <p className="text-gray-600 mt-2">Sign in to your account</p>
         </div>
+        
+        {authError && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{authError}</AlertDescription>
+          </Alert>
+        )}
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

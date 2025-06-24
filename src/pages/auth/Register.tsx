@@ -8,7 +8,8 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/contexts/AuthContext';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const formSchema = z.object({
   firstName: z.string().min(1, {
@@ -37,6 +38,8 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authSuccess, setAuthSuccess] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,14 +54,20 @@ const Register = () => {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    setAuthError(null);
+    setAuthSuccess(null);
     try {
       await signUp(values.email, values.password, {
         firstName: values.firstName,
         lastName: values.lastName,
       });
-      navigate('/auth/login');
-    } catch (error) {
+      setAuthSuccess("Account created successfully! Please check your email for verification.");
+      setTimeout(() => {
+        navigate('/auth/login');
+      }, 3000);
+    } catch (error: any) {
       console.error("Registration error:", error);
+      setAuthError(error.message || "Failed to create account. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -71,6 +80,20 @@ const Register = () => {
           <h1 className="text-2xl font-normal text-gray-900">Create your account</h1>
           <p className="text-gray-600 mt-2">Get started with your dashboard</p>
         </div>
+        
+        {authError && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{authError}</AlertDescription>
+          </Alert>
+        )}
+        
+        {authSuccess && (
+          <Alert className="mb-6 border-green-200 bg-green-50">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">{authSuccess}</AlertDescription>
+          </Alert>
+        )}
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

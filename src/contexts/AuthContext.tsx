@@ -2,7 +2,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 interface AuthContextType {
   user: User | null;
@@ -71,11 +70,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) throw error;
-      
-      toast.success("Account created successfully! Please check your email for verification.");
     } catch (error: any) {
       console.error('Sign up error:', error);
-      toast.error(error.message || 'Failed to create account');
       throw error;
     }
   };
@@ -96,11 +92,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) throw error;
-      
-      toast.success("Signed in successfully!");
     } catch (error: any) {
       console.error('Sign in error:', error);
-      toast.error(error.message || 'Failed to sign in');
       throw error;
     }
   };
@@ -109,11 +102,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       cleanupAuthState();
       await supabase.auth.signOut({ scope: 'global' });
-      toast.success("Signed out successfully!");
       window.location.href = '/auth/login';
     } catch (error: any) {
       console.error('Sign out error:', error);
-      toast.error('Failed to sign out');
+      throw error;
     }
   };
 
@@ -124,11 +116,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) throw error;
-      
-      toast.success("Password reset email sent!");
     } catch (error: any) {
       console.error('Reset password error:', error);
-      toast.error(error.message || 'Failed to send reset email');
       throw error;
     }
   };
